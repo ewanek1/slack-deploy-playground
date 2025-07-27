@@ -1,0 +1,18 @@
+name: Playground Slack Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy using composite action
+        uses: ./.github/actions/deploy-slack-app
+        with:
+          slack_token: dummy-token
+          slack_app_id: fake-app-id
+          slack_channel: test-deploy-channel
