@@ -1,31 +1,5 @@
 name: "Deploy Slack App"
 description: "Reusable composite action to deploy a Slack app and send a status message"
 
-inputs:
-  slack_token:
-    required: true
-  slack_app_id:
-    required: true
-  slack_channel:
-    required: true
 
-runs:
-  using: "composite"
-  steps:
-    - name: Install Slack CLI
-      run: |
-        curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash
-      shell: bash
 
-    - name: Deploy Slack App
-      run: |
-        echo "Simulating: slack deploy --app ${{ inputs.slack_app_id }}"
-        # slack deploy --app ${{ inputs.slack_app_id }} --token ${{ inputs.slack_token }}
-      shell: bash
-
-    - name: Notify Slack
-      run: |
-        echo "Simulating Slack message to #${{ inputs.slack_channel }}"
-        # slack chat send --channel ${{ inputs.slack_channel }} \
-        #   --message ":rocket: Deployed by ${{ github.actor }} on branch ${{ github.ref_name }}"
-      shell: bash

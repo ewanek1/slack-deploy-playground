@@ -1,18 +1,28 @@
-name: Playground Slack Deploy
+# GitHub Actions workflow that automatically deploys Slack app whenever code is pushed to main
+
+name: (Re)Deploy Slack app on push to main 
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ] # master??
 
 jobs:
   deploy:
+    name: 'Deploy Slack app using CLI'
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Deploy using composite action
-        uses: ./.github/actions/deploy-slack-app
-        with:
-          slack_token: dummy-token
-          slack_app_id: fake-app-id
-          slack_channel: test-deploy-channel
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Deploy a Slack app
+      uses: slackapi/slack-github-action@v2.0.0
+      with:
+        command: slack deploy --app ${{ secrets.SLACK_APP_ID }}
+        token: ${{ secrets.SLACK_SERVICE_TOKEN }}
