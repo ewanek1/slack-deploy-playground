@@ -25,3 +25,14 @@ jobs:
         command: slack deploy --app ${{ secrets.SLACK_APP_ID }}
         method: cli
         token: ${{ secrets.SLACK_SERVICE_TOKEN }}
+
+    - name: Send confirmation message 
+      uses: slackapi/slack-github-action@v2.0.0
+      with:
+        method: chat.postMessage
+        token: ${{ secrets.SLACK_BOT_TOKEN }}
+        payload: |
+          {
+            "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
+            "text": "Successfully deployed!"
+          }
