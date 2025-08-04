@@ -38,12 +38,12 @@ jobs:
           key: slack-cli-${{ env.SLACK_CLI_VERSION }}
 
       - name: Install Slack CLI (Linux/macOS)
-        if: steps.cache-slack.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
+        if: steps.cache-slack.outputs.cache-cli != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
         run: |
           curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
 
       - name: Install Slack CLI (Windows)
-        if: steps.cache-slack.outputs.cache-hit != 'true' && runner.os == 'Windows'
+        if: steps.cache-slack.outputs.cache-cli != 'true' && runner.os == 'Windows'
         run: |
           irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
         shell: powershell
