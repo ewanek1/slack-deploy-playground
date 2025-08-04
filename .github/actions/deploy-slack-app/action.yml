@@ -16,10 +16,11 @@ runs:
     - name: Install Slack CLI (Linux/macOS)
       if:
         steps.cache-cli.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
+      shell: bash
       run:
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
     - name: Install Slack CLI (Windows)
       if: steps.cache-cli.outputs.cache-hit != 'true' && runner.os == 'Windows'
+      shell: powershell
       run: |
         irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
-      shell: powershell
