@@ -67,7 +67,7 @@ jobs:
       - name: Execute command via script
         run: |
           echo "Running command: ${{ github.event.inputs.command }}"
-          node slack-cli-runner.js ${{ github.event.inputs.command }}
+          node cli-parse.js ${{ github.event.inputs.command }}
         env:
           # Get service token by running `slack auth token`
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }} 
