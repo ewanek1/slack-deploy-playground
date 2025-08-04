@@ -36,6 +36,10 @@ jobs:
         with:
           path: ~/.slack/bin
           key: slack-cli-${{ env.SLACK_CLI_VERSION }}
+        
+        # Add to PATH github env variable so it can be found in future steps
+      - name: Add Slack CLI to PATH
+        run: echo "$HOME/.slack/bin" >> $GITHUB_PATH
 
       - name: Install Slack CLI (Linux/macOS)
         if: steps.cache-cli.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
@@ -68,5 +72,6 @@ jobs:
 
 # Testing command before so it'll error quicker and not go through CLI step
 # What happens if token in secrets is not provided - is there a github specific error? 
+# Way to run action and output result to terminal to test here? 
 
 
