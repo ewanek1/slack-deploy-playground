@@ -11,9 +11,6 @@ on:
         description: 'CLI command to run'
         required: true
 
-env:
-  SLACK_CLI_VERSION: "3.5.2"
-
 jobs:
   deploy:
     name: "General using CLI"
@@ -29,28 +26,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Cache Slack CLI installation
-      - name: Cache Slack CLI
-        id: cache-cli
-        uses: actions/cache@v4
-        with:
-          path: ~/.slack/bin
-          key: slack-cli-${{ env.SLACK_CLI_VERSION }}
-        
-        # Add to PATH github env variable so it can be found in future steps
-      - name: Add Slack CLI to PATH
-        run: echo "$HOME/.slack/bin" >> $GITHUB_PATH
-
-      - name: Install Slack CLI (Linux/macOS)
-        if: steps.cache-cli.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
-        run: |
-          curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
-
-      - name: Install Slack CLI (Windows)
-        if: steps.cache-cli.outputs.cache-hit != 'true' && runner.os == 'Windows'
-        run: |
-          irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
-        shell: powershell
+      - name: Install Slack CLI
+        uses: ../.github/actions/deploy-slack-app/action.yml
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -70,8 +47,6 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
 
-# Testing command before so it'll error quicker and not go through CLI step
-# What happens if token in secrets is not provided - is there a github specific error? 
-# Way to run action and output result to terminal to test here? 
+
 
 

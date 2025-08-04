@@ -1,0 +1,24 @@
+# Composite action that caches and installs CLI
+name: Download Slack CLI
+description: Install Slack CLI if needed and add to PATH
+runs:
+  using: composite
+  steps:
+    - name: Cache Slack CLI
+      id: cache-cli
+      uses: actions/cache@v4
+      with:
+        path: ~/.slack/bin
+        key: 'slack-cli-${{ env.SLACK_CLI_VERSION }}'
+    - name: Add Slack CLI to PATH
+      run: echo "$HOME/.slack/bin" >> $GITHUB_PATH
+    - name: Install Slack CLI (Linux/macOS)
+      if:
+        steps.cache-cli.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
+      run:
+        curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
+    - name: Install Slack CLI (Windows)
+      if: steps.cache-cli.outputs.cache-hit != 'true' && runner.os == 'Windows'
+      run: |
+        irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
+      shell: powershell
