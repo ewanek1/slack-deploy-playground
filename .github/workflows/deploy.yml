@@ -38,12 +38,12 @@ jobs:
           key: slack-cli-${{ env.SLACK_CLI_VERSION }}
 
       - name: Install Slack CLI (Linux/macOS)
-        if: steps.cache-slack.outputs.cache-cli != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
+        if: steps.cache-cli.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
         run: |
           curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
 
       - name: Install Slack CLI (Windows)
-        if: steps.cache-slack.outputs.cache-cli != 'true' && runner.os == 'Windows'
+        if: steps.cache-cli.outputs.cache-hit != 'true' && runner.os == 'Windows'
         run: |
           irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
         shell: powershell
@@ -66,20 +66,7 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
 
-
-
-      #   # Just a test confirmation for me
-      # - name: Send confirmation message
-      #   uses: slackapi/slack-github-action@v2.0.0
-      #   with:
-      #     method: chat.postMessage
-      #     token: ${{ secrets.SLACK_BOT_TOKEN }}
-      #     payload: |
-      #       {
-      #         "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
-      #         "text": "Successfully deployed!"
-      #       }
-
+# Testing command before so it'll error quicker and not go through CLI step
 # What happens if token in secrets is not provided - is there a github specific error? 
 
 
