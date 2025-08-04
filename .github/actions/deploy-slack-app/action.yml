@@ -11,6 +11,7 @@ runs:
         path: ~/.slack/bin
         key: 'slack-cli-${{ env.SLACK_CLI_VERSION }}'
     - name: Add Slack CLI to PATH
+      shell: bash
       run: echo "$HOME/.slack/bin" >> $GITHUB_PATH
     - name: Install Slack CLI (Linux/macOS)
       if:
