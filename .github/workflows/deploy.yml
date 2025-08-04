@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Slack CLI
-        uses: ../.github/actions/deploy-slack-app/action.yml
+        uses: ./.github/actions/deploy-slack-app
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
