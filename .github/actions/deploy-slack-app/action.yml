@@ -1,3 +1,0 @@
-name: "Deploy Slack App"
-description: "Reusable composite action to deploy a Slack app and send a status message"
-

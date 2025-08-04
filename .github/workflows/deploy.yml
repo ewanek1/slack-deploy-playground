@@ -1,38 +1,93 @@
-# Deploy Slack app on push to main
-name: (Re)Deploy Slack app on push to main
+# Execute command
+name: GCli project wip script 
 
+# on:
+#   push:
+#     branches: [main]
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'CLI command to run'
+        required: true
+
+env:
+  SLACK_CLI_VERSION: "3.5.2"
 
 jobs:
   deploy:
-    name: 'Deploy Slack app using CLI'
+    name: "General using CLI"
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     defaults:
       run:
         shell: bash
 
     steps:
-    # Checkout the repository to the GitHub Actions runner
-    - name: Checkout
-      uses: actions/checkout@v4
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Deploy a Slack app
-      uses: slackapi/slack-github-action@v2.0.0
-      with:
-        command: slack deploy --app ${{ secrets.SLACK_APP_ID }}
-        method: cli
-        token: ${{ secrets.SLACK_SERVICE_TOKEN }}
+      # Cache Slack CLI installation
+      - name: Cache Slack CLI
+        id: cache-cli
+        uses: actions/cache@v4
+        with:
+          path: ~/.slack/bin
+          key: slack-cli-${{ env.SLACK_CLI_VERSION }}
 
-    - name: Send confirmation message 
-      uses: slackapi/slack-github-action@v2.0.0
-      with:
-        method: chat.postMessage
-        token: ${{ secrets.SLACK_BOT_TOKEN }}
-        payload: |
-          {
-            "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
-            "text": "Successfully deployed!"
+      - name: Install Slack CLI (Linux/macOS)
+        if: steps.cache-slack.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
+        run: |
+          if [ "$SLACK_CLI_VERSION" = "3.5.2" ]; then
+            curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash
+          else
+            curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
+          fi
+
+      - name: Install Slack CLI (Windows)
+        if: steps.cache-slack.outputs.cache-hit != 'true' && runner.os == 'Windows'
+        run: |
+          if ($env:SLACK_CLI_VERSION -eq "3.5.2") {
+            irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
+          } else {
+            irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex -v $env:SLACK_CLI_VERSION
           }
+        shell: powershell
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install shell-quote
+
+      - name: Execute command via script
+        run: |
+          echo "Running command: ${{ github.event.inputs.command }}"
+          node slack-cli-runner.js ${{ github.event.inputs.command }}
+        env:
+          # Get service token by running `slack auth token`
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }} 
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+
+
+
+      #   # Just a test confirmation for me
+      # - name: Send confirmation message
+      #   uses: slackapi/slack-github-action@v2.0.0
+      #   with:
+      #     method: chat.postMessage
+      #     token: ${{ secrets.SLACK_BOT_TOKEN }}
+      #     payload: |
+      #       {
+      #         "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
+      #         "text": "Successfully deployed!"
+      #       }
+
+# What happens if token in secrets is not provided - is there a github specific error? 
+
+
