@@ -40,8 +40,7 @@ jobs:
       - name: Install Slack CLI (Linux/macOS)
         if: steps.cache-slack.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
         run: |
-          if [ "$SLACK_CLI_VERSION" = "3.5.2" ]; then
-            curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash
+          curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash
           else
             curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
           fi
@@ -49,8 +48,7 @@ jobs:
       - name: Install Slack CLI (Windows)
         if: steps.cache-slack.outputs.cache-hit != 'true' && runner.os == 'Windows'
         run: |
-          if ($env:SLACK_CLI_VERSION -eq "3.5.2") {
-            irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
+          irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
           } else {
             irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex -v $env:SLACK_CLI_VERSION
           }
