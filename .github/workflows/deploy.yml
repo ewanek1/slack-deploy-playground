@@ -15,6 +15,7 @@ jobs:
   deploy:
     name: "General using CLI"
     runs-on: ubuntu-latest
+    env: SLACK_CLI_VERSION: "3.5.2"
     timeout-minutes: 5
 
     defaults:
