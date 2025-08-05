@@ -1,0 +1,13 @@
+{
+  "name": "gcli",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "parse-cli-command.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
