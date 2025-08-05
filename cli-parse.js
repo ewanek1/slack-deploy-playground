@@ -22,7 +22,7 @@ async function parse(rawInput) {
 
   // Call slack as the binary - leave args behind 
   const args = tokens.slice(1);
-
+  console.log('Executing the command:', args.join(' '));
   // child_process.execFile(file[, args][, options][, callback])
   execFile('slack', args, (error, stdout) => {
     if (error) {
