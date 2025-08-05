@@ -36,7 +36,7 @@ export const setExecFile = (mock) => { // export for unit testing
     let execFile = mock;
 };
 
-if (require.main === module) {
+if (import.meta.main) {
   // Run script directly from terminal 
   // Strips node and script.js before command 
   // e.g. 'node script.js slack deploy' --> 'slack deploy'
