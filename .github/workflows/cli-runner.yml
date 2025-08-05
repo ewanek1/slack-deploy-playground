@@ -37,6 +37,7 @@ jobs:
         run: npm install shell-quote
 
       - name: Execute command via script
+        run: | 
           echo "Running command: ${{ github.event.inputs.command }}"
           node parse-command.js ${{ github.event.inputs.command }}
         env:
