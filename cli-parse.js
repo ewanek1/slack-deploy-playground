@@ -1,5 +1,5 @@
-const shellQuote = require('shell-quote');
-const { execFile: testExecFile } = require('child_process');
+import { parse as _parse } from 'shell-quote';
+import { execFile as testExecFile } from 'child_process';
 
 // Mock execFile() for unit tests
 let execFile = testExecFile;
@@ -7,7 +7,7 @@ let execFile = testExecFile;
 async function parse(rawInput) {
   let tokens;
   try {
-    tokens = shellQuote.parse(rawInput);
+    tokens = _parse(rawInput);
   } catch (err) {
     throw Error("Invalid syntax: command contains at least one NULL character");
   }
@@ -21,8 +21,8 @@ async function parse(rawInput) {
   }
 
   // Call slack as the binary - leave args behind 
+  console.log('Executing the command:', tokens.join(' '));
   const args = tokens.slice(1);
-  console.log('Executing the command:', args.join(' '));
   // child_process.execFile(file[, args][, options][, callback])
   execFile('slack', args, (error, stdout) => {
     if (error) {
@@ -32,15 +32,14 @@ async function parse(rawInput) {
   });
 }
 
+export const setExecFile = (mock) => { // export for unit testing 
+    let execFile = mock;
+};
+
 if (require.main === module) {
   // Run script directly from terminal 
   // Strips node and script.js before command 
   // e.g. 'node script.js slack deploy' --> 'slack deploy'
   const rawInput = process.argv.slice(2).join(' '); 
   parse(rawInput);
-} else {  // export for unit testing
-  module.exports = { 
-    parse,
-    setExecFile: (mock) => { execFile = mock; },
-  };
-}
+};
