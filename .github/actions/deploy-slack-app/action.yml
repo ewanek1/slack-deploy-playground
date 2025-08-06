@@ -1,6 +1,5 @@
-# Composite action that caches and installs CLI
 name: Download Slack CLI
-description: Install Slack CLI if needed and add to PATH
+description: Install and cache Slack CLI 
 runs:
   using: composite
   steps:
@@ -35,7 +34,6 @@ runs:
         iwr https://deno.land/install.ps1 -useb | iex
         echo "$env:USERPROFILE\.deno\bin" | Out-File -Append -FilePath $env:GITHUB_PATH
 
-
     - name: Install Slack CLI (Windows)
       # steps.cache-cli.outputs.cache-hit != 'true' &&
       if: runner.os == 'Windows'
@@ -43,4 +41,4 @@ runs:
       run: |
         $ExecutionContext.SessionState.LanguageMode = "FullLanguage"
         Write-Host "PowerShell Language Mode set to $($ExecutionContext.SessionState.LanguageMode)" 
-        irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
+        irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -SkipDeno $true | iex
