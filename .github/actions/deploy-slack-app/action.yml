@@ -37,13 +37,9 @@ runs:
 
 
 
-
-
     - name: Install Slack CLI (Windows)
       if: runner.os == 'Windows'
       shell: pwsh
-      run: 
-      - name: Install Slack CLI (Windows, forced exit)
       run: |
 
         Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
