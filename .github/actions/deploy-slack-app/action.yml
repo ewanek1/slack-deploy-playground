@@ -39,33 +39,33 @@ runs:
 
 
 
-- name: Install Slack CLI (Windows)
-  if: runner.os == 'Windows'
-  shell: pwsh
-  run: |
-    $ExecutionContext.SessionState.LanguageMode = "FullLanguage"
-    Write-Host "PowerShell Language Mode set to $($ExecutionContext.SessionState.LanguageMode)"
+    - name: Install Slack CLI (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $ExecutionContext.SessionState.LanguageMode = "FullLanguage"
+        Write-Host "PowerShell Language Mode set to $($ExecutionContext.SessionState.LanguageMode)"
 
-    # Start the install script in the background
-    $job = Start-Job -ScriptBlock { irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex }
+        # Start the install script in the background
+        $job = Start-Job -ScriptBlock { irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex }
 
-    # Wait up to 90 seconds
-    $timeout = 90
-    $elapsed = 0
-    while ($job.State -eq 'Running' -and $elapsed -lt $timeout) {
-      Start-Sleep -Seconds 2
-      $elapsed += 2
-      Write-Host "⏳ Still installing... ($elapsed seconds)"
-    }
+        # Wait up to 90 seconds
+        $timeout = 90
+        $elapsed = 0
+        while ($job.State -eq 'Running' -and $elapsed -lt $timeout) {
+          Start-Sleep -Seconds 2
+          $elapsed += 2
+          Write-Host "⏳ Still installing... ($elapsed seconds)"
+        }
 
-    if ($job.State -eq 'Running') {
-      Write-Host "⚠️ Install still running after $timeout seconds. Stopping job..."
-      Stop-Job $job
-      Remove-Job $job
-    } else {
-      Write-Host "✅ Install finished in $elapsed seconds."
-      Receive-Job $job
-    }
+        if ($job.State -eq 'Running') {
+          Write-Host "⚠️ Install still running after $timeout seconds. Stopping job..."
+          Stop-Job $job
+          Remove-Job $job
+        } else {
+          Write-Host "✅ Install finished in $elapsed seconds."
+          Receive-Job $job
+        }
 
-    # Always exit cleanly so the step doesn't hang
-    exit 0
+        # Always exit cleanly so the step doesn't hang
+        exit 0
