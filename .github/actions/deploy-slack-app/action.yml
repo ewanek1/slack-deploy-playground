@@ -41,4 +41,4 @@ runs:
       run: |
         $ExecutionContext.SessionState.LanguageMode = "FullLanguage"
         Write-Host "PowerShell Language Mode set to $($ExecutionContext.SessionState.LanguageMode)" 
-        irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -SkipDeno $true | iex
+        irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
