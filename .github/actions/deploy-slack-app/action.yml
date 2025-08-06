@@ -21,6 +21,13 @@ runs:
       shell: powershell
       run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
 
+    - name: DEBUG: After Add to PATH (Windows)
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: Write-Host "After Add to PATH"
+
+      
+
     - name: Install Slack CLI (Linux/macOS)
       if:
         steps.cache-cli.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
@@ -32,3 +39,8 @@ runs:
       shell: powershell
       run: |
         irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
+
+    - name: DEBUG: After CLI Install (Windows)
+      if: steps.cache-cli.outputs.cache-hit != 'true' && runner.os == 'Windows'
+      shell: powershell
+      run: Write-Host "After CLI Install"
