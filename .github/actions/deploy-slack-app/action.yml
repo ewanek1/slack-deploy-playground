@@ -70,6 +70,7 @@ runs:
 
         if (-not $success) {
           throw "❌ Failed to install Slack CLI after $maxRetries attempts."
+        }
         if ($job.State -eq 'Running') {
           Write-Host "⚠️ Install still running after $timeout seconds. Stopping job..."
           Stop-Job $job
@@ -78,6 +79,7 @@ runs:
           Write-Host "✅ Job finished in $elapsed seconds."
           Receive-Job $job
         }
+
 
         Write-Host "🛣️ PATH after install:"
         Write-Host $env:PATH
