@@ -16,10 +16,10 @@ runs:
       shell: bash
       run: echo "$HOME/.slack/bin" >> "$GITHUB_PATH"
 
-    - name: Add Slack CLI to PATH (Windows)
-      if: runner.os == 'Windows'
-      shell: powershell
-      run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
+    # - name: Add Slack CLI to PATH (Windows)
+    #   if: runner.os == 'Windows'
+    #   shell: powershell
+    #   run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
 
     - name: Install Slack CLI (Linux/macOS)
       if:
@@ -27,21 +27,23 @@ runs:
       shell: bash
       run:
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
-    # - name: Install Slack CLI (Windows)
-    #   if: steps.cache-cli.outputs.cache-hit != 'true' && runner.os == 'Windows'
+
+    - name: Install Slack CLI (Windows)
+      # steps.cache-cli.outputs.cache-hit != 'true' &&
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: |
+        irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
+
+    # - name: Download Slack CLI install script (Windows)
+    #   if: runner.os == 'Windows'
     #   shell: powershell
     #   run: |
-    #     irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
+    #     Invoke-WebRequest -Uri https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -OutFile install-windows.ps1
+    #     Get-Content install-windows.ps1 | Write-Host
 
-    - name: Download Slack CLI install script (Windows)
-      if: runner.os == 'Windows'
-      shell: powershell
-      run: |
-        Invoke-WebRequest -Uri https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -OutFile install-windows.ps1
-        Get-Content install-windows.ps1 | Write-Host
-
-    - name: Run Slack CLI install script (Windows) with verbose
-      if: runner.os == 'Windows'
-      shell: powershell
-      run: |
-        .\install-windows.ps1 -Verbose
+    # - name: Run Slack CLI install script (Windows) with verbose
+    #   if: runner.os == 'Windows'
+    #   shell: powershell
+    #   run: |
+    #     .\install-windows.ps1 -Verbose
