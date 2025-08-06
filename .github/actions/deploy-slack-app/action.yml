@@ -9,11 +9,10 @@ runs:
       uses: actions/cache@v4
       with:
         path: ~/.slack/bin
-        key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ env.SLACK_CLI_VERSION }}
+        key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ env.SLACK_CLI_VERSION }}  
     - name: Add Slack CLI to PATH
       shell: bash
-      run: echo "$HOME/.slack/bin" >> $GITHUB_PATH
-      # Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+      run: echo "$HOME/.slack/bin" >> $GITHUB_PATH | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
     - name: Install Slack CLI (Linux/macOS)
       if:
         steps.cache-cli.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
