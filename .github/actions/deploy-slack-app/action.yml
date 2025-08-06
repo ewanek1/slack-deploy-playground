@@ -35,13 +35,6 @@ runs:
       run: |
         irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
 
-
-
-    - name: Install Slack CLI (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-
-
     - name: Install Slack CLI (Windows, forced exit)
       if: steps.cache-cli.outputs.cache-hit != 'true' && runner.os == 'Windows'
       shell: pwsh
