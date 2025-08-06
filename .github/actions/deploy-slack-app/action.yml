@@ -29,58 +29,18 @@ runs:
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
 
 
-    - name: Install Slack CLI (Windows, forced exit)
+    - name: Install Deno (Windows)
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        Write-Host "🐍 PowerShell Language Mode: $($ExecutionContext.SessionState.LanguageMode)"
+        iwr https://deno.land/install.ps1 -useb | iex
+        $env:PATH += ";$env:USERPROFILE\.deno\bin"
 
-        $retryCount = 0
-        $maxRetries = 3
-        $success = $false
-        Write-Host "📦 Downloading install script..."
-        iwr -Uri https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -OutFile install.ps1
-
-        while (-not $success -and $retryCount -lt $maxRetries) {
-          try {
-            Write-Host "📦 Downloading install script (attempt $($retryCount + 1))..."
-            iwr -Uri https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -OutFile install.ps1
-
-            Write-Host "🚀 Running install script in background job..."
-            $job = Start-Job -ScriptBlock { & "$PWD\install.ps1" }
-
-            # Wait up to 60 seconds for install
-            $timeout = 90
-            $elapsed = 0
-            while ($job.State -eq 'Running' -and $elapsed -lt $timeout) {
-              Start-Sleep -Seconds 2
-              $elapsed += 2
-              Write-Host "⏳ Still installing... ($elapsed seconds)"
-            }
-
-            if ($job.State -eq 'Running') {
-              Write-Host "⚠️ Install still running after $timeout seconds. Stopping job..."
-              Stop-Job $job
-              Remove-Job $job
-              throw "Installation timed out"
-            } else {
-              Write-Host "✅ Job finished in $elapsed seconds."
-              Receive-Job $job
-              $success = $true
-            }
-          } catch {
-            $retryCount++
-            Write-Host "⚠️ Installation failed (attempt $retryCount). Retrying in 5 seconds..."
-            Start-Sleep -Seconds 5
-          }
-        }
-
-        if (-not $success) {
-          throw "❌ Failed to install Slack CLI after $maxRetries attempts."
-        }
-
-        Write-Host "🛣️ PATH after install:"
-        Write-Host $env:PATH
-
-        Write-Host "🔚 Exiting install step..."
-        exit 0
+    - name: Install Slack CLI (Windows)
+      # steps.cache-cli.outputs.cache-hit != 'true' &&
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $ExecutionContext.SessionState.LanguageMode = "FullLanguage"
+        Write-Host "PowerShell Language Mode set to $($ExecutionContext.SessionState.LanguageMode)" 
+        irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
