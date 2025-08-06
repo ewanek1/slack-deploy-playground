@@ -35,21 +35,38 @@ runs:
       run: |
         irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
 
+  
+  
     - name: Install Slack CLI (Windows, forced exit)
-      if: runner.os == 'Windows'
+      if: steps.cache-cli.outputs.cache-hit != 'true' && runner.os == 'Windows'
       shell: pwsh
       run: |
-        Write-Host "🔧 Setting execution policy..."
-        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
 
         Write-Host "🐍 PowerShell Language Mode: $($ExecutionContext.SessionState.LanguageMode)"
 
+        $retryCount = 0
+        $maxRetries = 3
+        $success = $false
         Write-Host "📦 Downloading install script..."
         iwr -Uri https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -OutFile install.ps1
 
+        while (-not $success -and $retryCount -lt $maxRetries) {
+          try {
+            Write-Host "📦 Downloading install script (attempt $($retryCount + 1))..."
+            iwr -Uri https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -OutFile install.ps1
         Write-Host "🚀 Running install script in background job..."
         $job = Start-Job -ScriptBlock { & .\install.ps1 }
 
+            Write-Host "🚀 Running install script"
+            & .\install.ps1
+
+            $success = $true
+            Write-Host "✅ Slack CLI installation complete."
+          } catch {
+            $retryCount++
+            Write-Host "⚠️ Installation failed (attempt $retryCount). Retrying in 5 seconds..."
+            Start-Sleep -Seconds 5
+          }
         # Wait up to 60 seconds for install (tweak as needed)
         $timeout = 60
         $elapsed = 0
@@ -59,6 +76,8 @@ runs:
           Write-Host "⏳ Still installing... ($elapsed seconds)"
         }
 
+        if (-not $success) {
+          throw "❌ Failed to install Slack CLI after $maxRetries attempts."
         if ($job.State -eq 'Running') {
           Write-Host "⚠️ Install still running after $timeout seconds. Stopping job..."
           Stop-Job $job
@@ -71,7 +90,6 @@ runs:
         Write-Host "🛣️ PATH after install:"
         Write-Host $env:PATH
 
+        Write-Host "🔚 Exiting install step..."
         # ✅ Prevent step from hanging
         exit 0
-
-
