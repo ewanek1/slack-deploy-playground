@@ -1,39 +1,71 @@
-- name: Install Slack CLI (Windows)
-  if: steps.cache-cli.outputs.cache-hit != 'true' && runner.os == 'Windows'
-  shell: pwsh
-  run: |
-    Write-Host "🔧 Setting execution policy..."
-    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
+name: Download Slack CLI
+description: Install Slack CLI if needed and add to PATH
 
-    Write-Host "🐍 PowerShell Language Mode: $($ExecutionContext.SessionState.LanguageMode)"
+runs:
+  using: composite
+  steps:
+    - name: Cache Slack CLI
+      id: cache-cli
+      uses: actions/cache@v4
+      with:
+        path: ~/.slack/bin
+        key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ env.SLACK_CLI_VERSION }}
 
-    $retryCount = 0
-    $maxRetries = 3
-    $success = $false
+    - name: Add Slack CLI to PATH (Linux/macOS)
+      if: runner.os != 'Windows'
+      shell: bash
+      run: echo "$HOME/.slack/bin" >> "$GITHUB_PATH"
 
-    while (-not $success -and $retryCount -lt $maxRetries) {
-      try {
-        Write-Host "📦 Installing Slack CLI (attempt $($retryCount + 1))..."
-        
-        & {
-          irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
+    # Optionally uncomment if Windows PATH override is needed
+    - name: Add Slack CLI to PATH (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
+
+    - name: Install Slack CLI (Linux/macOS)
+      if: steps.cache-cli.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
+      shell: bash
+      run: |
+        echo "Installing Slack CLI for $RUNNER_OS..."
+        curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
+
+    - name: Install Slack CLI (Windows)
+      if: steps.cache-cli.outputs.cache-hit != 'true' && runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        Write-Host "🔧 Setting execution policy..."
+        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
+
+        Write-Host "🐍 PowerShell Language Mode: $($ExecutionContext.SessionState.LanguageMode)"
+
+        $retryCount = 0
+        $maxRetries = 3
+        $success = $false
+
+        while (-not $success -and $retryCount -lt $maxRetries) {
+          try {
+            Write-Host "📦 Installing Slack CLI (attempt $($retryCount + 1))..."
+            
+            & {
+              irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
+            }
+
+            $success = $true
+            Write-Host "✅ Slack CLI installation complete."
+          } catch {
+            $retryCount++
+            Write-Host "⚠️ Installation failed (attempt $retryCount). Retrying in 5 seconds..."
+            Start-Sleep -Seconds 5
+          }
         }
 
-        $success = $true
-        Write-Host "✅ Slack CLI installation complete."
-      } catch {
-        $retryCount++
-        Write-Host "⚠️ Installation failed (attempt $retryCount). Retrying in 5 seconds..."
-        Start-Sleep -Seconds 5
-      }
-    }
+        if (-not $success) {
+          throw "❌ Failed to install Slack CLI after $maxRetries attempts."
+        }
 
-    if (-not $success) {
-      throw "❌ Failed to install Slack CLI after $maxRetries attempts."
-    }
+        Write-Host "🛣️ PATH after install:"
+        Write-Host $env:PATH
 
-    Write-Host "🛣️ PATH after install:"
-    Write-Host $env:PATH
+        # 👇 Force exit the step in case something is hanging
+        exit 0
 
-    # 👇 Force exit the step in case something is hanging
-    exit 0
