@@ -12,7 +12,11 @@ runs:
         key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ env.SLACK_CLI_VERSION }}  
     - name: Add Slack CLI to PATH
       shell: bash
-      run: echo "$HOME/.slack/bin" >> $GITHUB_PATH | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+      if (runner.os == 'Linux' || runner.os == 'macOS'): 
+        run: echo "$HOME/.slack/bin" >> $GITHUB_PATH 
+      if (runner.os == 'Windows'):
+        run: Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+      #line 1: Out-File: command not found 
     - name: Install Slack CLI (Linux/macOS)
       if:
         steps.cache-cli.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
