@@ -10,16 +10,17 @@ runs:
       with:
         path: ~/.slack/bin
         key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ env.SLACK_CLI_VERSION }}  
-    
-    - name: Add Slack CLI to PATH
+
+    - name: Add Slack CLI to PATH (Linux/macOS)
+      if: runner.os != 'Windows'
       shell: bash
-      run: |
-        if [[ "$RUNNER_OS" == "Windows" ]]; then
-          echo "$USERPROFILE\\.slack\\bin" >> "$GITHUB_PATH"
-        else
-          echo "$HOME/.slack/bin" >> "$GITHUB_PATH"
-        fi
-    
+      run: echo "$HOME/.slack/bin" >> "$GITHUB_PATH"
+
+    - name: Add Slack CLI to PATH (Windows)
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
+
     - name: Install Slack CLI (Linux/macOS)
       if:
         steps.cache-cli.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
