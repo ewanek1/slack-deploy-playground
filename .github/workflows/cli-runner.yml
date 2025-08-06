@@ -54,9 +54,9 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-        $ExecutionContext.SessionState.LanguageMode = "FullLanguage"
-        Write-Host "PowerShell Language Mode set to $($ExecutionContext.SessionState.LanguageMode)" 
-        irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
+          $ExecutionContext.SessionState.LanguageMode = "FullLanguage"
+          Write-Host "PowerShell Language Mode set to $($ExecutionContext.SessionState.LanguageMode)" 
+          irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
