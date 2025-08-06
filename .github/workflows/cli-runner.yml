@@ -44,8 +44,7 @@ jobs:
       - name: Execute command via script
         if: always()
         run: | 
-          echo "Running command: ${{ github.event.inputs.command }}"
-          node parse-command.js ${{ github.event.inputs.command }}
+          slack version
         env:
           # Get service token by running `slack auth token`
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }} 
@@ -68,3 +67,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           extension: ts
           include: src
+
+  #echo "Running command: ${{ github.event.inputs.command }}"
+  #node parse-command.js ${{ github.event.inputs.command }}
