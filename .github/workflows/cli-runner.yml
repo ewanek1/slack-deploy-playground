@@ -44,7 +44,7 @@ jobs:
       - name: Execute command via script
         if: always()
         run: | 
-          slack version
+          slack.exe
         env:
           # Get service token by running `slack auth token`
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }} 
