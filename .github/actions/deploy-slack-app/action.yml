@@ -28,17 +28,9 @@ runs:
       run:
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
 
-    - name: Install Slack CLI (Windows)
-      # steps.cache-cli.outputs.cache-hit != 'true' &&
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
 
-  
-  
     - name: Install Slack CLI (Windows, forced exit)
-      if: steps.cache-cli.outputs.cache-hit != 'true' && runner.os == 'Windows'
+      if: runner.os == 'Windows'
       shell: pwsh
       run: |
 
@@ -67,7 +59,7 @@ runs:
             Write-Host "⚠️ Installation failed (attempt $retryCount). Retrying in 5 seconds..."
             Start-Sleep -Seconds 5
           }
-        # Wait up to 60 seconds for install (tweak as needed)
+        # wait up to 60 seconds for install (tweak as needed)
         $timeout = 60
         $elapsed = 0
         while ($job.State -eq 'Running' -and $elapsed -lt $timeout) {
