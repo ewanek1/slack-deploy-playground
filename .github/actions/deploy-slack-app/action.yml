@@ -50,7 +50,7 @@ runs:
             $job = Start-Job -ScriptBlock { & "$PWD\install.ps1" }
 
             # Wait up to 60 seconds for install
-            $timeout = 60
+            $timeout = 90
             $elapsed = 0
             while ($job.State -eq 'Running' -and $elapsed -lt $timeout) {
               Start-Sleep -Seconds 2
