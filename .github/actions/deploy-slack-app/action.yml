@@ -44,11 +44,11 @@ runs:
 
         while (-not $success -and $retryCount -lt $maxRetries) {
           try {
-            Write-Host "📦 Installing Slack CLI (attempt $($retryCount + 1))..."
-            
-            & {
-              irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
-            }
+            Write-Host "📦 Downloading install script (attempt $($retryCount + 1))..."
+            iwr -Uri https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -OutFile install.ps1
+
+            Write-Host "🚀 Running install script"
+            & .\install.ps1
 
             $success = $true
             Write-Host "✅ Slack CLI installation complete."
@@ -66,6 +66,7 @@ runs:
         Write-Host "🛣️ PATH after install:"
         Write-Host $env:PATH
 
-        # 👇 Force exit the step in case something is hanging
+        Write-Host "🔚 Exiting install step..."
         exit 0
+
 
