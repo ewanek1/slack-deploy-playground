@@ -1,8 +1,8 @@
 import { parse as _parse } from 'shell-quote';
-import { execFile as testExecFile } from 'child_process';
+import { exec as testExec } from 'child_process';
 
 // Mock execFile() for unit tests
-let execFile = testExecFile;
+let exec = testExec;
 
 async function parse(rawInput) {
   let tokens;
@@ -24,7 +24,7 @@ async function parse(rawInput) {
   console.log('Executing the command:', tokens.join(' '));
   const args = tokens.slice(1);
   // child_process.execFile(file[, args][, options][, callback])
-  execFile('slack', args, (error, stdout) => {
+  exec('slack', args, (error, stdout) => {
     if (error) {
       throw Error(`Slack CLI Error: ${error.message}`);
     }
@@ -32,8 +32,8 @@ async function parse(rawInput) {
   });
 }
 
-export const setExecFile = (mock) => { // export for unit testing 
-    let execFile = mock;
+export const setExec = (mock) => { // export for unit testing 
+    let exec = mock;
 };
 
 if (import.meta.main) {
