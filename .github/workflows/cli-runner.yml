@@ -29,8 +29,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Slack CLI
-        uses: ./.github/actions/deploy-slack-app
+      #- name: Install Slack CLI
+      #  uses: ./.github/actions/deploy-slack-app
+      - name: Cache Slack CLI
+        uses: actions/cache@v4
+        with:
+          path: ~/.slack/bin
+          key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ env.SLACK_CLI_VERSION }}  
+          
+      - name: Add Slack CLI to PATH (Linux/macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: echo "$HOME/.slack/bin" >> "$GITHUB_PATH"
+
+      - name: Install Slack CLI (Linux/macOS)
+        if:
+          steps.cache-cli.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
+        shell: bash
+        run:
+          curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
+
+      - name: Install Slack CLI (Windows)
+      # steps.cache-cli.outputs.cache-hit != 'true' &&
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+        $ExecutionContext.SessionState.LanguageMode = "FullLanguage"
+        Write-Host "PowerShell Language Mode set to $($ExecutionContext.SessionState.LanguageMode)" 
+        irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
