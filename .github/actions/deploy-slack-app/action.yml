@@ -39,8 +39,8 @@ runs:
       if: runner.os == 'Windows' && steps.cache-cli.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
-        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
-        .\install-windows-dev.ps1 -Version $env:SLACK_CLI_VERSION 
+        irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -outfile 'install-windows.ps1'
+        .\install-windows.ps1 -Alias slackcli -SkipGit $true -SkipDeno $true
 
 
         
