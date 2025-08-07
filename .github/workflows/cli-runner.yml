@@ -12,13 +12,19 @@ jobs:
   deploy:
     name: "XX"
     runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+      #ubuntu-latest, macos-latest, 
+        os: [windows-latest]
+        node: [16, 18, 20, 22, 24]
     env: 
       SLACK_CLI_VERSION: "3.5.2"
-    timeout-minutes: 5
+    #timeout-minutes: 5
 
-  
+
 
     steps:
+      # Checkout the repository to the GitHub Actions runner
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -39,6 +45,7 @@ jobs:
             echo "Running command: ${{ github.event.inputs.command }}"
             node parse-command.js ${{ github.event.inputs.command }}
         env:
+          # Get service token by running `slack auth token`
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }} 
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         
