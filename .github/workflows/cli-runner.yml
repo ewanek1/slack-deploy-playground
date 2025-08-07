@@ -36,5 +36,15 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
+      - name: Install dependencies
+        run: npm install shell-quote
 
+      - name: Execute command via script
+        if: always()
+        run: | 
+            echo "Running command: ${{ github.event.inputs.command }}"
+            node parse-command.js ${{ github.event.inputs.command }}
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }} 
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         

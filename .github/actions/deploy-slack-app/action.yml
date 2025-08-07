@@ -22,12 +22,13 @@ runs:
 
     - name: Install Slack CLI (Linux/macOS)
       if:
-        steps.cache-cli.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS')
+        (runner.os == 'Linux' || runner.os == 'macOS') && steps.cache-cli.outputs.cache-hit != 'true' 
       shell: bash
       run:
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
 
-    - name: Install Deno (manually)
+      - name: Install Deno (manually)
+      if: runner.os == 'Windows'
       shell: pwsh
       run: |
         irm https://deno.land/install.ps1 -OutFile install-deno.ps1
@@ -35,11 +36,12 @@ runs:
         Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.deno\bin"
 
     - name: Install Slack CLI (Windows)
-      if: runner.os == 'Windows'
+      if: runner.os == 'Windows' && steps.cache-cli.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
         irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
-        .\install-windows-dev.ps1 -Version 3.5.2
+        .\install-windows-dev.ps1 -Version $env:SLACK_CLI_VERSION
+
 
         
 
