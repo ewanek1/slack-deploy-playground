@@ -35,12 +35,21 @@ runs:
         echo "$env:USERPROFILE\.deno\bin" | Out-File -Append -FilePath $env:GITHUB_PATH
 
     - name: Install Slack CLI (Windows)
-      # steps.cache-cli.outputs.cache-hit != 'true' &&
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
         $ExecutionContext.SessionState.LanguageMode = "FullLanguage"
-        Write-Host "PowerShell Language Mode set to $($ExecutionContext.SessionState.LanguageMode)" 
-        irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
-        slack version
+
+        $job = Start-Job {
+          irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
+        }
+
+        if (Wait-Job $job -Timeout 90) {
+          Receive-Job $job
+        } else {
+          Write-Error "Slack CLI install timed out after 90 seconds."
+          Stop-Job $job
+          exit 1
+        }
+
 
