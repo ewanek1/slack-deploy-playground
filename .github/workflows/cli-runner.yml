@@ -37,6 +37,7 @@ jobs:
           node-version: ${{ matrix.node }}
 
       - name: Install dependencies
+        working-directory: ${{ github.workspace }}
         run: npm install shell-quote
 
       - name: Execute command via script
