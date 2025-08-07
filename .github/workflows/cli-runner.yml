@@ -5,28 +5,20 @@ on:
   workflow_dispatch:
     inputs:
       command:
-        description: 'CLI command to run'
+        description: 'XX'
         required: true
 
 jobs:
   deploy:
-    name: "General using CLI"
+    name: "XX"
     runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-      #ubuntu-latest, macos-latest, 
-        os: [windows-latest]
-        node: [16, 18, 20, 22, 24]
     env: 
       SLACK_CLI_VERSION: "3.5.2"
-    #timeout-minutes: 5
+    timeout-minutes: 5
 
-    defaults:
-      run:
-        shell: bash
+  
 
     steps:
-      # Checkout the repository to the GitHub Actions runner
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -47,24 +39,6 @@ jobs:
             echo "Running command: ${{ github.event.inputs.command }}"
             node parse-command.js ${{ github.event.inputs.command }}
         env:
-          # Get service token by running `slack auth token`
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }} 
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         
-  health-score:
-    name: "Report Health Score"
-    needs: deploy
-    runs-on: ubuntu-latest
-    permissions:
-      checks: write
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Report health score
-        uses: slackapi/slack-health-score@v0
-        with:
-          codecov_token: ${{ secrets.CODECOV_TOKEN }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          extension: ts
-          include: src
