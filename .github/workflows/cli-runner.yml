@@ -11,6 +11,11 @@ jobs:
   deploy:
     name: "Run Slack CLI command"
     runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+      #ubuntu-latest, macos-latest, 
+        os: [windows-latest]
+        node: [16, 18, 20, 22, 24]
     env: 
       SLACK_CLI_VERSION: "3.5.2"
     timeout-minutes: 5
