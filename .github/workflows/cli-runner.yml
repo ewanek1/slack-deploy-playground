@@ -18,7 +18,7 @@ jobs:
         node: [16, 18, 20, 22, 24]
     env: 
       SLACK_CLI_VERSION: "3.5.2"
-    timeout-minutes: 5
+    timeout-minutes: 20
 
     defaults:
       run:
