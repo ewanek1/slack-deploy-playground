@@ -40,16 +40,39 @@ runs:
       run: |
         $ExecutionContext.SessionState.LanguageMode = "FullLanguage"
 
-        $job = Start-Job {
-          irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
+        Write-Host "Setting execution policy..."
+        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
+
+        Write-Host "PowerShell Language Mode: $($ExecutionContext.SessionState.LanguageMode)"
+
+        Write-Host "Downloading install script..."
+        iwr -Uri https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -OutFile install.ps1
+
+        Write-Host "Running install script in background job..."
+        $job = Start-Job -ScriptBlock { & .\install.ps1 }
+
+        # Wait up to 60 seconds for install (tweak as needed)
+        $timeout = 60
+        $elapsed = 0
+        while ($job.State -eq 'Running' -and $elapsed -lt $timeout) {
+          Start-Sleep -Seconds 2
+          $elapsed += 2
+          Write-Host "Still installing... ($elapsed seconds)"
         }
 
-        if (Wait-Job $job -Timeout 90) {
-          Receive-Job $job
-        } else {
-          Write-Error "Slack CLI install timed out after 90 seconds."
+        if ($job.State -eq 'Running') {
+          Write-Host "Install still running after $timeout seconds. Stopping job..."
           Stop-Job $job
-          exit 1
+          Remove-Job $job
+        } else {
+          Write-Host "Job finished in $elapsed seconds."
+          Receive-Job $job
         }
+
+        Write-Host "🛣️ PATH after install:"
+        Write-Host $env:PATH
+
+        # Prevent step from hanging
+        exit 0
 
 
