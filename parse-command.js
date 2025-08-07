@@ -1,7 +1,5 @@
 import { parse as _parse } from 'shell-quote';
-import { execFile as testExecFile } from 'child_process';
-
-let execFile = testExecFile;
+import { execFile} from 'child_process';
 
 async function parse(rawInput) {
   let tokens;
@@ -25,10 +23,6 @@ async function parse(rawInput) {
     console.log(stdout);  
   });
 }
-
-export const setExecFile = (mock) => { 
-    let execFile = mock;
-};
 
 if (import.meta.main) {
   const rawInput = process.argv.slice(2).join(' '); 

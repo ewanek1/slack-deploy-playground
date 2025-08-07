@@ -27,14 +27,6 @@ runs:
       run:
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
 
-    - name: Install Deno (manually)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        irm https://deno.land/install.ps1 -OutFile install-deno.ps1
-        .\install-deno.ps1
-        Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.deno\bin"
-
     - name: Install Slack CLI (Windows)
       if: runner.os == 'Windows' && steps.cache-cli.outputs.cache-hit != 'true'
       shell: pwsh 
