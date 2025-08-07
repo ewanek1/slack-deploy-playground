@@ -36,11 +36,13 @@ runs:
         Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.deno\bin"
 
     - name: Install Slack CLI (Windows)
-      if: runner.os == 'Windows' && steps.cache-cli.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
+        Write-Host "Starting Slack CLI installer..."
         irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
-        .\install-windows-dev.ps1 -Version $env:SLACK_CLI_VERSION || exit 0
+        .\install-windows-dev.ps1 -Version $env:SLACK_CLI_VERSION
+        Write-Host "Slack CLI installer finished."
+
 
 
         
