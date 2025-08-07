@@ -27,7 +27,7 @@ runs:
       run:
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
 
-      - name: Install Deno (manually)
+    - name: Install Deno (manually)
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
