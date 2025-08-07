@@ -31,7 +31,6 @@ runs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -outfile 'install-windows-dev.ps1'
-        \install-windows-dev.ps1 -Version 3.5.2
+        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -outfile 'install-windows-dev.ps1'.\install-windows-dev.ps1 -Version 3.5.2
         
 
