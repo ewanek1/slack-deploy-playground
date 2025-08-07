@@ -15,11 +15,6 @@ async function parse(rawInput) {
     throw Error("No command provided");
   }
 
-  if (tokens[0] !== 'slack') {
-    throw Error("Command must start with 'slack'");
-  }
-
-
   console.log('Executing the command:', tokens.join(' '));
   const args = tokens.slice(1);
 

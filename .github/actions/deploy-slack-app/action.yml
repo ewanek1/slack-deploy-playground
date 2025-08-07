@@ -41,6 +41,6 @@ runs:
       run: |
         $ExecutionContext.SessionState.LanguageMode = "FullLanguage"
         Write-Host "PowerShell Language Mode set to $($ExecutionContext.SessionState.LanguageMode)" 
-        irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -outfile 'install-windows.ps1'
-        .\install-windows.ps1 -Alias slackcli -SkipGit $true -SkipDeno $true
-        
+        irm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 | iex
+        slack version
+
