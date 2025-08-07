@@ -1,30 +1,25 @@
-# Execute command
-name: GCli project wip script 
+name: Slack CLI Command Runner
 
 on:
   workflow_dispatch:
     inputs:
       command:
-        description: 'XX'
+        description: 'Slack CLI command to run'
         required: true
 
 jobs:
   deploy:
-    name: "XX"
+    name: "Run Slack CLI command"
     runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-      #ubuntu-latest, macos-latest, 
-        os: [windows-latest]
-        node: [16, 18, 20, 22, 24]
     env: 
       SLACK_CLI_VERSION: "3.5.2"
-    #timeout-minutes: 5
+    timeout-minutes: 5
 
-
+    defaults:
+      run:
+        shell: bash
 
     steps:
-      # Checkout the repository to the GitHub Actions runner
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -45,7 +40,6 @@ jobs:
             echo "Running command: ${{ github.event.inputs.command }}"
             node parse-command.js ${{ github.event.inputs.command }}
         env:
-          # Get service token by running `slack auth token`
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }} 
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         

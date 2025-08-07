@@ -1,5 +1,5 @@
-name: Download Slack CLI
-description: Install and cache Slack CLI 
+name: Slack CLI Installation
+description: Download and cache the Slack CLI 
 runs:
   using: composite
   steps:
@@ -15,10 +15,10 @@ runs:
       shell: bash
       run: echo "$HOME/.slack/bin" >> "$GITHUB_PATH"
 
-    # - name: Add Slack CLI to PATH (Windows)
-    #   if: runner.os == 'Windows'
-    #   shell: pwsh
-    #   run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
+    - name: Add Slack CLI to PATH (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
 
     - name: Install Slack CLI (Linux/macOS)
       if:
@@ -27,52 +27,11 @@ runs:
       run:
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
 
-    - name: Install Deno (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        iwr https://deno.land/install.ps1 -useb | iex
-        echo "$env:USERPROFILE\.deno\bin" | Out-File -Append -FilePath $env:GITHUB_PATH
-
     - name: Install Slack CLI (Windows)
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        $ExecutionContext.SessionState.LanguageMode = "FullLanguage"
-
-        Write-Host "Setting execution policy..."
-        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
-
-        Write-Host "PowerShell Language Mode: $($ExecutionContext.SessionState.LanguageMode)"
-
-        Write-Host "Downloading install script..."
-        iwr -Uri https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -OutFile install.ps1
-
-        Write-Host "Running install script in background job..."
-        $job = Start-Job -ScriptBlock { & .\install.ps1 }
-
-        # Wait up to 60 seconds for install (tweak as needed)
-        $timeout = 60
-        $elapsed = 0
-        while ($job.State -eq 'Running' -and $elapsed -lt $timeout) {
-          Start-Sleep -Seconds 2
-          $elapsed += 2
-          Write-Host "Still installing... ($elapsed seconds)"
-        }
-
-        if ($job.State -eq 'Running') {
-          Write-Host "Install still running after $timeout seconds. Stopping job..."
-          Stop-Job $job
-          Remove-Job $job
-        } else {
-          Write-Host "Job finished in $elapsed seconds."
-          Receive-Job $job
-        }
-
-        Write-Host "🛣️ PATH after install:"
-        Write-Host $env:PATH
-
-        # Prevent step from hanging
-        exit 0
-
+        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -outfile 'install-windows-dev.ps1'
+        \install-windows-dev.ps1 -Version 3.5.2
+        
 
