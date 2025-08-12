@@ -17,18 +17,20 @@ async function parse(rawInput) {
   const args = tokens.slice(1);
 
   execFile('slack', args, (error, stdout) => {
-    if (error) {
-      throw Error(`Slack CLI Error: ${error.message}`);
-    }
-    console.log(stdout);  
-  });
-}
+  if (error) {
+    console.error(`Error: ${error.message}`);
+  }
+  if (stderr) {
+    console.error(`stderr: ${stderr}`);
+  }
+  console.log(stdout);
+});
 
 if (import.meta.main) {
   const rawInput = process.argv.slice(2).join(' '); 
   parse(rawInput);
 };
-
+}
 
 
 
