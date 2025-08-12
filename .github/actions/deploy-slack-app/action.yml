@@ -21,8 +21,8 @@ runs:
       run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
 
     - name: Install Slack CLI (Linux/macOS)
-      #if:
-        #(runner.os == 'Linux' || runner.os == 'macOS') && steps.cache-cli.outputs.cache-hit != 'true' 
+      if:
+        (runner.os == 'Linux' || runner.os == 'macOS') && steps.cache-cli.outputs.cache-hit != 'true' 
       shell: bash
       run:
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION

@@ -1,7 +1,7 @@
 import { parse as _parse } from 'shell-quote';
 import { execFile} from 'child_process';
 
-async function parse(rawInput) {
+function parse(rawInput) {
   let tokens;
   try {
     tokens = _parse(rawInput);
@@ -16,21 +16,23 @@ async function parse(rawInput) {
   console.log('Executing the command:', tokens.join(' '));
   const args = tokens.slice(1);
 
-  execFile('slack', args, (error, stdout) => {
-  if (error) {
-    console.error(`Error: ${error.message}`);
-  }
-  if (stderr) {
-    console.error(`stderr: ${stderr}`);
-  }
-  console.log(stdout);
-});
+
+  execFile('slack', args, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error: ${error.message}`);
+      return;
+    }
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+    }
+    console.log(stdout);
+  });
+}
 
 if (import.meta.main) {
   const rawInput = process.argv.slice(2).join(' '); 
   parse(rawInput);
 };
-}
 
 
 
