@@ -16,7 +16,6 @@ function parse(rawInput) {
   console.log('Executing the command:', tokens.join(' '));
   const args = tokens.slice(1);
 
-
   execFile('slack', args, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error: ${error.message}`);
@@ -30,7 +29,7 @@ function parse(rawInput) {
 }
 
 if (import.meta.main) {
-  const rawInput = process.argv.slice(2).join(' '); 
+  const rawInput = process.argv.slice(2).join(' ');
   parse(rawInput);
 };
 

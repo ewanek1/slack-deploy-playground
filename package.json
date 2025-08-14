@@ -1,7 +1,6 @@
 {
   "name": "gcli",
   "version": "0.0.1",
-  "type": "module",
   "main": "parse-command.js",
   "scripts": {
     "test": "jest"
@@ -14,3 +13,4 @@
     "jest": "^30.0.5"
   }
 }
+

@@ -1,0 +1,54 @@
+name: Slack CLI Install
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'Slack CLI command to run'
+        required: true
+      verbose:
+        description: 'Verbose flag'
+        required: false
+        default: true
+      automatic_installs:
+        description: 'Install latest CLI during workflow?'
+        required: false
+        default: true
+      app_id:
+        description: 'App ID?'
+        required: false
+      team_id:
+        description: 'Team ID?'
+        required: false
+
+env:
+  SLACK_DISABLE_TELEMETRY: "true"
+  SLACK_CLI_VERSION: "latest" 
+  timeout-minutes: 20
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Slack CLI
+        if: ${{ github.event.inputs.automatic_installs == 'true' }}
+        run: |
+          if [ "${{ github.event.inputs.verbose }}" == 'true' ]; then
+            curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
+          else
+            curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- $SLACK_CLI_VERSION
+          fi
+
+      - name: Set App ID
+        if: ${{ github.event.inputs.app_id }}
+        run: echo "App ID is ${{ github.event.inputs.app_id }}"
+
+      - name: Set Team ID
+        if: ${{ github.event.inputs.team_id }}
+        run: echo "Team ID is ${{ github.event.inputs.team_id }}"
+
+
+
+# VERSION_FLAG="--skip-update"
+
+
