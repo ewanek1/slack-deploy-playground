@@ -11,7 +11,7 @@ async function parse(rawInput) {
 
     for (const command of arrayOfCommands) {
 
-      console.log(`Running..., ${command}`);
+      console.log(`Running command: ${command}`);
       // split by spaces
       const tokens = command.trim().split(/\s+/);
       //console.log(tokens);
