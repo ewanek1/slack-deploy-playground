@@ -1,38 +1,53 @@
-import { parse as _parse } from 'shell-quote';
-import { execFile} from 'child_process';
+//import { execFile as testExecFile } from 'child_process';
+//import { parseArgs } from 'node:util';
+//JSON "type": "module",
+//const { parseArgs } = require('node:util'); 
+const { execFile: testExecFile } = require('child_process');
 
-function parse(rawInput) {
-  let tokens;
-  try {
-    tokens = _parse(rawInput);
-  } catch (err) {
-    throw Error("Invalid syntax: command contains at least one NULL character");
-  }
+let execFile = testExecFile;
 
-  if (tokens.length === 0) {
-    throw Error("No command provided");
-  }
+async function parse(rawInput) {
+    const arrayOfCommands = rawInput.split(',');
 
-  console.log('Executing the command:', tokens.join(' '));
-  const args = tokens.slice(1);
+    for (const command of arrayOfCommands) {
+      // split by spaces
+      const tokens = command.trim().split(/\s+/);
+      console.log(tokens);
 
-  execFile('slack', args, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error: ${error.message}`);
-      return;
+      if (!tokens.includes('slack')) {
+          throw new Error("Invalid syntax: command must contain 'slack'");
+      }
+
+      const args = tokens.slice(1); 
+      //const parsed = parseArgs({ args }); 
+ 
+      execFile('slack', args, (error, stdout, stderr) => {
+          if (error) {
+          console.error(`Slack CLI error: ${error.message}`);
+          return;
+          }
+          if (stderr) {
+          console.error(`stderr: ${stderr}`);
+          }
+          console.log(stdout);
+      });
     }
-    if (stderr) {
-      console.error(`stderr: ${stderr}`);
-    }
-    console.log(stdout);
-  });
 }
 
-if (import.meta.main) {
-  const rawInput = process.argv.slice(2).join(' ');
-  parse(rawInput);
-};
+// Potential issue: this requires slack to be the first argument 
 
+if (require.main === module) {
+  // run script directly from terminal 
+  // strips node and script.js before command 
+  // e.g. 'node script.js slack deploy' --> 'slack deploy'
+  const rawInput = process.argv.slice(2).join(' '); 
+  parse(rawInput);
+} else {  // export for unit testing
+  module.exports = { 
+    parse,
+    setExecFile: (mock) => { execFile = mock; },
+  };
+}
 
 
 
