@@ -47,6 +47,9 @@ jobs:
         if: ${{ github.event.inputs.team_id }}
         run: echo "Team ID is ${{ github.event.inputs.team_id }}"
 
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
