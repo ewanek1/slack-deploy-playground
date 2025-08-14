@@ -9,10 +9,12 @@ on:
       verbose:
         description: 'Verbose flag'
         required: false
+        type: boolean
         default: true
       automatic_installs:
         description: 'Install latest CLI during workflow?'
         required: false
+        type: boolean
         default: true
       app_id:
         description: 'App ID?'

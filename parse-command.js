@@ -10,9 +10,11 @@ async function parse(rawInput) {
     const arrayOfCommands = rawInput.split(',');
 
     for (const command of arrayOfCommands) {
+
+      console.log(`Running..., ${command}`);
       // split by spaces
       const tokens = command.trim().split(/\s+/);
-      console.log(tokens);
+      //console.log(tokens);
 
       if (!tokens.includes('slack')) {
           throw new Error("Invalid syntax: command must contain 'slack'");
