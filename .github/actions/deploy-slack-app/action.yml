@@ -37,3 +37,35 @@ runs:
 
         
 
+
+  slack_bot_token:
+    description: 'Slack Bot Token'
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Slack CLI
+      if: ${{ inputs.automatic_installs == 'true' }}
+      shell: bash
+      run: |
+        if [ "${{ inputs.verbose }}" == 'true' ]; then
+          curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v ${{ env.SLACK_CLI_VERSION || 'latest' }}
+        else
+          curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- ${{ env.SLACK_CLI_VERSION || 'latest' }}
+        fi
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+
+    - name: Execute command via script
+      shell: bash
+      run: |
+        echo "Running command: ${{ inputs.command }}"
+        node src/parse-command.js ${{ inputs.command }}
+      env:
+        SLACK_SERVICE_TOKEN: ${{ inputs.slack_service_token }}
+        SLACK_BOT_TOKEN: ${{ inputs.slack_bot_token }}
+        GITHUB_ACTIONS: true

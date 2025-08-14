@@ -1,0 +1,20 @@
+runs:
+  using: composite
+  steps:
+    - name: Install Slack CLI
+      uses: ./.github/.actions/slack-cli-installer/action.yml
+      with:
+        verbose: ${{ github.event.inputs.verbose }}
+        automatic_installs: ${{ github.event.inputs.automatic_installs }}
+
+    - name: Execute command via script
+      if: ${{ github.event.inputs.command }}
+      run: | 
+        echo "Running command: ${{ github.event.inputs.command }}"
+        node src/parse-command.js ${{ github.event.inputs.command }}
+      env:
+        SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }} 
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        GITHUB_ACTIONS: true
+
+    

@@ -1,4 +1,4 @@
-name: Slack CLI Install
+name: Slack CLI Command Runner
 
 on:
   workflow_dispatch:
@@ -16,58 +16,31 @@ on:
         required: false
         type: boolean
         default: true
-      app_id:
-        description: 'App ID?'
-        required: false
-      team_id:
-        description: 'Team ID?'
-        required: false
-
 env:
   SLACK_DISABLE_TELEMETRY: "true"
   SLACK_CLI_VERSION: "latest" 
-  timeout-minutes: 20
 
 jobs:
-  install:
+  deploy:
+    name: "Run Slack CLI command"
     runs-on: ubuntu-latest
+    env: 
+      SLACK_CLI_VERSION: "latest"
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        shell: bash
+
     steps:
-      - name: Install Slack CLI
-        if: ${{ github.event.inputs.automatic_installs == 'true' }}
-        run: |
-          if [ "${{ github.event.inputs.verbose }}" == 'true' ]; then
-            curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v $SLACK_CLI_VERSION
-          else
-            curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- $SLACK_CLI_VERSION
-          fi
-
-      - name: Set App ID
-        if: ${{ github.event.inputs.app_id }}
-        run: echo "App ID is ${{ github.event.inputs.app_id }}"
-
-      - name: Set Team ID
-        if: ${{ github.event.inputs.team_id }}
-        run: echo "Team ID is ${{ github.event.inputs.team_id }}"
-
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
-
+        
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Execute command via script
-        run: | 
-            node parse-command.js ${{ github.event.inputs.command }}
-        env:
-          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }} 
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          GITHUB_ACTIONS: true
-        
-
-
-
-# VERSION_FLAG="--skip-update"
-
-
+      - name: Run Slack CLI
+        if: ${{ !github.event.inputs.command }}
+        uses: ./action.yml
