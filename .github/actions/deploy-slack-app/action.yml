@@ -34,6 +34,15 @@ runs:
         irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
         .\install-windows-dev.ps1 -Version $env:SLACK_CLI_VERSION || exit 0
 
+    - name: Execute command via script
+      if: ${{ github.event.inputs.command }}
+      shell: bash
+      env:
+        SLACK_SERVICE_TOKEN: ${{ inputs.slack-service-token }}
+        SLACK_BOT_TOKEN: ${{ inputs.slack-bot-token }}
+      run: | 
+        echo "Running command: ${{ github.event.inputs.command }}"
+        node src/parse-command.js ${{ github.event.inputs.command }}
 
 
 
