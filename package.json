@@ -11,6 +11,8 @@
   "description": "",
   "devDependencies": {
     "jest": "^30.0.5"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1"
   }
 }
-

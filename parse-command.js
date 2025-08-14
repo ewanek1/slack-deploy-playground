@@ -3,6 +3,10 @@
 //JSON "type": "module",
 //const { parseArgs } = require('node:util'); 
 const { execFile: testExecFile } = require('child_process');
+const core = require('@actions/core');
+const Logger = require('../src/logger.js').default;
+
+const { logger } = new Logger(core);
 
 let execFile = testExecFile;
 
@@ -11,12 +15,13 @@ async function parse(rawInput) {
 
     for (const command of arrayOfCommands) {
 
-      console.log(`Running command: ${command}`);
+      logger.debug(`Running command: ${command}`);
       // split by spaces
       const tokens = command.trim().split(/\s+/);
       //console.log(tokens);
 
       if (!tokens.includes('slack')) {
+          logger.error("Invalid syntax: command must contain 'slack'");
           throw new Error("Invalid syntax: command must contain 'slack'");
       }
 
@@ -25,13 +30,13 @@ async function parse(rawInput) {
  
       execFile('slack', args, (error, stdout, stderr) => {
           if (error) {
-          console.error(`Slack CLI error: ${error.message}`);
-          return;
+            logger.error(`Slack CLI error: ${error.message}`);
+            return;
           }
           if (stderr) {
-          console.error(`stderr: ${stderr}`);
+            console.warn(`stderr: ${stderr}`);
           }
-          //console.log(stdout);
+          logger.info(stdout);
       });
     }
 }
