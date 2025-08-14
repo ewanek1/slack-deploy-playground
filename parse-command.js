@@ -4,7 +4,7 @@
 //const { parseArgs } = require('node:util'); 
 const { execFile: testExecFile } = require('child_process');
 const core = require('@actions/core');
-const Logger = require('./src/logger.js').default;
+const Logger = require('./src/logger.js');
 
 const { logger } = new Logger(core);
 
