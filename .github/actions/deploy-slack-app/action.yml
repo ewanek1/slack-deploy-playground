@@ -42,7 +42,7 @@ runs:
         SLACK_BOT_TOKEN: ${{ inputs.slack-bot-token }}
       run: | 
         echo "Running command: ${{ github.event.inputs.command }}"
-        node src/parse-command.js ${{ github.event.inputs.command }}
+        node parse-command.js ${{ github.event.inputs.command }}
 
 
 
