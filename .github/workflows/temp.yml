@@ -47,6 +47,20 @@ jobs:
         if: ${{ github.event.inputs.team_id }}
         run: echo "Team ID is ${{ github.event.inputs.team_id }}"
 
+        - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Execute command via script
+        run: | 
+            echo "Running command: ${{ github.event.inputs.command }}"
+            node parse-command.js ${{ github.event.inputs.command }}
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }} 
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        
+
 
 
 # VERSION_FLAG="--skip-update"
