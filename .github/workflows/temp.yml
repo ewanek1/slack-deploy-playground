@@ -47,7 +47,7 @@ jobs:
         if: ${{ github.event.inputs.team_id }}
         run: echo "Team ID is ${{ github.event.inputs.team_id }}"
 
-        - name: Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
