@@ -31,7 +31,7 @@ async function parse(rawInput) {
           if (stderr) {
           console.error(`stderr: ${stderr}`);
           }
-          console.log(stdout);
+          //console.log(stdout);
       });
     }
 }
