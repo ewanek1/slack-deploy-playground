@@ -9,12 +9,12 @@ runs:
 
     - name: Execute command via script
       if: ${{ github.event.inputs.command }}
+      shell: bash
+      env:
+        SLACK_SERVICE_TOKEN: ${{ inputs.slack-service-token }}
+        SLACK_BOT_TOKEN: ${{ inputs.slack-bot-token }}
       run: | 
         echo "Running command: ${{ github.event.inputs.command }}"
         node src/parse-command.js ${{ github.event.inputs.command }}
-      env:
-        SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }} 
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        GITHUB_ACTIONS: true
 
     
