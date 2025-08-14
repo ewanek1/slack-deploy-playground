@@ -46,4 +46,4 @@ jobs:
 
       - name: Run Slack CLI
         if: ${{ github.event.inputs.command }}
-        uses: ./
+        uses: ./action.yml
