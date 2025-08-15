@@ -17,7 +17,7 @@ runs:
       with:
         path: ~/.slack/bin
         #key: slack-cli-${{ runner.os }}-${{ runner.arch }}-latest
-        key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ inputs.automatic_installs }}
+        key: slack-cli-${{ runner.os }}-${{ runner.arch }}-3.6.0
 
     #- name: Cache Slack CLI (specific version)
       #id: cache-cli-specific
@@ -46,7 +46,7 @@ runs:
         if [ "${{ inputs.automatic_installs }}" == "true" ]; then
           curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s
         else
-          curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s --${{ inputs.automatic_installs }}
+          curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s --3.6.0
         fi
 
     - name: Install Slack CLI (Windows)
