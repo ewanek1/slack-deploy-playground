@@ -26,7 +26,7 @@ runs:
         echo "Running command: ${{ inputs.command }}"
         echo "Verbose: ${{ inputs.verbose }}"
         if [ "${{ inputs.verbose }}" == "true" ]; then
-          node parse-command.js slack ${{ inputs.command }} --verbose
+          slack ${{ inputs.command }} --verbose
         else
-          node parse-command.js slack ${{ inputs.command }}
+          slack ${{ inputs.command }}
         fi
