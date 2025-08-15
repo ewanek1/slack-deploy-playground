@@ -41,6 +41,5 @@ runs:
         (steps.cache-cli-automatic.outputs.cache-hit != 'true')
       shell: pwsh 
       run: |
-        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
+        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -outFile 'install-windows-dev.ps1'
         .\install-windows-dev.ps1
-
