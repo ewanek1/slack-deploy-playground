@@ -35,12 +35,12 @@ runs:
       run: |
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v ${{ inputs.cli_version }}
 
-    #- name: Install Slack CLI (Windows)
-      #if: 
-        #runner.os == 'Windows' && 
-        #(steps.cache-cli-automatic.outputs.cache-hit != 'true')
-      #shell: pwsh 
-      #run: |
-        #irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
-        #.\install-windows-dev.ps1 -Version $env:SLACK_CLI_VERSION || exit 0
+    - name: Install Slack CLI (Windows)
+      if: 
+        runner.os == 'Windows' && 
+        (steps.cache-cli-automatic.outputs.cache-hit != 'true')
+      shell: pwsh 
+      run: |
+        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
+        .\install-windows-dev.ps1 || exit 0
 
