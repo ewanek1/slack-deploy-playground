@@ -9,13 +9,11 @@ on:
       verbose:
         description: 'Verbose flag'
         type: boolean
-        required: false
-        default: false
+        default: true
       automatic_installs:
         description: 'Install latest CLI during workflow?'
         type: boolean
-        required: false
-        default: false
+        default: true
 
 env:
   SLACK_DISABLE_TELEMETRY: "true"
@@ -29,12 +27,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run Slack CLI Action
-        uses: ./.github/actions/slack-cli-runner
+      - name: Run Slack Action
+        uses: ./
         with:
           command: ${{ github.event.inputs.command }}
-          verbose: ${{ github.event.workflow_run.run_attempt > 1 }}
+          verbose: ${{ github.event.inputs.verbose }}
           automatic_installs: ${{ github.event.inputs.automatic_installs }}
-          slack-service-token: ${{ secrets.SLACK_SERVICE_TOKEN }}
-          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
