@@ -17,7 +17,7 @@ runs:
     - name: Cache Slack CLI (automatic install)
       id: cache-cli
       uses: actions/cache@v4
-      if: {{ inputs.automatic_installs == 'true'}}
+      if: ${{ inputs.automatic_installs == 'true'}}
       with:
         path: ~/.slack/bin
         key: slack-cli-${{ runner.os }}-${{ runner.arch }}-latest
