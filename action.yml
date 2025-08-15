@@ -19,7 +19,6 @@ runs:
     - name: Install Slack CLI
       uses: ./.github/.actions/slack-cli-installer
       with:
-        #verbose: ${{ inputs.verbose }}
         automatic_installs: ${{ inputs.automatic_installs }}
 
     - name: Setup Node.js

@@ -2,10 +2,6 @@ name: Slack CLI Installation
 description: Download and cache the Slack CLI 
 
 inputs:
-  #verbose:
-    #description: "Enable verbose output"
-    #required: false
-    #default: "false"
   automatic_installs:
     description: "Install latest CLI if not present"
     required: false
