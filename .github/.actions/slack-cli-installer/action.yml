@@ -13,10 +13,9 @@ runs:
     - name: Cache Slack CLI (automatic install)
       id: cache-cli-automatic
       uses: actions/cache@v4
-      if: ${{ inputs.automatic_installs == '3.6.0'}}
+      if: ${{ inputs.automatic_installs == inputs.automatic_installs.default }}
       with:
         path: ~/.slack/bin
-        #key: slack-cli-${{ runner.os }}-${{ runner.arch }}-latest
         key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ inputs.automatic_installs }}
 
     - name: Add Slack CLI to PATH (Linux/macOS)
