@@ -28,7 +28,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run Slack Action
-        if: ${{ github.event.inputs.command }}
         uses: ./
         with:
           command: ${{ github.event.inputs.command }}
