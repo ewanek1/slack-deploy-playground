@@ -20,7 +20,7 @@ async function parse(rawInput) {
       const tokens = command.trim().split(/\s+/);
       //console.log(tokens);
 
-      //const slackCount = tokens.filter(token => token === 'slack').length;
+      const slackCount = tokens.filter(token => token === 'slack').length;
       // make subarray of slack tokens 
       if (slackCount > 2) {
           logger.error("Invalid syntax: you included slack too many times'");
