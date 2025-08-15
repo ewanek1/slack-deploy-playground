@@ -9,8 +9,8 @@ inputs:
   automatic_installs:
     description: "Install latest CLI if not present"
     required: false
-    default: "true"
-    
+    default: "false"
+
 runs:
   using: composite
   steps:

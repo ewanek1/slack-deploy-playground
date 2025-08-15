@@ -7,11 +7,11 @@ inputs:
   verbose:
     description: "Enable verbose output"
     required: false
-    default: 'true'
+    default: 'false'
   automatic_installs:
     description: "Install latest CLI if not present"
     required: false
-    default: 'true'
+    default: 'false'
 
 runs:
   using: 'composite'
