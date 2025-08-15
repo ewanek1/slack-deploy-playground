@@ -43,3 +43,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+
+      - name: Run Slack CLI Action
+        uses: .  # This calls the action.yml at the root
+        with:
+          command: ${{ github.event.inputs.command }}
+          verbose: ${{ github.event.inputs.verbose }}
+          automatic_installs: ${{ github.event.inputs.automatic_installs }}
+          slack-service-token: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}

@@ -1,12 +1,6 @@
 runs:
   using: composite
   steps:
-    - name: Install Slack CLI
-      uses: ./.github/actions/deploy-slack-app/action.yml
-      with:
-        verbose: ${{ github.event.inputs.verbose }}
-        automatic_installs: ${{ github.event.inputs.automatic_installs }}
-
     - name: Execute command via script
       if: ${{ github.event.inputs.command }}
       shell: bash
@@ -20,8 +14,7 @@ runs:
     - name: Run Slack CLI
       uses: ./.github/actions/slack-cli-runner
       with:
-        command: 'slack deploy --help'
-        verbose: true
+        verbose: false
         slack-service-token: ${{ secrets.SLACK_SERVICE_TOKEN }}
         slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
     

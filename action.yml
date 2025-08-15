@@ -1,0 +1,42 @@
+name: 'Slack CLI Command Runner'
+description: 'Execute Slack CLI commands in GitHub Actions'
+inputs:
+  command:
+    description: 'Slack CLI command to run'
+    required: true
+  verbose:
+    description: 'Verbose flag'
+    required: false
+    default: 'true'
+  automatic_installs:
+    description: 'Install latest CLI during workflow?'
+    required: false
+    default: 'true'
+  slack-service-token:
+    description: 'Slack Service Token'
+    required: false
+  slack-bot-token:
+    description: 'Slack Bot Token'
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Slack CLI
+      if: ${{ inputs.automatic_installs == 'true' }}
+      shell: bash
+      run: |
+        if [ "${{ inputs.verbose }}" == 'true' ]; then
+          curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v latest
+        else
+          curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- latest
+        fi
+
+    - name: Execute command via script
+      shell: bash
+      env:
+        SLACK_SERVICE_TOKEN: ${{ inputs.slack-service-token }}
+        SLACK_BOT_TOKEN: ${{ inputs.slack-bot-token }}
+      run: | 
+        echo "Running command: ${{ inputs.command }}"
+        node parse-command.js ${{ inputs.command }}
