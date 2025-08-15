@@ -40,7 +40,6 @@ runs:
         runner.os == 'Windows' && 
         (steps.cache-cli-automatic.outputs.cache-hit != 'true')
       shell: pwsh 
-      timeout-minutes: 1
       run: |
         irm https://deno.land/x/install/install.ps1 | iex
         $env:PATH = "$env:USERPROFILE\.deno\bin;$env:PATH"
