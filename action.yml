@@ -1,23 +1,5 @@
 name: 'Slack CLI Command Runner'
 description: 'Execute Slack CLI commands in GitHub Actions'
-inputs:
-  command:
-    description: "Slack CLI command to run"
-    required: true
-  verbose:
-    description: "Enable verbose output"
-    required: false
-    default: 'true'
-  automatic_installs:
-    description: "Install latest CLI if not present"
-    required: false
-    default: 'true'
-  slack-service-token:
-    description: "Slack Service Token"
-    required: false
-  slack-bot-token:
-    description: "Slack Bot Token"
-    required: false
 
 runs:
   using: 'composite'
