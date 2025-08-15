@@ -5,7 +5,7 @@ inputs:
   automatic_installs:
     description: "Install latest CLI if not present"
     required: false
-    default: "false"
+    default: "3.6.0"
 
 runs:
   using: composite
