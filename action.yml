@@ -24,9 +24,9 @@ runs:
         VERBOSE: ${{ inputs.verbose }}
       run: |
         echo "Running command: ${{ inputs.command }}"
-        echo "Verbose: ${{ inputs.verbose }}"
         if [ "${{ inputs.verbose }}" == "true" ]; then
-          slack ${{ inputs.command }} --verbose
+          slack ${{ inputs.command }} --verbose --skip-update
         else
-          slack ${{ inputs.command }}
+          slack ${{ inputs.command }} --skip-update
         fi
+  

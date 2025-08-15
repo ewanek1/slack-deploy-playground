@@ -33,7 +33,7 @@ runs:
         (steps.cache-cli-automatic.outputs.cache-hit != 'true')
       shell: bash
       run: |
-        curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v ${{ inputs.cli_version }}
+        curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v ${{ inputs.cli_version }} --skip-update
 
     - name: Install Slack CLI (Windows)
       if: 
@@ -41,9 +41,5 @@ runs:
         (steps.cache-cli-automatic.outputs.cache-hit != 'true')
       shell: pwsh 
       run: |
-        irm https://deno.land/x/install/install.ps1 | iex
-        $env:PATH = "$env:USERPROFILE\.deno\bin;$env:PATH"
-        
         irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
-        .\install-windows-dev.ps1 || exit 0
-    #-Version ${{ inputs.automatic_installs }} || exit 0
+        .\install-windows-dev.ps1 
