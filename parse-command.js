@@ -20,17 +20,20 @@ async function parse(rawInput) {
       const tokens = command.trim().split(/\s+/);
       //console.log(tokens);
 
-      const slackCount = tokens.filter(token => token === 'slack').length;
-      const containsMoreThanTwoSlacks = slackCount > 2;
-      if (containsMoreThanTwoSlacks) {
+      //const slackCount = tokens.filter(token => token === 'slack').length;
+      // make subarray of slack tokens 
+      if (slackCount > 2) {
           logger.error("Invalid syntax: you included slack too many times'");
           throw new Error("Invalid syntax: you included slack too many times'");
       }
 
-      const args = tokens.slice(1); 
-      //const parsed = parseArgs({ args }); 
+      let args = tokens.slice(1); 
+      //if (slackCount > 2) {
+          //args = tokens.slice(2); 
+      //}
+    
  
-      execFile('slack', args, (error, stdout, stderr) => {
+      execFile('', args, (error, stdout, stderr) => {
           if (error) {
             logger.error(`Slack CLI error: ${error.message}`);
             process.exit(1);
