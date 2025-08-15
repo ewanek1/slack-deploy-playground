@@ -13,7 +13,6 @@ runs:
     - name: Cache Slack CLI (automatic install)
       id: cache-cli-automatic
       uses: actions/cache@v4
-      #if: ${{ inputs.automatic_installs == inputs.automatic_installs.default }}
       with:
         path: ~/.slack/bin
         key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ inputs.automatic_installs }}
@@ -34,12 +33,12 @@ runs:
         (steps.cache-cli-automatic.outputs.cache-hit != 'true')
       shell: bash
       run: |
-        curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s ${{ inputs.automatic_installs }}
+        curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v ${{ inputs.automatic_installs }}
 
     #- name: Install Slack CLI (Windows)
       #if: 
         #runner.os == 'Windows' && 
-        #(steps.cache-cli-automatic.outputs.cache-hit != 'true' && steps.cache-cli-specific.outputs.cache-hit != 'true')
+        #(steps.cache-cli-automatic.outputs.cache-hit != 'true')
       #shell: pwsh 
       #run: |
         #irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
