@@ -8,47 +8,28 @@ on:
         required: true
       verbose:
         description: 'Verbose flag'
-        required: false
         type: boolean
         default: true
       automatic_installs:
         description: 'Install latest CLI during workflow?'
-        required: false
         type: boolean
         default: true
+
 env:
   SLACK_DISABLE_TELEMETRY: "true"
-  SLACK_CLI_VERSION: "latest" 
+  SLACK_CLI_VERSION: "latest"
 
 jobs:
   deploy:
-    name: "Run Slack CLI command"
     runs-on: ubuntu-latest
-    env: 
-      SLACK_CLI_VERSION: "latest"
     timeout-minutes: 10
 
-    defaults:
-      run:
-        shell: bash
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Slack CLI
-        uses: ./.github/actions/deploy-slack-app
-        
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Run Slack CLI Action
-        uses: .  # This calls the action.yml at the root
+      - name: Run Slack Action
+        uses: ./
         with:
           command: ${{ github.event.inputs.command }}
           verbose: ${{ github.event.inputs.verbose }}
           automatic_installs: ${{ github.event.inputs.automatic_installs }}
-          slack-service-token: ${{ secrets.SLACK_SERVICE_TOKEN }}
-          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
