@@ -16,7 +16,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-
     - name: Run Slack CLI Command
       shell: bash
       env:
