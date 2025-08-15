@@ -22,15 +22,19 @@ jobs:
   deploy:
     permissions:
       contents: read
-    runs-on: ${{ matrix.os }}
-    #runs-on: ubuntu-latest
-    on: 
-      pull request: 
-      strategy:
-        matrix:
-          os: [ubuntu-latest, macos-latest]
-          node: [16, 18, 20, 22, 24]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
+
+on:
+  pull_request: 
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node: [16, 18, 20, 22, 24]
 
     steps:
       - uses: actions/checkout@v4
