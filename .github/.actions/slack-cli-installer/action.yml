@@ -34,11 +34,7 @@ runs:
         (steps.cache-cli-automatic.outputs.cache-hit != 'true')
       shell: bash
       run: |
-        if [ "${{ inputs.automatic_installs }}" != inputs.automatic_installs.default ]; then
-          curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s
-        else
-          curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s ${{ inputs.automatic_installs }}
-        fi
+        curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s ${{ inputs.automatic_installs }}
 
     #- name: Install Slack CLI (Windows)
       #if: 

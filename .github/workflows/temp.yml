@@ -18,7 +18,6 @@ on:
 
 env:
   SLACK_DISABLE_TELEMETRY: "true"
-  #SLACK_CLI_VERSION: "latest"
 
 jobs:
   deploy:
