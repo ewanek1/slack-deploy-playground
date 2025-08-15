@@ -1,14 +1,23 @@
 name: 'Slack CLI Command Runner'
 description: 'Execute Slack CLI commands in GitHub Actions'
+inputs:
+  command:
+    description: "Slack CLI command to run"
+    required: true
+  verbose:
+    description: "Enable verbose output"
+    required: false
+    default: 'true'
+  automatic_installs:
+    description: "Install latest CLI if not present"
+    required: false
+    default: 'true'
 
 runs:
   using: 'composite'
   steps:
     - name: Install Slack CLI
       uses: ./.github/.actions/slack-cli-installer
-      with:
-        verbose: ${{ inputs.verbose }}
-        automatic_installs: ${{ inputs.automatic_installs }}
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
