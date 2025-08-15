@@ -31,7 +31,7 @@ async function parse(rawInput) {
       execFile('slack', args, (error, stdout, stderr) => {
           if (error) {
             logger.error(`Slack CLI error: ${error.message}`);
-            return;
+            process.exit(1);
           }
           if (stderr) {
             console.warn(`stderr: ${stderr}`);
