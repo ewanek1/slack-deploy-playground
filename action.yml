@@ -1,17 +1,5 @@
-name: "Slack: Send to Slack"
-description: "Run Slack CLI commands or API calls"
-inputs:
-  command:
-    description: "Slack CLI command to run"
-    required: true
-  verbose:
-    description: "Enable verbose output"
-    default: false
-  automatic_installs:
-    description: "Install latest CLI if not present"
-    default: true
 runs:
-  using: "composite"
+  using: composite
   steps:
     - name: Install Slack CLI
       uses: ./.github/resources/.actions/slack-cli-installer
@@ -30,8 +18,9 @@ runs:
         slack ${{ inputs.command }}
       shell: bash
       env:
-        SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
+        SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
+
 
 
     
