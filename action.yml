@@ -32,6 +32,12 @@ runs:
       env:
         SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
         SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
+        VERBOSE: ${{ inputs.verbose }}
       run: |
         echo "Running command: ${{ inputs.command }}"
-        node parse-command.js ${{ inputs.command }}
+        echo "Verbose: ${{ inputs.verbose }}"
+        if [ "${{ inputs.verbose }}" == "true" ]; then
+          node parse-command.js ${{ inputs.command }} --verbose
+        else
+          node parse-command.js ${{ inputs.command }}
+        fi
