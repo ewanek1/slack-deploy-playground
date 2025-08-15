@@ -2,7 +2,7 @@ runs:
   using: composite
   steps:
     - name: Install Slack CLI
-      uses: ./.github/resources/.actions/slack-cli-installer
+      uses: ./.github/.actions/slack-cli-installer
       with:
         verbose: ${{ inputs.verbose }}
         automatic_installs: ${{ inputs.automatic_installs }}
