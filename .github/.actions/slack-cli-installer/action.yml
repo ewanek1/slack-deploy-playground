@@ -41,5 +41,8 @@ runs:
         (steps.cache-cli-automatic.outputs.cache-hit != 'true')
       shell: pwsh 
       run: |
-        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -outFile 'install-windows-dev.ps1'
-        .\install-windows-dev.ps1
+        irm https://deno.land/x/install/install.ps1 | iex
+        $env:PATH = "$env:USERPROFILE\.deno\bin;$env:PATH"
+        
+        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
+        .\install-windows-dev.ps1 -Version ${{ inputs.automatic_installs }} || exit 0
