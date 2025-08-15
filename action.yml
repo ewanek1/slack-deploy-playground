@@ -16,15 +16,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Install Slack CLI
-      uses: ./.github/.actions/slack-cli-installer
-      with:
-        automatic_installs: ${{ inputs.automatic_installs }}
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18
 
     - name: Run Slack CLI Command
       shell: bash
