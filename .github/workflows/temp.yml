@@ -24,12 +24,13 @@ jobs:
       contents: read
     runs-on: ${{ matrix.os }}
     #runs-on: ubuntu-latest
-    strategy:
-      matrix:
-      #ubuntu-latest, macos-latest, 
-        os: [windows-latest]
-        node: [16, 18, 20, 22, 24]
-    timeout-minutes: 1
+    on: 
+      pull request: 
+      strategy:
+        matrix:
+          os: [ubuntu-latest, macos-latest]
+          node: [16, 18, 20, 22, 24]
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
