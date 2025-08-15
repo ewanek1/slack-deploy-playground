@@ -45,7 +45,7 @@ jobs:
           node-version: 18
 
       - name: Run Slack CLI
-        uses: ./
+        uses: .
         with:
           command: ${{ github.event.inputs.command }}
           verbose: ${{ github.event.inputs.verbose }}
