@@ -42,5 +42,5 @@ runs:
       shell: pwsh 
       run: |
         irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
-        .\install-windows-dev.ps1 || exit 0
+        .\install-windows-dev.ps1
 
