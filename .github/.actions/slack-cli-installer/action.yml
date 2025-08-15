@@ -43,7 +43,7 @@ runs:
         (steps.cache-cli-automatic.outputs.cache-hit != 'true' && steps.cache-cli-specific.outputs.cache-hit != 'true')
       shell: bash
       run:
-        if [ "${{ inputs.automatic_installs }}" == "true" ]; then
+        if [ "${{ inputs.automatic_installs }}" == "3.6.0" ]; then
           curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s
         else
           curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s 3.6.0
