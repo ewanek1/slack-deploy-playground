@@ -17,4 +17,11 @@ runs:
         echo "Running command: ${{ github.event.inputs.command }}"
         node src/parse-command.js ${{ github.event.inputs.command }}
 
+    - name: Run Slack CLI
+      uses: ./.github/actions/slack-cli-runner
+      with:
+        command: 'slack deploy --help'
+        verbose: true
+        slack-service-token: ${{ secrets.SLACK_SERVICE_TOKEN }}
+        slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
     
