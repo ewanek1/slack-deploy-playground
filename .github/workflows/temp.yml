@@ -45,5 +45,5 @@ jobs:
           node-version: 18
 
       - name: Run Slack CLI
-        if: ${{ github.event.inputs.command }}
-        uses: ./action.yml
+        if: ${{ inputs.command }}
+        uses: ./
