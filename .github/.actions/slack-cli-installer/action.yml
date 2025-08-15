@@ -11,7 +11,7 @@ runs:
   using: composite
   steps:
     - name: Cache Slack CLI (automatic install)
-      id: cache-cli
+      id: cache-cli-automatic
       uses: actions/cache@v4
       if: ${{ inputs.automatic_installs == 'true'}}
       with:
@@ -19,7 +19,7 @@ runs:
         key: slack-cli-${{ runner.os }}-${{ runner.arch }}-latest
 
     - name: Cache Slack CLI (specific version)
-      id: cache-cli
+      id: cache-cli-specific
       uses: actions/cache@v4
       if: ${{ inputs.automatic_installs != 'true' }} 
       with:
@@ -38,7 +38,8 @@ runs:
 
     - name: Install Slack CLI (Linux/macOS)
       if:
-        (runner.os == 'Linux' || runner.os == 'macOS') && steps.cache-cli.outputs.cache-hit != 'true' 
+        (runner.os == 'Linux' || runner.os == 'macOS') && 
+        (steps.cache-cli-automatic.outputs.cache-hit != 'true' && steps.cache-cli-specific.outputs.cache-hit != 'true')
       shell: bash
       run:
         if [ "${{ inputs.automatic_installs }}" == "true" ]; then
@@ -48,14 +49,12 @@ runs:
         fi
 
     - name: Install Slack CLI (Windows)
-      if: runner.os == 'Windows' && steps.cache-cli.outputs.cache-hit != 'true'
+      if: 
+        runner.os == 'Windows' && 
+        (steps.cache-cli-automatic.outputs.cache-hit != 'true' && steps.cache-cli-specific.outputs.cache-hit != 'true')
       shell: pwsh 
       run: |
         irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
         .\install-windows-dev.ps1 -Version $env:SLACK_CLI_VERSION || exit 0
 
-
-
-
-        
 
