@@ -51,3 +51,26 @@ jobs:
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }} 
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         
+
+
+  test:
+    permissions:
+      contents: read
+    runs-on: ${{ matrix.os }}
+    if: github.event_name == 'pull_request'  
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node: [16, 18, 20, 22, 24]
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Run tests
+        run: npm test

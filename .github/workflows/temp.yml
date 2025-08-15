@@ -15,6 +15,9 @@ on:
         required: false
         default: "latest"
 
+  pull_request:
+  branches: [ main ] 
+
 env:
   SLACK_DISABLE_TELEMETRY: "true"
 
@@ -22,12 +25,7 @@ jobs:
   deploy:
     permissions:
       contents: read
-    runs-on: ${{ matrix.os }}
-    if: github.event_name == 'pull_request' 
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        node: [16, 18, 20, 22, 24]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
@@ -36,7 +34,7 @@ jobs:
       - name: Install Slack CLI
         uses: ./.github/.actions/slack-cli-installer
         with:
-          cli_version: ${{ inputs.cli_version }}
+          cli_version: ${{ github.event.inputs.cli_version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -52,5 +50,3 @@ jobs:
         env:
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
-
