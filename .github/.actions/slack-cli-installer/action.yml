@@ -14,12 +14,20 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Cache Slack CLI
+    - name: Cache Slack CLI (automatic install)
       id: cache-cli
       uses: actions/cache@v4
+      if: {{ inputs.automatic_installs == 'true'}}
       with:
         path: ~/.slack/bin
-        key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ env.SLACK_CLI_VERSION }}  
+        key: slack-cli-${{ runner.os }}-${{ runner.arch }}-latest
+
+    - name: Cache Slack CLI (specific version)
+      uses: actions/cache@v4
+      if: ${{ inputs.automatic_installs != 'true' }} 
+      with:
+        path: ~/.slack/bin
+        key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ env.SLACK_CLI_VERSION }}
 
     - name: Add Slack CLI to PATH (Linux/macOS)
       if: runner.os != 'Windows'
