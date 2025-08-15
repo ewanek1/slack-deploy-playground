@@ -1,19 +1,29 @@
+name: 'Slack CLI Command Runner'
+description: 'Execute Slack CLI commands in GitHub Actions'
 inputs:
   command:
     description: "Slack CLI command to run"
     required: true
   verbose:
     description: "Enable verbose output"
-    default: true
+    required: false
+    default: 'true'
   automatic_installs:
     description: "Install latest CLI if not present"
-    default: true
+    required: false
+    default: 'true'
+  slack-service-token:
+    description: "Slack Service Token"
+    required: false
+  slack-bot-token:
+    description: "Slack Bot Token"
+    required: false
 
 runs:
-  using: composite
+  using: 'composite'
   steps:
     - name: Install Slack CLI
-      uses: ./.github/.actions/slack-cli-installer
+      uses: ./.github/resources/.actions/slack-cli-installer/action.yml
       with:
         verbose: ${{ inputs.verbose }}
         automatic_installs: ${{ inputs.automatic_installs }}
@@ -24,14 +34,10 @@ runs:
         node-version: 18
 
     - name: Run Slack CLI Command
-      run: |
-        echo "Running command: ${{ inputs.command }}"
-        slack ${{ inputs.command }}
       shell: bash
       env:
-        SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
-        SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
-
-
-
-    
+        SLACK_SERVICE_TOKEN: ${{ inputs.slack-service-token }}
+        SLACK_BOT_TOKEN: ${{ inputs.slack-bot-token }}
+      run: |
+        echo "Running command: ${{ inputs.command }}"
+        node parse-command.js ${{ inputs.command }}
