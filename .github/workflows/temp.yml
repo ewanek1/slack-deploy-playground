@@ -11,14 +11,14 @@ on:
         type: boolean
         default: false
       automatic_installs:
-        description: 'Install latest CLI during workflow?'
+        description: 'Slack CLI version'
         #type: boolean
         required: false
         default: "3.6.0"
 
 env:
   SLACK_DISABLE_TELEMETRY: "true"
-  SLACK_CLI_VERSION: "latest"
+  #SLACK_CLI_VERSION: "latest"
 
 jobs:
   deploy:
