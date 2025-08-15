@@ -20,9 +20,11 @@ async function parse(rawInput) {
       const tokens = command.trim().split(/\s+/);
       //console.log(tokens);
 
-      if (!tokens.includes('slack')) {
-          logger.error("Invalid syntax: command must contain 'slack'");
-          throw new Error("Invalid syntax: command must contain 'slack'");
+      const slackCount = tokens.filter(token => token === 'slack').length;
+      const containsMoreThanTwoSlacks = slackCount > 2;
+      if (containsMoreThanTwoSlacks) {
+          logger.error("Invalid syntax: you included slack too many times'");
+          throw new Error("Invalid syntax: you included slack too many times'");
       }
 
       const args = tokens.slice(1); 
