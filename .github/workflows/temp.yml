@@ -18,23 +18,17 @@ on:
 env:
   SLACK_DISABLE_TELEMETRY: "true"
 
-jobs:
-  deploy:
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-on:
-  pull_request: 
-
-jobs:
-  test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        node: [16, 18, 20, 22, 24]
+  jobs:
+    deploy:
+      permissions:
+        contents: read
+      runs-on: ${{ matrix.os }}
+      if: github.event_name == 'pull_request' 
+      strategy:
+        matrix:
+          os: [ubuntu-latest, macos-latest]
+          node: [16, 18, 20, 22, 24]
+      timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
