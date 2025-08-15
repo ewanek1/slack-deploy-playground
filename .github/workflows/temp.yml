@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Slack CLI and run command
+      - name: Install Slack CLI and Run Command
         uses: ./.github/.actions/slack-cli-installer
         with:
           command: ${{ github.event.inputs.command }}

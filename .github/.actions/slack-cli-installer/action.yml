@@ -1,5 +1,5 @@
-name: Slack CLI Installation
-description: Download and cache the Slack CLI 
+name: Slack CLI Installation and Command Runner 
+description: Download and cache the Slack CLI and run the input command 
 
 inputs:
   command:
