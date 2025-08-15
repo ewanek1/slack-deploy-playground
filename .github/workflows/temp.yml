@@ -31,8 +31,8 @@ jobs:
         uses: ./
         with:
           command: ${{ github.event.inputs.command }}
-          verbose: ${{ github.event.inputs.verbose }}
-          #verbose: ${{ github.event.workflow_run.run_attempt > 1 }}
+          #verbose: ${{ github.event.inputs.verbose }}
+          verbose: ${{ github.event.workflow_run.run_attempt > 1 }}
           automatic_installs: ${{ github.event.inputs.automatic_installs }}
         env:
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
