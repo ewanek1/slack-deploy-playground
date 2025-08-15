@@ -8,8 +8,8 @@ inputs:
     description: "Enable verbose output"
     required: false
     default: 'false'
-  automatic_installs:
-    description: "Install latest CLI if not present"
+  cli_version:
+    description: "Slack CLI Version"
     required: false
     default: '3.6.0'
 
