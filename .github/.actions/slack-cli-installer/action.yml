@@ -45,4 +45,5 @@ runs:
         $env:PATH = "$env:USERPROFILE\.deno\bin;$env:PATH"
         
         irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
-        .\install-windows-dev.ps1 -Version ${{ inputs.automatic_installs }} || exit 0
+        .\install-windows-dev.ps1
+    #-Version ${{ inputs.automatic_installs }} || exit 0
