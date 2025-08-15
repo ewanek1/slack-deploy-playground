@@ -28,18 +28,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Slack CLI
+      - name: Install Slack CLI and run command
         uses: ./.github/.actions/slack-cli-installer
-        with:
-          cli_version: ${{ github.event.inputs.cli_version }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Run Slack Action
-        uses: ./
         with:
           command: ${{ github.event.inputs.command }}
           verbose: ${{ github.run_attempt > 1 }}
@@ -47,3 +37,8 @@ jobs:
         env:
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18

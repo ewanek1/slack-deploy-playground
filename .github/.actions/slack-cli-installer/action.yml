@@ -2,10 +2,17 @@ name: Slack CLI Installation
 description: Download and cache the Slack CLI 
 
 inputs:
+  command:
+    description: "Slack CLI command to run"
+    required: true
+  verbose:
+    description: "Enable verbose output"
+    required: false
+    default: 'false'
   cli_version:
     description: "Slack CLI Version"
     required: false
-    default: "3.6.0"
+    default: '3.6.0'
 
 runs:
   using: composite
@@ -43,3 +50,18 @@ runs:
       run: |
         irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
         .\install-windows-dev.ps1 
+  
+    - name: Run Slack CLI Command
+      shell: bash
+      env:
+        SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
+        SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
+        VERBOSE: ${{ inputs.verbose }}
+      run: |
+        echo "Running command: ${{ inputs.command }}"
+        if [ "${{ inputs.verbose }}" == "true" ]; then
+          slack ${{ inputs.command }} --verbose --skip-update
+        else
+          slack ${{ inputs.command }} --skip-update
+        fi
+  
