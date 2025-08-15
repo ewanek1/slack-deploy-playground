@@ -17,7 +17,7 @@ runs:
       with:
         path: ~/.slack/bin
         #key: slack-cli-${{ runner.os }}-${{ runner.arch }}-latest
-        key: slack-cli-${{ runner.os }}-${{ runner.arch }}-3.6.0
+        key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ inputs.automatic_installs }}
 
     #- name: Cache Slack CLI (specific version)
       #id: cache-cli-specific
@@ -49,12 +49,12 @@ runs:
           curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s 3.6.0
         fi
 
-    - name: Install Slack CLI (Windows)
-      if: 
-        runner.os == 'Windows' && 
-        (steps.cache-cli-automatic.outputs.cache-hit != 'true' && steps.cache-cli-specific.outputs.cache-hit != 'true')
-      shell: pwsh 
-      run: |
-        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
-        .\install-windows-dev.ps1 -Version $env:SLACK_CLI_VERSION || exit 0
+    #- name: Install Slack CLI (Windows)
+      #if: 
+        #runner.os == 'Windows' && 
+        #(steps.cache-cli-automatic.outputs.cache-hit != 'true' && steps.cache-cli-specific.outputs.cache-hit != 'true')
+      #shell: pwsh 
+      #run: |
+        #irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -OutFile 'install-windows-dev.ps1'
+        #.\install-windows-dev.ps1 -Version $env:SLACK_CLI_VERSION || exit 0
 
