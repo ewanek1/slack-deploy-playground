@@ -14,7 +14,7 @@ on:
         description: 'Install latest CLI during workflow?'
         #type: boolean
         required: false
-        default: "3"
+        default: "3.6.0"
 
 env:
   SLACK_DISABLE_TELEMETRY: "true"
