@@ -27,8 +27,8 @@ runs:
     - name: Run Slack CLI Command
       shell: bash
       env:
-        SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        SLACK_SERVICE_TOKEN: ${{ inputs.slack-service-token }}
+        SLACK_BOT_TOKEN: ${{ inputs.slack-bot-token }}
       run: |
         echo "Running command: ${{ inputs.command }}"
         node parse-command.js ${{ inputs.command }}
