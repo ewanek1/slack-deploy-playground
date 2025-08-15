@@ -15,9 +15,6 @@ on:
         required: false
         default: "latest"
 
-  pull_request:
-  branches: [ main ] 
-
 env:
   SLACK_DISABLE_TELEMETRY: "true"
 

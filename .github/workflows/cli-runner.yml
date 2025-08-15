@@ -52,7 +52,9 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         
 
-
+  pull_request:
+  branches: [ main ] 
+  
   test:
     permissions:
       contents: read
