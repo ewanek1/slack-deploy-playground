@@ -48,7 +48,7 @@ runs:
         (steps.cache-cli.outputs.cache-hit != 'true')
       shell: pwsh 
       run: |
-        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1
+        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
   
     - name: Run Slack CLI Command
       shell: bash
