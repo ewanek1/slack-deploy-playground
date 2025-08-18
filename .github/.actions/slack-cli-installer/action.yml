@@ -54,8 +54,8 @@ runs:
 
 
     - name: Install Slack CLI (Windows)
-      run: irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
       shell: pwsh
+      run: irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
 
 
     #- name: Install Slack CLI (Windows)
