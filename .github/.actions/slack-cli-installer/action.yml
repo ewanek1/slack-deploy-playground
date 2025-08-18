@@ -48,14 +48,17 @@ runs:
       with:
         deno-version: v2.x
 
-        
-    - name: Install Slack CLI (Windows)
-      if: 
-        runner.os == 'Windows' && 
-        (steps.cache-cli.outputs.cache-hit != 'true')
-      shell: pwsh 
-      run: |
-        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
+
+    - name: Install Slack CLI
+      run: ./github/actions/slack-cli-installer
+
+    #- name: Install Slack CLI (Windows)
+      #if: 
+        #runner.os == 'Windows' && 
+        #(steps.cache-cli.outputs.cache-hit != 'true')
+      #shell: pwsh 
+      #run: |
+        #irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
 
   
     - name: Run Slack CLI Command
