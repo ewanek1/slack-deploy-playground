@@ -82,7 +82,7 @@ runs:
       run: |
         Write-Host "Running command: ${{ inputs.command }}"
         if ("${{ inputs.verbose }}" -eq "true") {
-          slack ${{ inputs.command }} --verbose --skip-update
+          slack version
         } else {
           slack ${{ inputs.command }} --skip-update
         }
