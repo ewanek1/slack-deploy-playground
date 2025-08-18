@@ -72,8 +72,8 @@ runs:
     - name: Run Slack CLI Command
       shell: pwsh
       env:
-        SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
+        SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
         VERBOSE: ${{ inputs.verbose }}
       run: |
         Write-Host "Running command: ${{ inputs.command }}"
