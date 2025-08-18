@@ -29,10 +29,10 @@ runs:
       shell: bash
       run: echo "$HOME/.slack/bin" >> "$GITHUB_PATH"
 
-    - name: Add Slack CLI to PATH (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
+    #- name: Add Slack CLI to PATH (Windows)
+      #if: runner.os == 'Windows'
+      #shell: pwsh
+      #run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
 
     - name: Install Slack CLI (Linux/macOS)
       if:
@@ -48,23 +48,39 @@ runs:
       shell: pwsh
       run: |
         Write-Host "Installing Slack CLI on Windows..."
+        
+        # Install Deno first using the official Windows installer
+        Write-Host "Installing Deno..."
+        irm https://deno.land/x/install/install.ps1 | iex
+        
+        # Add Deno to PATH for this session
+        $env:PATH = "$env:USERPROFILE\.deno\bin;$env:PATH"
+        
+        # Verify Deno installation
+        Write-Host "Verifying Deno installation..."
+        deno --version
+        
+        # Now install Slack CLI
+        Write-Host "Installing Slack CLI..."
         irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
-        exit 0
+        
+        Write-Host "Installation complete!"
 
     - name: Add Slack CLI to PATH (Windows)
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        $slack_cli_path = "$env:USERPROFILE\AppData\Local\slack-cli\bin"
-        Write-Host "Adding $slack_cli_path to PATH"
-        echo "$slack_cli_path" >> $env:GITHUB_PATH
+        # Add both Deno and Slack CLI to PATH
+        echo "$env:USERPROFILE\.deno\bin" >> $env:GITHUB_PATH
+        echo "$env:USERPROFILE\AppData\Local\slack-cli\bin" >> $env:GITHUB_PATH
+        
         Write-Host "PATH updated. Current PATH: $env:PATH"
 
     - name: Run Slack CLI Command
       shell: pwsh
       env:
-        SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
-        SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
+        SLACK_SERVICE_TOKEN: ${{ inputs.slack-service-token }}
+        SLACK_BOT_TOKEN: ${{ inputs.slack-bot-token }}
         VERBOSE: ${{ inputs.verbose }}
       run: |
         Write-Host "Running command: ${{ inputs.command }}"
@@ -77,8 +93,6 @@ runs:
         } else {
           slack ${{ inputs.command }} --skip-update
         }
-
-
   
     #- name: Run Slack CLI Command
       #shell: bash
