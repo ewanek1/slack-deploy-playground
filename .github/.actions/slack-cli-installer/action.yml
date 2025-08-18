@@ -52,6 +52,12 @@ runs:
     - name: Install Slack CLI
       run: ./github/actions/slack-cli-installer
 
+
+      - name: Install Slack CLI (Windows)
+      run: iwr https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -useb | iex
+      shell: pwsh
+
+
     #- name: Install Slack CLI (Windows)
       #if: 
         #runner.os == 'Windows' && 
