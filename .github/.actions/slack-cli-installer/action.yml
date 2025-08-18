@@ -42,6 +42,13 @@ runs:
       run: |
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v ${{ inputs.cli_version }} --skip-update
 
+
+    - name: Install Deno
+      uses: denoland/setup-deno@v1
+      with:
+        deno-version: v2.x
+
+        
     - name: Install Slack CLI (Windows)
       if: 
         runner.os == 'Windows' && 
@@ -49,6 +56,7 @@ runs:
       shell: pwsh 
       run: |
         irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
+
   
     - name: Run Slack CLI Command
       shell: bash
