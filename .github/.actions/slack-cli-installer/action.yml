@@ -29,10 +29,10 @@ runs:
       shell: bash
       run: echo "$HOME/.slack/bin" >> "$GITHUB_PATH"
 
-    #- name: Add Slack CLI to PATH (Windows)
-      #if: runner.os == 'Windows'
-      #shell: pwsh
-      #run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
+    - name: Add Slack CLI to PATH (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
 
     - name: Install Slack CLI (Linux/macOS)
       if:
@@ -42,54 +42,54 @@ runs:
       run: |
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v ${{ inputs.cli_version }} --skip-update
 
-
-    - name: Install Deno
-      uses: denoland/setup-deno@v1
-      with:
-        deno-version: v2.x
-
-
-
-
-    - name: Install Slack CLI
+    
+    - name: Install Slack CLI (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
       run: |
+        Write-Host "Installing Slack CLI on Windows..."
         irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
         exit 0
+
+    - name: Add Slack CLI to PATH (Windows)
+      if: runner.os == 'Windows'
       shell: pwsh
+      run: |
+        $slack_cli_path = "$env:USERPROFILE\AppData\Local\slack-cli\bin"
+        Write-Host "Adding $slack_cli_path to PATH"
+        echo "$slack_cli_path" >> $env:GITHUB_PATH
+        Write-Host "PATH updated. Current PATH: $env:PATH"
 
+    - name: Run Slack CLI Command
+      shell: pwsh
+      env:
+        SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
+        SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
+        VERBOSE: ${{ inputs.verbose }}
+      run: |
+        Write-Host "Running command: ${{ inputs.command }}"
+        Write-Host "Current PATH: $env:PATH"
+        Write-Host "Checking if slack exists:"
+        Get-Command slack -ErrorAction SilentlyContinue | Select-Object Name, Source
+        
+        if ("${{ inputs.verbose }}" -eq "true") {
+          slack ${{ inputs.command }} --verbose --skip-update
+        } else {
+          slack ${{ inputs.command }} --skip-update
+        }
 
-
-    #- name: Install Slack CLI (Windows)
-      #if: 
-        #runner.os == 'Windows' && 
-        #(steps.cache-cli.outputs.cache-hit != 'true')
-      #shell: pwsh 
-      #run: |
-        #irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
 
   
-    - name: Add Slack CLI to PATH
-      run: echo "$env:USERPROFILE\AppData\Local\slack-cli\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-      shell: pwsh
-
-
-
-
-
-
-    - name: Run Slack CLI
-      run: slack version --skip-update
-      shell: pwsh
-   # - name: Run Slack CLI Command
+    #- name: Run Slack CLI Command
       #shell: bash
-     # env:
-       # SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
-      #  SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
-      #  VERBOSE: ${{ inputs.verbose }}
+      #env:
+        #SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
+        #SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
+        #VERBOSE: ${{ inputs.verbose }}
       #run: |
-      #  echo "Running command: ${{ inputs.command }}"
-      #  if [ "${{ inputs.verbose }}" == "true" ]; then
-      #    slack ${{ inputs.command }} --verbose --skip-update
-      #  else
-      #    slack ${{ inputs.command }} --skip-update
-      #  fi
+       #echo "Running command: ${{ inputs.command }}"
+        #if [ "${{ inputs.verbose }}" == "true" ]; then
+          #slack ${{ inputs.command }} --verbose --skip-update
+        #else
+          #slack ${{ inputs.command }} --skip-update
+        #fi
