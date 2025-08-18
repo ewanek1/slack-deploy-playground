@@ -29,10 +29,10 @@ runs:
       shell: bash
       run: echo "$HOME/.slack/bin" >> "$GITHUB_PATH"
 
-    - name: Add Slack CLI to PATH (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
+    #- name: Add Slack CLI to PATH (Windows)
+      #if: runner.os == 'Windows'
+      #shell: pwsh
+      #run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
 
     - name: Install Slack CLI (Linux/macOS)
       if:
