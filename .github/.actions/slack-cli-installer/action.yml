@@ -73,19 +73,7 @@ runs:
       shell: pwsh
 
 
-    - name: Run Slack CLI Command
-      shell: pwsh
-      env:
-        SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
-        SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
-        VERBOSE: ${{ inputs.verbose }}
-      run: |
-        Write-Host "Running command: ${{ inputs.command }}"
-        if ("${{ inputs.verbose }}" -eq "true") {
-          slack ${{ inputs.command }} --verbose --skip-update
-        } else {
-          slack ${{ inputs.command }} --skip-update
-        }
+
 
 
 
