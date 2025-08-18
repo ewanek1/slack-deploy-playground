@@ -49,10 +49,6 @@ runs:
         deno-version: v2.x
 
 
-    - name: Install Slack CLI
-      run: ./github/actions/slack-cli-installer
-
-
     - name: Install Slack CLI (Windows)
       shell: pwsh
       run: irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
