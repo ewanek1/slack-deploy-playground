@@ -68,16 +68,31 @@ runs:
         #irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
 
   
+
     - name: Run Slack CLI Command
-      shell: bash
+      shell: pwsh
       env:
-        SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
-        SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
+        SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         VERBOSE: ${{ inputs.verbose }}
       run: |
-        echo "Running command: ${{ inputs.command }}"
-        if [ "${{ inputs.verbose }}" == "true" ]; then
+        Write-Host "Running command: ${{ inputs.command }}"
+        if ("${{ inputs.verbose }}" -eq "true") {
           slack ${{ inputs.command }} --verbose --skip-update
-        else
+        } else {
           slack ${{ inputs.command }} --skip-update
-        fi
+        }
+
+   # - name: Run Slack CLI Command
+      #shell: bash
+     # env:
+       # SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
+      #  SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
+      #  VERBOSE: ${{ inputs.verbose }}
+      #run: |
+      #  echo "Running command: ${{ inputs.command }}"
+      #  if [ "${{ inputs.verbose }}" == "true" ]; then
+      #    slack ${{ inputs.command }} --verbose --skip-update
+      #  else
+      #    slack ${{ inputs.command }} --skip-update
+      #  fi
