@@ -29,10 +29,10 @@ runs:
       shell: bash
       run: echo "$HOME/.slack/bin" >> "$GITHUB_PATH"
 
-    #- name: Add Slack CLI to PATH (Windows)
-      #if: runner.os == 'Windows'
-      #shell: pwsh
-      #run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
+    - name: Add Slack CLI to PATH (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
 
     - name: Install Slack CLI (Linux/macOS)
       if:
@@ -42,68 +42,24 @@ runs:
       run: |
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v ${{ inputs.cli_version }} --skip-update
 
-    
     - name: Install Slack CLI (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
+      if: 
+        runner.os == 'Windows' && 
+        (steps.cache-cli.outputs.cache-hit != 'true')
+      shell: pwsh 
       run: |
-        Write-Host "Installing Slack CLI on Windows..."
-        
-        # Install Deno first using the official Windows installer
-        Write-Host "Installing Deno..."
-        irm https://deno.land/x/install/install.ps1 | iex
-        
-        # Add Deno to PATH for this session
-        $env:PATH = "$env:USERPROFILE\.deno\bin;$env:PATH"
-        
-        # Verify Deno installation
-        Write-Host "Verifying Deno installation..."
-        deno --version
-        
-        # Now install Slack CLI
-        Write-Host "Installing Slack CLI..."
         irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
-        
-        Write-Host "Installation complete!"
-
-    - name: Add Slack CLI to PATH (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        # Add both Deno and Slack CLI to PATH
-        echo "$env:USERPROFILE\.deno\bin" >> $env:GITHUB_PATH
-        echo "$env:USERPROFILE\AppData\Local\slack-cli\bin" >> $env:GITHUB_PATH
-        
-        Write-Host "PATH updated. Current PATH: $env:PATH"
-
+  
     - name: Run Slack CLI Command
-      shell: pwsh
+      shell: bash
       env:
-        SLACK_SERVICE_TOKEN: ${{ inputs.slack-service-token }}
-        SLACK_BOT_TOKEN: ${{ inputs.slack-bot-token }}
+        SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
+        SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
         VERBOSE: ${{ inputs.verbose }}
       run: |
-        Write-Host "Running command: ${{ inputs.command }}"
-        Write-Host "Current PATH: $env:PATH"
-        Write-Host "Checking if slack exists:"
-        Get-Command slack -ErrorAction SilentlyContinue | Select-Object Name, Source
-        
-        if ("${{ inputs.verbose }}" -eq "true") {
+        echo "Running command: ${{ inputs.command }}"
+        if [ "${{ inputs.verbose }}" == "true" ]; then
           slack ${{ inputs.command }} --verbose --skip-update
-        } else {
+        else
           slack ${{ inputs.command }} --skip-update
-        }
-  
-    #- name: Run Slack CLI Command
-      #shell: bash
-      #env:
-        #SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
-        #SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
-        #VERBOSE: ${{ inputs.verbose }}
-      #run: |
-       #echo "Running command: ${{ inputs.command }}"
-        #if [ "${{ inputs.verbose }}" == "true" ]; then
-          #slack ${{ inputs.command }} --verbose --skip-update
-        #else
-          #slack ${{ inputs.command }} --skip-update
-        #fi
+        fi
