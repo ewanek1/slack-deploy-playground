@@ -44,7 +44,9 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
     # New step
-      - name: Notify Slack Workflow Started
-        run: slack chat send --channel C0975RF9BK3 --text "Workflow `${{ github.workflow }}` has started"
-        env:
-          SLACK_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      - name: Notify Slack via API
+        run: |
+          curl -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer ${{ secrets.SLACK_BOT_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"channel":"C0975RF9BK3","text":"Workflow `Slack CLI Command Runner` has started"}'
