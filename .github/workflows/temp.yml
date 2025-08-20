@@ -45,6 +45,6 @@ jobs:
 
     # New step
       - name: Notify Slack Workflow Started
-        run: slack chat send --channel C0975RF9BK3 --text "Workflow `${{ github.workflow }}` has started (run #${{ github.run_number }})"
+        run: slack chat send --channel C0975RF9BK3 --text "Workflow `${{ github.workflow }}` has started"
         env:
           SLACK_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
