@@ -54,7 +54,7 @@ jobs:
 
   pull_request:
   branches: [ main ] 
-  
+
   test:
     permissions:
       contents: read
@@ -76,3 +76,23 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+
+
+   runs:
+  using: 'composite'
+  steps:
+    - name: Run Slack CLI Command
+      shell: bash
+      env:
+        SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
+        SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
+        VERBOSE: ${{ inputs.verbose }}
+      run: |
+        echo "Running command: ${{ inputs.command }}"
+    #echo "Verbose: ${{ inputs.verbose }}"
+        if [ "${{ inputs.verbose }}" == "true" ]; then
+          slack ${{ inputs.command }} --verbose
+        else
+          slack ${{ inputs.command }}
+        fi

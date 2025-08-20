@@ -19,27 +19,21 @@ env:
   SLACK_DISABLE_TELEMETRY: "true"
 
 jobs:
-  deploy:
-    permissions:
-      contents: read
+  run-slack-command:
     runs-on: ubuntu-latest
-    #runs-on: ${{ matrix.os }}
-    #strategy:
-      #matrix:
-        #os: [windows-latest]
-        #node: [16, 18, 20, 22, 24]
-    timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Install Slack CLI and Run Command
-        uses: ./.github/.actions/slack-cli-installer
-        with:
-          command: ${{ github.event.inputs.command }}
-          verbose: ${{ github.run_attempt > 1 }}
-          cli_version: ${{ github.event.inputs.cli_version }}
+      - name: Install Slack CLI
+        run: npm install -g @slack/cli@${{ github.event.inputs.cli_version }}
+
+      - name: Run Slack CLI Command
+        run: |
+          echo "Running command: ${{ github.event.inputs.command }}"
+          slack ${{ github.event.inputs.command }}
         env:
-          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
     
