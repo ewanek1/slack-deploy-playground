@@ -19,21 +19,32 @@ env:
   SLACK_DISABLE_TELEMETRY: "true"
 
 jobs:
-  run-slack-command:
+  deploy:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
+    #runs-on: ${{ matrix.os }}
+    #strategy:
+      #matrix:
+        #os: [windows-latest]
+        #node: [16, 18, 20, 22, 24]
+    timeout-minutes: 10
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Slack CLI
-        run: npm install -g @slack/cli@${{ github.event.inputs.cli_version }}
+      - name: Install Slack CLI and Run Command
+        uses: ./.github/.actions/slack-cli-installer
+        with:
+          command: ${{ github.event.inputs.command }}
+          verbose: ${{ github.run_attempt > 1 }}
+          cli_version: ${{ github.event.inputs.cli_version }}
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - name: Run Slack CLI Command
-        run: |
-          echo "Running command: ${{ github.event.inputs.command }}"
-          slack ${{ github.event.inputs.command }}
+    # New step
+      - name: Notify Slack Workflow Started
+        run: slack chat send --channel C0975RF9BK3 --text "Workflow `${{ github.workflow }}` has started (run #${{ github.run_number }})"
         env:
           SLACK_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
-    
