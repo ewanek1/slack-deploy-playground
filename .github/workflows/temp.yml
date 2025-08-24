@@ -19,25 +19,19 @@ env:
   SLACK_DISABLE_TELEMETRY: "true"
 
 jobs:
-  deploy:
+  deploy: # Change this?
     permissions:
       contents: read
     runs-on: ubuntu-latest
     outputs:
-      success:
-        description: "Whether the command ran successfully"
-        value: ${{ steps.run-slack-cli-command.outputs.success }}
-      command_executed:
-        description: "Standard output of the command"
-        value: ${{ steps.run-slack-cli-command.outputs.command_executed }}
-      stdout:
-        description: "Output from command executed"
-        value: ${{ steps.run-slack-cli-command.outputs.stdout }}
+      success: ${{ steps.run-slack-cli-command.outputs.success }}
+      command_executed: ${{ steps.run-slack-cli-command.outputs.command_executed }}
+      stdout: ${{ steps.run-slack-cli-command.outputs.stdout }}
     #runs-on: ${{ matrix.os }}
     #strategy:
-      #matrix:
-        #os: [windows-latest]
-        #node: [16, 18, 20, 22, 24]
+    #  matrix:
+    #    os: [windows-latest]
+    #    node: [16, 18, 20, 22, 24]
     timeout-minutes: 10
 
     steps:
