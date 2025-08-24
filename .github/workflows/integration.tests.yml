@@ -1,0 +1,128 @@
+name: Integration Tests for Slack CLI Action
+
+on:
+  workflow_dispatch:
+  #pull_request:
+
+env:
+  SLACK_DISABLE_TELEMETRY: "true"
+
+jobs:
+  test-basic-command:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run slack version
+        id: version
+        uses: ./.github/.actions/slack-cli-installer
+        with:
+          command: "version"
+          cli_version: "3.6.0"
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Verify CLI version
+        run: |
+          echo "STDOUT: ${{ steps.version.outputs.stdout }}"
+          echo "Success: ${{ steps.version.outputs.success }}"
+          echo "Exit Code: ${{ steps.version.outputs.exit_code }}"
+          echo "Command Executed: ${{ steps.version.outputs.command_executed }}"
+          
+          if [ "${{ steps.version.outputs.success }}" != "true" ]; then
+            echo "CLI version failure"
+            exit 1
+          fi
+
+  test-verbose-flag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run slack help with verbose
+        id: help
+        uses: ./.github/.actions/slack-cli-installer
+        with:
+          command: "help"
+          verbose: "true"
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Ensure verbose flag worked
+        run: |
+          echo "STDOUT: ${{ steps.help.outputs.stdout }}"
+          echo "Success: ${{ steps.help.outputs.success }}"
+          
+          if [ "${{ steps.help.outputs.success }}" != "true" ]; then
+            echo "Verbose flag failure"
+            exit 1
+          fi
+
+  test-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: First run (no cache)
+        id: no-cache
+        uses: ./.github/.actions/slack-cli-installer
+        with:
+          command: "version"
+          cli_version: "3.6.0"
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Second run (cached)
+        id: cache-hit
+        uses: ./.github/.actions/slack-cli-installer
+        with:
+          command: "version"
+          cli_version: "3.6.0"
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Ensure cache hit on second run
+        run: |
+          echo "First run success: ${{ steps.no-cache.outputs.success }}"
+          echo "Second run success: ${{ steps.cache-hit.outputs.success }}"
+          
+          if [ "${{ steps.cache2.outputs.success }}" != "true" ]; then
+            echo "Cache failure"
+            exit 1
+          fi
+
+  test-invalid-command:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run with invalid command
+        id: invalid-command
+        continue-on-error: true
+        uses: ./.github/.actions/slack-cli-installer
+        with:
+          command: "invalid-command"
+          cli_version: "3.6.0"
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Expect failure
+        run: |
+          echo "Success: ${{ steps.bad.outputs.success }}"
+          echo "Exit Code: ${{ steps.bad.outputs.exit_code }}"
+          echo "STDERR: ${{ steps.bad.outputs.stderr }}"
+          
+          if [ "${{ steps.bad.outputs.success }}" == "true" ]; then
+            echo "Expected failure with invalid command"
+            exit 1
+          fi
+          
+          if [ "${{ steps.bad.outputs.exit_code }}" == "0" ]; then
+            echo "Expected non-zero exit code"
+            exit 1
+          fi

@@ -14,6 +14,17 @@ inputs:
     required: false
     default: '3.6.0'
 
+outputs:
+  success:
+    description: "Whether the command ran successfully"
+    value: ${{ steps.run-slack-cli-command.outputs.success }}
+  command_executed:
+    description: "Standard output of the command"
+    value: ${{ steps.run-slack-cli-command.outputs.command_executed }}
+  stdout:
+    description: "Output from command executed"
+    value: ${{ steps.run-slack-cli-command.outputs.stdout }}
+
 runs:
   using: composite
   steps:
@@ -51,6 +62,7 @@ runs:
         irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
   
     - name: Run Slack CLI Command
+      id: run-slack-cli-command
       shell: bash
       env:
         SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
@@ -63,3 +75,4 @@ runs:
         else
           slack ${{ inputs.command }} --skip-update
         fi
+
