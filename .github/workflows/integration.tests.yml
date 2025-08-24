@@ -1,12 +1,3 @@
-name: Integration Tests for Slack CLI Action
-
-on:
-  workflow_dispatch:
-  #pull_request:
-
-env:
-  SLACK_DISABLE_TELEMETRY: "true"
-
 jobs:
   test-basic-command:
     runs-on: ubuntu-latest
@@ -15,28 +6,23 @@ jobs:
 
       - name: Run slack version
         id: version
-        uses: ./.github/.actions/slack-cli-installer
+        uses: ./.github/.actions/test-action
         with:
           command: "version"
           cli_version: "3.6.0"
         env:
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
       - name: Debug outputs
         run: |
           echo "STDOUT: ${{ steps.version.outputs.stdout }}"
-          echo "STDERR: ${{ steps.version.outputs.stderr }}"
           echo "Success: ${{ steps.version.outputs.success }}"
           echo "Exit Code: ${{ steps.version.outputs.exit_code }}"
           echo "Command Executed: ${{ steps.version.outputs.command_executed }}"
 
       - name: Verify CLI version
         run: |
-          echo "STDOUT: ${{ steps.version.outputs.stdout }}"
-          echo "Success: ${{ steps.version.outputs.success }}"
-          echo "Exit Code: ${{ steps.version.outputs.exit_code }}"
-          echo "Command Executed: ${{ steps.version.outputs.command_executed }}"
-          
           if [ "${{ steps.version.outputs.success }}" != "true" ]; then
             echo "CLI version failure"
             exit 1

@@ -1,22 +1,53 @@
-- name: Run Slack CLI Command (with capture)
-  id: run-slack-cli-command
-  shell: bash
-  run: |
-    set +e
-    output=$(slack ${{ inputs.command }} --skip-update 2>&1)
-    exit_code=$?
-    set -e
+name: Slack CLI Debug Runner
+description: Run Slack CLI commands with full debug info (for testing only)
 
-    echo "stdout<<EOF" >> $GITHUB_OUTPUT
-    echo "$output" >> $GITHUB_OUTPUT
-    echo "EOF" >> $GITHUB_OUTPUT
+inputs:
+  command:
+    description: "Slack CLI command to run"
+    required: true
+  cli_version:
+    description: "Slack CLI Version"
+    required: false
+    default: '3.6.0'
 
-    # Capture exit code and command executed
-    echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
-    echo "command_executed=slack ${{ inputs.command }}" >> $GITHUB_OUTPUT
+outputs:
+  success:
+    description: "Whether the command ran successfully"
+    value: ${{ steps.run-slack-cli-command.outputs.success }}
+  stdout:
+    description: "Output from command executed"
+    value: ${{ steps.run-slack-cli-command.outputs.stdout }}
+  exit_code:
+    description: "Exit code of the command"
+    value: ${{ steps.run-slack-cli-command.outputs.exit_code }}
+  command_executed:
+    description: "The exact command executed"
+    value: ${{ steps.run-slack-cli-command.outputs.command_executed }}
 
-    if [ $exit_code -eq 0 ]; then
-      echo "success=true" >> $GITHUB_OUTPUT
-    else
-      echo "success=false" >> $GITHUB_OUTPUT
-    fi
+runs:
+  using: composite
+  steps:
+    - name: Add Slack CLI to PATH
+      shell: bash
+      run: echo "$HOME/.slack/bin" >> "$GITHUB_PATH"
+
+    - name: Run Slack CLI Command (with capture)
+      id: run-slack-cli-command
+      shell: bash
+      run: |
+        set +e
+        output=$(slack ${{ inputs.command }} --skip-update 2>&1)
+        exit_code=$?
+        set -e
+
+        echo "stdout<<EOF" >> $GITHUB_OUTPUT
+        echo "$output" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
+        echo "command_executed=slack ${{ inputs.command }}" >> $GITHUB_OUTPUT
+
+        if [ $exit_code -eq 0 ]; then
+          echo "success=true" >> $GITHUB_OUTPUT
+        else
+          echo "success=false" >> $GITHUB_OUTPUT
+        fi
