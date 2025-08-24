@@ -90,7 +90,7 @@ jobs:
           echo "First run success: ${{ steps.no-cache.outputs.success }}"
           echo "Second run success: ${{ steps.cache-hit.outputs.success }}"
           
-          if [ "${{ steps.cache2.outputs.success }}" != "true" ]; then
+          if [ "${{ steps.cache-hit.outputs.success }}" != "true" ]; then
             echo "Cache failure"
             exit 1
           fi
@@ -113,16 +113,11 @@ jobs:
 
       - name: Expect failure
         run: |
-          echo "Success: ${{ steps.bad.outputs.success }}"
-          echo "Exit Code: ${{ steps.bad.outputs.exit_code }}"
-          echo "STDERR: ${{ steps.bad.outputs.stderr }}"
+          echo "Success: ${{ steps.invalid-command.outputs.success }}"
+          echo "STDOUT: ${{ steps.invalid-command.outputs.stdout }}"
           
-          if [ "${{ steps.bad.outputs.success }}" == "true" ]; then
+          if [ "${{ steps.invalid-command.outputs.success }}" == "true" ]; then
             echo "Expected failure with invalid command"
             exit 1
           fi
-          
-          if [ "${{ steps.bad.outputs.exit_code }}" == "0" ]; then
-            echo "Expected non-zero exit code"
-            exit 1
-          fi
+
