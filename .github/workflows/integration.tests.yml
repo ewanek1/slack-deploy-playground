@@ -45,18 +45,15 @@ jobs:
 
       - name: Run slack help with verbose
         id: help
-        uses: ./.github/.actions/slack-cli-installer
+        uses: ./.github/.actions/test-action
         with:
           command: "help"
-          verbose: "true"
-        env:
-          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          cli_version: "3.6.0"
 
       - name: Ensure verbose flag worked
         run: |
-          echo "STDOUT: ${{ steps.help.outputs.stdout }}"
-          echo "Success: ${{ steps.help.outputs.success }}"
+          echo "STDOUT: '${{ steps.help.outputs.stdout }}'"
+          echo "Success: '${{ steps.help.outputs.success }}'"
           
           if [ "${{ steps.help.outputs.success }}" != "true" ]; then
             echo "Verbose flag failure"
@@ -70,28 +67,22 @@ jobs:
 
       - name: First run (no cache)
         id: no-cache
-        uses: ./.github/.actions/slack-cli-installer
+        uses: ./.github/.actions/test-action
         with:
           command: "version"
           cli_version: "3.6.0"
-        env:
-          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Second run (cached)
         id: cache-hit
-        uses: ./.github/.actions/slack-cli-installer
+        uses: ./.github/.actions/test-action
         with:
           command: "version"
           cli_version: "3.6.0"
-        env:
-          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Ensure cache hit on second run
         run: |
-          echo "First run success: ${{ steps.no-cache.outputs.success }}"
-          echo "Second run success: ${{ steps.no-cache.outputs.success }}"
+          echo "First run success: '${{ steps.no-cache.outputs.success }}'"
+          echo "Second run success: '${{ steps.cache-hit.outputs.success }}'"
           
           if [ "${{ steps.cache-hit.outputs.success }}" != "true" ]; then
             echo "Cache failure"
@@ -106,18 +97,15 @@ jobs:
       - name: Run with invalid command
         id: invalid-command
         continue-on-error: true
-        uses: ./.github/.actions/slack-cli-installer
+        uses: ./.github/.actions/test-action
         with:
           command: "invalid-command"
           cli_version: "3.6.0"
-        env:
-          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Expect failure
         run: |
-          echo "Success: ${{ steps.invalid-command.outputs.success }}"
-          echo "STDOUT: ${{ steps.invalid-command.outputs.stdout }}"
+          echo "Success: '${{ steps.invalid-command.outputs.success }}'"
+          echo "STDOUT: '${{ steps.invalid-command.outputs.stdout }}'"
           
           if [ "${{ steps.invalid-command.outputs.success }}" == "true" ]; then
             echo "Expected failure with invalid command"
