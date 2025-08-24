@@ -27,6 +27,11 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Install Slack CLI
+      shell: bash
+      run: |
+        curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v ${{ inputs.cli_version }} --skip-update
+
     - name: Add Slack CLI to PATH
       shell: bash
       run: echo "$HOME/.slack/bin" >> "$GITHUB_PATH"
@@ -35,19 +40,16 @@ runs:
       id: run-slack-cli-command
       shell: bash
       run: |
-        set +e
+        # Capture command output and exit code
         output=$(slack ${{ inputs.command }} --skip-update 2>&1)
         exit_code=$?
-        set -e
-
+        
+        # Set outputs using proper GitHub Actions syntax
+        echo "success=$([ $exit_code -eq 0 ] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+        echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
+        echo "command_executed=slack ${{ inputs.command }} --skip-update" >> $GITHUB_OUTPUT
+        
+        # Handle multi-line output properly
         echo "stdout<<EOF" >> $GITHUB_OUTPUT
         echo "$output" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
-        echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
-        echo "command_executed=slack ${{ inputs.command }}" >> $GITHUB_OUTPUT
-
-        if [ $exit_code -eq 0 ]; then
-          echo "success=true" >> $GITHUB_OUTPUT
-        else
-          echo "success=false" >> $GITHUB_OUTPUT
-        fi

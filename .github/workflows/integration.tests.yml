@@ -1,3 +1,9 @@
+name: Integration Tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+
 jobs:
   test-basic-command:
     runs-on: ubuntu-latest
@@ -10,20 +16,24 @@ jobs:
         with:
           command: "version"
           cli_version: "3.6.0"
-        env:
-          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Debug outputs
         run: |
-          echo "STDOUT: ${{ steps.version.outputs.stdout }}"
-          echo "Success: ${{ steps.version.outputs.success }}"
-          echo "Exit Code: ${{ steps.version.outputs.exit_code }}"
-          echo "Command Executed: ${{ steps.version.outputs.command_executed }}"
+          echo "=== OUTPUT DEBUG ==="
+          echo "STDOUT: '${{ steps.version.outputs.stdout }}'"
+          echo "Success: '${{ steps.version.outputs.success }}'"
+          echo "Exit Code: '${{ steps.version.outputs.exit_code }}'"
+          echo "Command Executed: '${{ steps.version.outputs.command_executed }}'"
+          echo "===================="
 
       - name: Verify CLI version
         run: |
           if [ "${{ steps.version.outputs.success }}" != "true" ]; then
-            echo "CLI version failure"
+            echo "❌ CLI version command failed"
+            echo "Exit code: ${{ steps.version.outputs.exit_code }}"
+            echo "Output: ${{ steps.version.outputs.stdout }}"
             exit 1
+          else
+            echo "✅ CLI version command succeeded"
+            echo "Output: ${{ steps.version.outputs.stdout }}"
           fi
