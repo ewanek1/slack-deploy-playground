@@ -1,65 +1,22 @@
-name: Slack CLI Debug Runner
-description: Run Slack CLI commands with full debug info (for testing only)
+- name: Run Slack CLI Command (with capture)
+  id: run-slack-cli-command
+  shell: bash
+  run: |
+    set +e
+    output=$(slack ${{ inputs.command }} --skip-update 2>&1)
+    exit_code=$?
+    set -e
 
-inputs:
-  command:
-    description: "Slack CLI command to run"
-    required: true
-  cli_version:
-    description: "Slack CLI Version"
-    required: false
-    default: '3.6.0'
+    echo "stdout<<EOF" >> $GITHUB_OUTPUT
+    echo "$output" >> $GITHUB_OUTPUT
+    echo "EOF" >> $GITHUB_OUTPUT
 
-outputs:
-  success:
-    description: "Whether the command ran successfully"
-    value: ${{ steps.run-slack-cli-command.outputs.success }}
-  stdout:
-    description: "Output from command executed"
-    value: ${{ steps.run-slack-cli-command.outputs.stdout }}
-  exit_code:
-    description: "Exit code of the command"
-    value: ${{ steps.run-slack-cli-command.outputs.exit_code }}
-  command_executed:
-    description: "The exact command executed"
-    value: ${{ steps.run-slack-cli-command.outputs.command_executed }}
+    # Capture exit code and command executed
+    echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
+    echo "command_executed=slack ${{ inputs.command }}" >> $GITHUB_OUTPUT
 
-runs:
-  using: composite
-  steps:
-    - name: Cache Slack CLI 
-      id: cache-cli
-      uses: actions/cache@v4
-      with:
-        path: ~/.slack/bin
-        key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ inputs.cli_version }}
-
-    - name: Add Slack CLI to PATH
-      shell: bash
-      run: echo "$HOME/.slack/bin" >> "$GITHUB_PATH"
-
-    - name: Install Slack CLI
-      if: steps.cache-cli.outputs.cache-hit != 'true'
-      shell: bash
-      run: |
-        curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | \
-          bash -s -- -v ${{ inputs.cli_version }} --skip-update
-
-    - name: Run Slack CLI Command (with capture)
-      id: run-slack-cli-command
-      shell: bash
-      run: |
-        set +e
-        output=$(slack ${{ inputs.command }} --skip-update 2>&1)
-        exit_code=$?
-        set -e
-
-        echo "stdout=$output" >> $GITHUB_OUTPUT
-        echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
-        echo "command_executed=slack ${{ inputs.command }}" >> $GITHUB_OUTPUT
-
-        if [ $exit_code -eq 0 ]; then
-          echo "success=true" >> $GITHUB_OUTPUT
-        else
-          echo "success=false" >> $GITHUB_OUTPUT
-        fi
+    if [ $exit_code -eq 0 ]; then
+      echo "success=true" >> $GITHUB_OUTPUT
+    else
+      echo "success=false" >> $GITHUB_OUTPUT
+    fi
