@@ -70,12 +70,12 @@ jobs:
       - name: ensure all inputs work
         if: steps.empty-command.outputs.success != 'true' || 
             steps.command-with-whitespace.outputs.success != 'true' || 
-            steps.command-with-flags.outputs.success != 'true' || 
+            steps.long-command.outputs.success != 'true' || 
             steps.special-chars.outputs.success != 'true'
         run: |
           echo "test-input-validation failure"
           echo "empty command: ${{ steps.empty-command.outputs.success }}"
-          echo "command with args: ${{ steps.command-with-args.outputs.success }}"
+          echo "command with whitespace: ${{ steps.command-with-whitespace.outputs.success }}"
           echo "long command: ${{ steps.long-command.outputs.success }}"
           echo "special chars: ${{ steps.special-chars.outputs.success }}"
           exit 1
@@ -101,7 +101,7 @@ jobs:
           echo "stdout: '${{ steps.help.outputs.stdout }}'"
           exit 1
 
-test-cache:
+  test-cache:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -135,7 +135,7 @@ test-cache:
           echo "cache failure"
           exit 1
 
-test-invalid-command:
+  test-invalid-command:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -157,7 +157,7 @@ test-invalid-command:
           echo "success: '${{ steps.invalid-command.outputs.success }}'"
           exit 1
 
-test-cli-versions:
+  test-cli-versions:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
