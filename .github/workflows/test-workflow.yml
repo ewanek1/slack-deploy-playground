@@ -21,16 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Slack CLI and Run Command
-        uses: ./.github/.actions/slack-cli-installer
-        with:
-          command: ${{ github.event.inputs.command }}
-          verbose: ${{ github.run_attempt > 1 }}
-          cli_version: ${{ github.event.inputs.cli_version }}
-        env:
-          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
       - name: run slack version
         id: version
         uses: ./.github/.actions/test-action
@@ -74,7 +64,7 @@ jobs:
         id: long-command
         uses: ./.github/.actions/test-action
         with:
-          command: 'slack doctor --help --experiment "string"'
+          command: 'slack doctor --help --experiment string'
           cli_version: "latest"
 
       - name: special chars
