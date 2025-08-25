@@ -17,13 +17,15 @@ jobs:
         with:
           command: "auth list"
           cli_version: "latest"
+
+      - name: Debug auth outputs
         run: |
-          echo "stdout: '${{ steps.version.outputs.stdout }}'"
-          echo "success: '${{ steps.version.outputs.success }}'"
-          echo "command executed: '${{ steps.version.outputs.command_executed }}'"
+          echo "stdout: '${{ steps.auth.outputs.stdout }}'"
+          echo "success: '${{ steps.auth.outputs.success }}'"
+          echo "command executed: '${{ steps.auth.outputs.command_executed }}'"
 
       - name: Fail if not authed
-        if: ${{ steps.auth.outputs.success != 'true' }}
+        if: steps.auth.outputs.success != 'true'
         run: |
           echo "Slack CLI auth failed"
           echo "stdout: ${{ steps.auth.outputs.stdout }}"
