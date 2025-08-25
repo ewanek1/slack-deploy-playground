@@ -68,10 +68,10 @@ jobs:
           verbose: "true"
 
       - name: ensure all inputs work
-        if: ${{ steps.empty-command.outputs.success != 'true' || 
-                steps.command-with-whitespace.outputs.success != 'true' || 
-                steps.command-with-flags.outputs.success != 'true' || 
-                steps.special-chars.outputs.success != 'true' }}
+        if: steps.empty-command.outputs.success != 'true' || 
+            steps.command-with-whitespace.outputs.success != 'true' || 
+            steps.command-with-flags.outputs.success != 'true' || 
+            steps.special-chars.outputs.success != 'true'
         run: |
           echo "test-input-validation failure"
           echo "empty command: ${{ steps.empty-command.outputs.success }}"
@@ -94,7 +94,7 @@ jobs:
           verbose: "true"
 
       - name: ensure verbose flag worked
-        if: ${{ steps.help.outputs.success != 'true' }}
+        if: steps.help.outputs.success != 'true'
         run: |
           echo "verbose flag failure"
           echo "success: '${{ steps.help.outputs.success }}'"
@@ -130,7 +130,7 @@ test-cache:
           verbose: "true"
 
       - name: ensure cache worked
-        if: ${{ steps.cli-cache.outputs.cache-hit != 'true' }}
+        if: steps.cli-cache.outputs.cache-hit != 'true'
         run: |
           echo "cache failure"
           exit 1
@@ -150,7 +150,7 @@ test-invalid-command:
           verbose: "true"
 
       - name: expect failure
-        if: ${{ steps.invalid-command.outputs.success == 'true' }}
+        if: steps.invalid-command.outputs.success == 'true'
         run: |
           echo "expected failure with invalid command"
           echo "stdout: '${{ steps.invalid-command.outputs.stdout }}'"
@@ -179,7 +179,7 @@ test-cli-versions:
           verbose: "true"
 
       - name: ensure specific versions
-        if: ${{ steps.specific-version.outputs.success != 'true' || steps.latest-version.outputs.success != 'true' }}
+        if: steps.specific-version.outputs.success != 'true' || steps.latest-version.outputs.success != 'true'
         run: |
           echo "specific version failure"
           echo "specific version: ${{ steps.specific-version.outputs.success }}"
