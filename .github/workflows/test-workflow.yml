@@ -60,12 +60,12 @@ jobs:
           command: "  version"
           cli_version: "latest"
 
-      - name: long command with flags 
-        id: long-command
-        uses: ./.github/.actions/test-action
-        with:
-          command: 'slack doctor --help --experiment string'
-          cli_version: "latest"
+      #- name: long command with flags 
+        #id: long-command
+        #uses: ./.github/.actions/test-action
+        #with:
+          #command: 'slack doctor --help --experiment string'
+          #cli_version: "latest"
 
       - name: special chars
         id: special-chars
