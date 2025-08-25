@@ -22,12 +22,12 @@ jobs:
       - name: slack login
         id: login
         uses: ./.github/.actions/test-action
+        continue-on-error: true
         with:
           command: "deploy"
           cli_version: "latest"
 
       - name: debug outputs
-        continue-on-error: true
         run: |
           echo "stdout: '${{ steps.auth.outputs.stdout }}'"
           echo "success: '${{ steps.auth.outputs.success }}'"
