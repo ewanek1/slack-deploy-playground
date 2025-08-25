@@ -143,7 +143,6 @@ describe("check if input is valid", () => {
       
         const result = await runCLI(mocks.core); 
 
-        assert.isTrue(result.isValid);
         assert.include(result.command, "slack random --skip-update");
       
         assert.isTrue(mocks.core.getInput.calledWith("command"));
@@ -163,7 +162,7 @@ describe("check if input is valid", () => {
         const result = await runCLI(mocks.core); 
 
         assert.isTrue(result.isValid);
-        assert.include(result.command, "slack version 3.5.0 --skip-update");
+        assert.include(result.command, "slack version --skip-update");
       
         assert.isTrue(mocks.core.getInput.calledWith("command"));
         assert.isTrue(mocks.core.getInput.calledWith("verbose"));

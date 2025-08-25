@@ -1,0 +1,187 @@
+name: Integration
+
+on:
+  workflow_dispatch:
+  #pull_request:
+
+jobs:
+  test-basic-commands:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: run slack version
+        id: version
+        uses: ./.github/.actions/test-action
+        with:
+          command: "version"
+          cli_version: "latest"
+
+      - name: debug outputs
+        run: |
+          echo "stdout: '${{ steps.version.outputs.stdout }}'"
+          echo "success: '${{ steps.version.outputs.success }}'"
+          echo "command executed: '${{ steps.version.outputs.command_executed }}'"
+
+      - name: verify CLI version
+        if: ${{ steps.version.outputs.success != "true" }}
+        run: |
+            echo "CLI version command failure"
+            echo "output: ${{ steps.version.outputs.stdout }}"
+            exit 1
+
+  test-input-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: empty command
+        id: empty-command
+        uses: ./.github/.actions/test-action
+        with:
+          command: ""
+          cli_version: "latest"
+          verbose: "true"
+
+      - name: command with whitespace
+        id: command-with-whitespace
+        uses: ./.github/.actions/test-action
+        with:
+          command: "  version"
+          cli_version: "latest"
+          verbose: "true"
+
+      - name: long command with flags 
+        id: long-command
+        uses: ./.github/.actions/test-action
+        with:
+          command: "slack doctor --help --experiment strings"
+          cli_version: "latest"
+          verbose: "true"
+
+      - name: special chars
+        id: special-chars
+        uses: ./.github/.actions/test-action
+        with:
+          command: 'slack doctor --help --experiment "release version@2.0.0"'
+          cli_version: "latest"
+          verbose: "true"
+
+      - name: ensure all inputs work
+        if: ${{ steps.empty-command.outputs.success != 'true' || 
+                steps.command-with-whitespace.outputs.success != 'true' || 
+                steps.command-with-flags.outputs.success != 'true' || 
+                steps.special-chars.outputs.success != 'true' }}
+        run: |
+          echo "test-input-validation failure"
+          echo "empty command: ${{ steps.empty-command.outputs.success }}"
+          echo "command with args: ${{ steps.command-with-args.outputs.success }}"
+          echo "long command: ${{ steps.long-command.outputs.success }}"
+          echo "special chars: ${{ steps.special-chars.outputs.success }}"
+          exit 1
+
+  test-verbose-flag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: run slack help with verbose
+        id: help
+        uses: ./.github/.actions/test-action
+        with:
+          command: "help --verbose"
+          cli_version: "latest"
+          verbose: "true"
+
+      - name: ensure verbose flag worked
+        if: ${{ steps.help.outputs.success != 'true' }}
+        run: |
+          echo "verbose flag failure"
+          echo "success: '${{ steps.help.outputs.success }}'"
+          echo "stdout: '${{ steps.help.outputs.stdout }}'"
+          exit 1
+
+test-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: cache Slack CLI
+        id: cli-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.slack/cli
+          key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ inputs.cli_version }}
+
+      - name: first run (install if missing)
+        id: no-cache
+        uses: ./.github/.actions/test-action
+        with:
+          command: "version"
+          cli_version: "latest"
+          verbose: "true"
+
+      - name: second run (should use cache)
+        id: cache-hit
+        uses: ./.github/.actions/test-action
+        with:
+          command: "version"
+          cli_version: "latest"
+          verbose: "true"
+
+      - name: ensure cache worked
+        if: ${{ steps.cli-cache.outputs.cache-hit != 'true' }}
+        run: |
+          echo "cache failure"
+          exit 1
+
+test-invalid-command:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: run with invalid command
+        id: invalid-command
+        continue-on-error: true
+        uses: ./.github/.actions/test-action
+        with:
+          command: "invalid-command"
+          cli_version: "latest"
+          verbose: "true"
+
+      - name: expect failure
+        if: ${{ steps.invalid-command.outputs.success == 'true' }}
+        run: |
+          echo "expected failure with invalid command"
+          echo "stdout: '${{ steps.invalid-command.outputs.stdout }}'"
+          echo "success: '${{ steps.invalid-command.outputs.success }}'"
+          exit 1
+
+test-cli-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: test specific version
+        id: specific-version
+        uses: ./.github/.actions/test-action
+        with:
+          command: "version"
+          cli_version: "3.5.0"
+          verbose: "true"
+
+      - name: test latest version
+        id: latest-version
+        uses: ./.github/.actions/test-action
+        with:
+          command: "version"
+          cli_version: "latest"
+          verbose: "true"
+
+      - name: ensure specific versions
+        if: ${{ steps.specific-version.outputs.success != 'true' || steps.latest-version.outputs.success != 'true' }}
+        run: |
+          echo "specific version failure"
+          echo "specific version: ${{ steps.specific-version.outputs.success }}"
+          echo "latest version: ${{ steps.latest-version.outputs.success }}"
+          exit 1

@@ -17,9 +17,6 @@ outputs:
   stdout:
     description: "Output from command executed"
     value: ${{ steps.run-slack-cli-command.outputs.stdout }}
-  exit_code:
-    description: "Exit code of the command"
-    value: ${{ steps.run-slack-cli-command.outputs.exit_code }}
   command_executed:
     description: "The exact command executed"
     value: ${{ steps.run-slack-cli-command.outputs.command_executed }}
@@ -40,13 +37,11 @@ runs:
       id: run-slack-cli-command
       shell: bash
       run: |
-        # Capture command output and exit code
+        # capture command output
         output=$(slack ${{ inputs.command }} --skip-update 2>&1)
-        exit_code=$?
         
         # Set outputs using proper GitHub Actions syntax
         echo "success=$([ $exit_code -eq 0 ] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-        echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
         echo "command_executed=slack ${{ inputs.command }} --skip-update" >> $GITHUB_OUTPUT
         
         # Handle multi-line output properly

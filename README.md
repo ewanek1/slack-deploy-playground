@@ -6,9 +6,9 @@
 - Inputs: `command`, `verbose`, `cli_version`
 - Outputs: `success`, `command_executed`, `stdout`, `stderr`
 
-### Workflow (`.github/workflows/XXX.yml`)
+### Workflow (`.github/workflows/slack-cli-github-action.yml`)
 - Calls the composite action 
-- Includes Manual dispatch and input types 
+- Includes manual dispatch and input types 
 
 ### Test Suite (`test/cli-runner.test.js`)
 - Mocha + Chai + Sinon
@@ -29,7 +29,7 @@ npm test
 
 ### **CLI Installation Fails**
 - Check installation link is valid
-- Use GitHub's [testing matrix](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/run-job-variations)
+- Use GitHub's [testing matrix](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/run-job-variations) for clearer outputs
 
 ### **Command Execution Errors**
 - Verify service token is valid and in GitHub secrets 
@@ -38,7 +38,7 @@ npm test
 ## Debugging
 
 Use the `--verbose` flag for detailed outputs and check GitHub Actions logs. 
-Or, test locally with similar environment verify inputs are being passed correctly
+Or, test locally with similar environment verify inputs are being passed correctly.
 
 ### To Update When a New Slack CLI Version Releases
 

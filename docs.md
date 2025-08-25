@@ -6,7 +6,7 @@ sidebar_label: Overview
 
 This technique uses the Slack CLI in GitHub Actions to run commands through workflows.
 
-Setting up a CI/CD pipeline [requires](https://docs.slack.dev/tools/slack-cli/guides/authorizing-the-slack-cli/#ci-cd) authorization using a service token. [Service tokens](https://api.slack.com/concepts/token-types#service) are long-lived, non-rotatable user tokens that don’t expire.
+Setting up a CI/CD pipeline [requires](https://docs.slack.dev/tools/slack-cli/guides/authorizing-the-slack-cli/#ci-cd) authorization using a service token. [Service tokens](https://docs.slack.dev/tools/slack-cli/guides/authorizing-the-slack-cli/#obtain-token) are long-lived, non-rotatable user tokens that don’t expire.
 
 ## Setup
 
@@ -86,7 +86,7 @@ jobs:
       - name: Run Slack CLI Command
         uses: slackapi/slack-github-action@main
         with:
-          command: 'deploy'  
+          command: 'version'  
         env:
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
 ```

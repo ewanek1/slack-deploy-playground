@@ -1,0 +1,27 @@
+name: E2E Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  e2e-slack-cli:
+    runs-on: ubuntu-latest
+    env:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Slack auth login
+        id: auth
+        uses: ./.github/.actions/test-action
+        with:
+          command: "auth list"
+          cli_version: "latest"
+          verbose: "true"
+
+      - name: Fail if not authed
+        if: ${{ steps.auth.outputs.success != 'true' }}
+        run: |
+          echo "Slack CLI auth failed"
+          echo "stdout: ${{ steps.auth.outputs.stdout }}"
+          exit 1
