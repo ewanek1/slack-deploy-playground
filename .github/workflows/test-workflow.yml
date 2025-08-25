@@ -24,7 +24,7 @@ jobs:
           echo "command executed: '${{ steps.version.outputs.command_executed }}'"
 
       - name: verify CLI version
-        if: ${{ steps.version.outputs.success != "true" }}
+        if: steps.version.outputs.success != 'true'
         run: |
             echo "CLI version command failure"
             echo "output: ${{ steps.version.outputs.stdout }}"
