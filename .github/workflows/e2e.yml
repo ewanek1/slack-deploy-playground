@@ -17,7 +17,6 @@ jobs:
         with:
           command: "auth list"
           cli_version: "latest"
-          verbose: "true"
 
       - name: Fail if not authed
         if: ${{ steps.auth.outputs.success != 'true' }}
