@@ -2,7 +2,18 @@ name: Integration
 
 on:
   workflow_dispatch:
-  #pull_request:
+    inputs:
+      command:
+        description: 'Slack CLI command to run'
+        required: false
+      verbose:
+        description: 'Verbose flag'
+        type: boolean
+        default: false
+      cli_version:
+        description: 'Slack CLI version'
+        required: false
+        default: "latest"
 
 jobs:
   test-basic-commands:
