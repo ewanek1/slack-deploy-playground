@@ -29,9 +29,6 @@ jobs:
 
       - name: debug outputs
         run: |
-          echo "stdout: '${{ steps.auth.outputs.stdout }}'"
-          echo "success: '${{ steps.auth.outputs.success }}'"
-          echo "command executed: '${{ steps.auth.outputs.command_executed }}'"
           echo "stdout: '${{ steps.login.outputs.stdout }}'"
           echo "success: '${{ steps.login.outputs.success }}'"
           echo "command executed: '${{ steps.login.outputs.command_executed }}'"
