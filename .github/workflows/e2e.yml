@@ -17,6 +17,10 @@ jobs:
         with:
           command: "auth list"
           cli_version: "latest"
+        run: |
+          echo "stdout: '${{ steps.version.outputs.stdout }}'"
+          echo "success: '${{ steps.version.outputs.success }}'"
+          echo "command executed: '${{ steps.version.outputs.command_executed }}'"
 
       - name: Fail if not authed
         if: ${{ steps.auth.outputs.success != 'true' }}
