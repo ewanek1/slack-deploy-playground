@@ -27,6 +27,7 @@ jobs:
           cli_version: "latest"
 
       - name: debug outputs
+        continue-on-error: true
         run: |
           echo "stdout: '${{ steps.auth.outputs.stdout }}'"
           echo "success: '${{ steps.auth.outputs.success }}'"
