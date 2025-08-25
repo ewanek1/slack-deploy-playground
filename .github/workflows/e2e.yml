@@ -24,7 +24,7 @@ jobs:
         uses: ./.github/.actions/test-action
         continue-on-error: true
         with:
-          command: "deploy"
+          command: "init"
           cli_version: "latest"
 
       - name: debug outputs
