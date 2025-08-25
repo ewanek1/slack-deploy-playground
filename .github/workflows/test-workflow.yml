@@ -120,7 +120,14 @@ jobs:
           key: slack-cli-${{ runner.os }}-${{ runner.arch }}-latest
 
       - name: first run (install if missing)
-        id: cli-cache
+        id: no-cache
+        uses: ./.github/.actions/test-action
+        with:
+          command: "version"
+          cli_version: "latest"
+
+      - name: second run (should use cache)
+        id: cache-hit
         uses: ./.github/.actions/test-action
         with:
           command: "version"
