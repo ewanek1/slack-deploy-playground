@@ -23,7 +23,7 @@ jobs:
         id: login
         uses: ./.github/.actions/test-action
         with:
-          command: "login"
+          command: "deploy"
           cli_version: "latest"
 
       - name: debug outputs
