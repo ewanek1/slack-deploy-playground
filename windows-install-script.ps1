@@ -369,5 +369,5 @@ install_git $SkipGit
 install_deno_vscode_extension $SkipDeno
 Write-Host "Sweet! You're all set to start developing!"
 feedback_message $Alias
-#terms_of_service $Alias
+terms_of_service $Alias
 #next_step_message $Alias
