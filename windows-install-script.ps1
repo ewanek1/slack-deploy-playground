@@ -221,7 +221,7 @@ function feedback_message {
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias
   )
-  $confirmed_alias = check_slack_binary_exist $Alias $null $false
+  $confirmed_alias = check_slack_binary_exist $Alias $Version $false
   # if (Get-Command $confirmed_alias) {
   Write-Host "`nWe would love to know how things are going. Really. All of it."
   Write-Host "   Survey your development experience with ``$confirmed_alias feedback``"
@@ -232,7 +232,7 @@ function next_step_message {
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias
   )
-  $confirmed_alias = check_slack_binary_exist $Alias $null $false
+  $confirmed_alias = check_slack_binary_exist $Alias $Version $false
   if (Get-Command $confirmed_alias -ErrorAction SilentlyContinue) {
     try {
       $confirmed_alias | Out-Null
