@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+$ErrorActionPreference = "Stop"
 
 param(
   [Parameter(HelpMessage = "Alias of Slack CLI")]
@@ -393,6 +393,9 @@ trap {
   Write-Host "Submit installation issues: https://github.com/slackapi/slack-cli/issues"
 }
 
+
+
+
 install_slack_cli $Alias $Version
 [Console]::Error.WriteLine("`n`e[1mWarning: Starting on September 1, 2025, Deno will no longer be installed with this script!`e[0m")
 [Console]::Error.WriteLine("Warning: Apps built with Deno should install Deno separately:")
@@ -412,6 +415,22 @@ Write-Host "Slack CLI command exists: $(Get-Command $Alias -ErrorAction Silently
 
 Write-Host "Proceeding with alias: '$Alias'"
 Write-Host "Slack CLI installation completed successfully!"
+
+
+try {
+    Write-Host "Proceeding with alias: '$Alias'"
+    Write-Host "Slack CLI installation completed successfully!"
+    
+    feedback_message $Alias
+    terms_of_service $Alias
+    next_step_message $Alias
+
+    exit 0
+} catch {
+    Write-Error "Script failed with error: $_"
+    exit 1
+}
+
 #exit 0 
 #feedback_message $Alias
 #terms_of_service $Alias
