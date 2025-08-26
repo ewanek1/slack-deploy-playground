@@ -16,10 +16,10 @@ $SLACK_CLI_VERSION = "3.6.0"
 
 param(
   [Parameter(HelpMessage = "Alias of Slack CLI")]
-  [string]$Alias = "slack",
+  [string]$Alias = "slack"
 
   [Parameter(HelpMessage = "Skip Git installation")]
-  [bool]$SkipGit = $false,
+  [bool]$SkipGit = $false
 
   [Parameter(HelpMessage = "Skip Deno installation")]
   [bool]$SkipDeno = $false
