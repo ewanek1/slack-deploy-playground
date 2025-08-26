@@ -80,7 +80,7 @@ runs:
   
     - name: Run Slack CLI Command
       id: run-slack-cli-command
-      shell: bash
+      shell: pwsh
       env:
         SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
         SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
