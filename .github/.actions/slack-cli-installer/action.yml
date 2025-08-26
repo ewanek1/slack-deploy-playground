@@ -72,7 +72,7 @@ runs:
         Write-Host "Script exists: $(Test-Path $scriptPath)"
 
         Write-Host "Running install script..."
-        & $scriptPath -SkipDeno $true -Verbose
+        & $scriptPath -Verbose
 
         Write-Host "Script completed with exit code: $LASTEXITCODE"
 
