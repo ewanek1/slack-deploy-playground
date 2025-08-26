@@ -68,14 +68,14 @@ runs:
       shell: pwsh
       run: |
         Write-Host "=== INSTALL DEBUG ==="
-        $scriptPath = "$env:RUNNER_TEMP\install.ps1"
+        $scriptPath = Join-Path $env:GITHUB_WORKSPACE "windows-install-script.ps1"
         Write-Host "Script exists: $(Test-Path $scriptPath)"
 
-        # Use named parameters only
         Write-Host "Running install script..."
-        & $scriptPath -Alias "slack" -SkipGit $false -SkipDeno $true -Verbose
+        & $scriptPath -Version "${{ inputs.cli_version }}" -SkipDeno $true -Verbose
 
         Write-Host "Script completed with exit code: $LASTEXITCODE"
+
 
   
     - name: Run Slack CLI Command
@@ -87,30 +87,28 @@ runs:
       run: |
         Write-Host "Running command: ${{ inputs.command }}"
         
+        # Use the full path to slack.exe
         $slackExe = "C:\Users\runneradmin\AppData\Local\slack-cli\bin\slack.exe"
         Write-Host "Using Slack CLI at: $slackExe"
         
-        # If user passed "version", translate it to "--version"
-        $cmd = "${{ inputs.command }}"
-        if ($cmd -eq "version") { $cmd = "--version" }
-        
         if ("${{ inputs.verbose }}" -eq "true") {
-          $output = & $slackExe $cmd --verbose --skip-update 2>&1
+          $output = & $slackExe ${{ inputs.command }} --verbose --skip-update 2>&1
         } else {
-          $output = & $slackExe $cmd --skip-update 2>&1
+          $output = & $slackExe ${{ inputs.command }} --skip-update 2>&1
         }
         $exitCode = $LASTEXITCODE
         
         Write-Host "Exit code: $exitCode"
         
+        # Set outputs for GitHub Actions
         $success = if ($exitCode -eq 0) { "true" } else { "false" }
         Add-Content -Path $env:GITHUB_OUTPUT -Value "success=$success"
         Add-Content -Path $env:GITHUB_OUTPUT -Value "exit_code=$exitCode"
         
+        # Handle multi-line output correctly
         $eof = [Guid]::NewGuid().ToString()
         Add-Content -Path $env:GITHUB_OUTPUT -Value "stdout<<$eof"
         $output | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
         Add-Content -Path $env:GITHUB_OUTPUT -Value "$eof"
-
 
 
