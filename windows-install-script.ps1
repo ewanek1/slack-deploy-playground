@@ -33,7 +33,6 @@ Function delay ([float]$seconds, [string]$message, [string]$newlineOption) {
   Start-Sleep -Seconds $seconds
 }
 
-
 function check_slack_binary_exist {
     param(
         [Parameter(HelpMessage = "Alias of Slack CLI")]
@@ -51,6 +50,7 @@ function check_slack_binary_exist {
 
     Write-Host "`n[Debug] Using CLI alias: $SLACK_CLI_NAME"
 
+    # If CLI is not installed, just return the alias
     if (-not (Get-Command $SLACK_CLI_NAME -ErrorAction SilentlyContinue)) {
         Write-Host "[Debug] CLI command not found. Returning alias only."
         return $SLACK_CLI_NAME
@@ -58,9 +58,14 @@ function check_slack_binary_exist {
 
     Write-Host "[Debug] CLI command found."
 
-    # Run fingerprint safely with timeout
+    # -----------------------------
+    # Fingerprint check with timeout
+    # -----------------------------
+    $get_finger_print = $null
     try {
         $job = Start-Job { & $using:SLACK_CLI_NAME _fingerprint }
+
+        # Wait max 2 seconds
         if (Wait-Job $job -Timeout 2) {
             $get_finger_print = Receive-Job $job
             Write-Host "[Debug] Fingerprint result: $get_finger_print"
@@ -68,24 +73,26 @@ function check_slack_binary_exist {
             Write-Warning "[Debug] Fingerprint check timed out!"
             Stop-Job $job
             Remove-Job $job
-            $get_finger_print = $null
         }
     } catch {
         Write-Warning "[Debug] Error running fingerprint: $_"
-        $get_finger_print = $null
     }
 
+    # -----------------------------
     # Check fingerprint match
+    # -----------------------------
     if ($get_finger_print -ne $FINGERPRINT -and $get_finger_print) {
         Write-Warning "Existing $SLACK_CLI_NAME command is different from this Slack CLI. Skipping overwrite."
     }
 
+    # Show version info if requested
     if ($Version) {
         Write-Host "[Debug] Requested version: $Version"
     }
 
     return $SLACK_CLI_NAME
 }
+
 
 
 
