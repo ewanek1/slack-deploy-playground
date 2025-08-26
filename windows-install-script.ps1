@@ -435,6 +435,6 @@ try {
 }
 
 exit 0 
-feedback_message $Alias
-terms_of_service $Alias
-next_step_message $Alias
+#feedback_message $Alias
+#terms_of_service $Alias
+#next_step_message $Alias
