@@ -257,15 +257,11 @@ Write-Host "`nAdding developer tooling for an enhanced experience..."
 install_git $SkipGit
 Write-Host "Sweet! You're all set to start developing!"
 
-Write-Host "Calling terms_of_service..."
 terms_of_service $Alias
-Write-Host "Done with terms_of_service"
+Write-Host "LASTEXITCODE after terms_of_service: $LASTEXITCODE"
 
-Write-Host "Calling feedback_message..."
 feedback_message $Alias
-Write-Host "Done with feedback_message"
+Write-Host "LASTEXITCODE after feedback_message: $LASTEXITCODE"
 
-Write-Host "Calling next_step..."
 next_step_message $Alias
-Write-Host "Done with next_step"
-exit 0
+Write-Host "LASTEXITCODE after next_step_message: $LASTEXITCODE"
