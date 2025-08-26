@@ -20,7 +20,10 @@ param(
   [string]$Version,
 
   [Parameter(HelpMessage = "Skip Git installation")]
-  [bool]$SkipGit = $false
+  [bool]$SkipGit = $false,
+
+  [Parameter(HelpMessage = "Skip Deno installation")]
+  [bool]$SkipDeno = $false
 )
 
 Function delay ([float]$seconds, [string]$message, [string]$newlineOption) {
@@ -70,7 +73,7 @@ function check_slack_binary_exist {
             $get_finger_print = Receive-Job $job
             Write-Host "[Debug] Fingerprint result: $get_finger_print"
         } else {
-            Write-Warning "[Debug] Fingerprint check timed out!"
+            Write-Host "[Debug] Fingerprint check timed out!"
             Stop-Job $job
             Remove-Job $job
         }
@@ -82,7 +85,7 @@ function check_slack_binary_exist {
     # Check fingerprint match
     # -----------------------------
     if ($get_finger_print -ne $FINGERPRINT -and $get_finger_print) {
-        Write-Warning "Existing $SLACK_CLI_NAME command is different from this Slack CLI. Skipping overwrite."
+        Write-Host "Existing $SLACK_CLI_NAME command is different from this Slack CLI. Skipping overwrite."
     }
 
     # Show version info if requested
@@ -265,7 +268,6 @@ function next_step_message {
 trap {
   Write-Host "`nWe would love to know how things are going. Really. All of it."
   Write-Host "Submit installation issues: https://github.com/slackapi/slack-cli/issues"
-  exit 1
 }
 
 install_slack_cli $Alias $Version
