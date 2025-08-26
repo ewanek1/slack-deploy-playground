@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#$ErrorActionPreference = "Stop"
 
 param(
   [Parameter(HelpMessage = "Alias of Slack CLI")]
   [string]$Alias,
+
+  [Parameter(HelpMessage = "Version of Slack CLI")]
+  [string]$Version,
 
   [Parameter(HelpMessage = "Skip Git installation")]
   [bool]$SkipGit = $false,
@@ -419,7 +421,7 @@ Write-Host "Slack CLI installation completed successfully!"
 
 
 
-
+exit 0 
 #feedback_message $Alias
 #terms_of_service $Alias
 #next_step_message $Alias
