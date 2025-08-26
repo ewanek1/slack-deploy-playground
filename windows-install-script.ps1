@@ -418,19 +418,6 @@ Write-Host "Proceeding with alias: '$Alias'"
 Write-Host "Slack CLI installation completed successfully!"
 
 
-try {
-    Write-Host "Proceeding with alias: '$Alias'"
-    Write-Host "Slack CLI installation completed successfully!"
-    
-    feedback_message $Alias
-    terms_of_service $Alias
-    next_step_message $Alias
-
-    exit 0
-} catch {
-    Write-Error "Script failed with error: $_"
-    exit 1
-}
 
 exit 0 
 #feedback_message $Alias
