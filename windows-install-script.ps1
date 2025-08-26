@@ -18,15 +18,13 @@ param(
   [Parameter(HelpMessage = "Alias of Slack CLI")]
   [string]$Alias,
 
-  [Parameter(HelpMessage = "Version of Slack CLI")]
-  [string]$Version,
-
   [Parameter(HelpMessage = "Skip Git installation")]
   [bool]$SkipGit = $false,
 
   [Parameter(HelpMessage = "Skip Deno installation")]
   [bool]$SkipDeno = $false
 )
+
 
 # Add this right after the param block
 Write-Host "=== SCRIPT PARAMETER DEBUG ==="
