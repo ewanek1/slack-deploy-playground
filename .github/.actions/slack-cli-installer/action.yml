@@ -75,7 +75,7 @@ runs:
         
         # Test the script with a simple command first
         Write-Host "Testing script parameters..."
-        & $scriptPath -Alias "slack" -Version "latest" -SkipDeno $true -Verbose
+        & $scriptPath -Alias "slack" -SkipDeno $true -Verbose
         
         # If that fails, try running it directly with positional parameters
         Write-Host "Trying positional parameters..."
