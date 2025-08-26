@@ -25,6 +25,23 @@ param(
   [bool]$SkipDeno = $false
 )
 
+# Add this right after the param block
+Write-Host "=== SCRIPT PARAMETER DEBUG ==="
+Write-Host "Alias: '$Alias'"
+Write-Host "Version: '$Version'"
+Write-Host "SkipGit: '$SkipGit'"
+Write-Host "SkipDeno: '$SkipDeno'"
+Write-Host "=== END PARAMETER DEBUG ==="
+
+# Also add this to see where it's failing
+Write-Host "About to set environment variable..."
+try {
+    [System.Environment]::SetEnvironmentVariable('SLACK_DISABLE_TELEMETRY', $true)
+    Write-Host "Environment variable set successfully"
+} catch {
+    Write-Host "Warning: Could not set environment variable: $($_.Exception.Message)"
+}
+
 # IMMEDIATELY ADD THIS DEBUG CODE
 Write-Host "=== PARAMETER DEBUG ==="
 Write-Host "Alias parameter received: '$Alias'"
