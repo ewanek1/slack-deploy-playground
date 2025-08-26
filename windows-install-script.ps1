@@ -78,7 +78,7 @@ function check_slack_binary_exist {
             Remove-Job $job
         }
     } catch {
-        Write-Warning "[Debug] Error running fingerprint: $_"
+        Write-Host "[Debug] Error running fingerprint: $_"
     }
 
     # -----------------------------
