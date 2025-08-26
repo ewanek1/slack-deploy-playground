@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-$ErrorActionPreference = "Stop"
+#$ErrorActionPreference = "Stop"
 
 param(
   [Parameter(HelpMessage = "Alias of Slack CLI")]
