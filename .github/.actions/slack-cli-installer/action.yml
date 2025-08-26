@@ -64,20 +64,19 @@ runs:
         echo "script_exists=true" >> $env:GITHUB_OUTPUT
 
     - name: Install Slack CLI (Windows)
-      if: 
-        runner.os == 'Windows' && 
-        (steps.cache-cli.outputs.cache-hit != 'true')
-      shell: pwsh 
+      if: runner.os == 'Windows' && (steps.cache-cli.outputs.cache-hit != 'true')
+      shell: pwsh
       run: |
+        Write-Host "=== INSTALL DEBUG ==="
         $scriptPath = "$env:RUNNER_TEMP\install.ps1"
-        Write-Host "Running Windows install script..."
-        & $scriptPath -Alias "slack" -Version "latest" -SkipDeno $true
+        Write-Host "Script exists: $(Test-Path $scriptPath)"
+
+        # Use named parameters only
+        Write-Host "Running install script..."
+        & $scriptPath -Alias "slack" -SkipGit $false -SkipDeno $true -Verbose
+
         Write-Host "Script completed with exit code: $LASTEXITCODE"
-        
-        # Verify installation
-        Write-Host "Verifying Slack CLI installation..."
-        slack --version
-        Write-Host "Slack CLI is ready!"
+
   
     - name: Run Slack CLI Command
       id: run-slack-cli-command
