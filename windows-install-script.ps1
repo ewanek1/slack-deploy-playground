@@ -255,6 +255,6 @@ install_slack_cli $Alias $Version
 Write-Host "`nAdding developer tooling for an enhanced experience..."
 install_git $SkipGit
 Write-Host "Sweet! You're all set to start developing!"
-terms_of_service $Alias
+#terms_of_service $Alias
 #feedback_message $Alias
 #next_step_message $Alias
