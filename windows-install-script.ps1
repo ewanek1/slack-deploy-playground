@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+SLACK_CLI_VERSION = "3.6.0"
 
 param(
   [Parameter(HelpMessage = "Alias of Slack CLI")]
@@ -109,9 +109,9 @@ function check_slack_binary_exist() {
       }
     }
     $message = "It is the same Slack CLI! Upgrading to the latest version..."
-    if ($Version) {
-      $SLACK_CLI_VERSION = $Version
-      $message = "It is the same Slack CLI! Switching over to v$Version..."
+    if ("latest") {
+      $SLACK_CLI_VERSION = "latest"
+      $message = "It is the same Slack CLI! Switching over to v..."
     }
     if ($Diagnostics) {
       delay 0.3 "$message`n"
@@ -124,9 +124,6 @@ function install_slack_cli {
   param(
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias = "slack",
-    
-    [Parameter(HelpMessage = "Version of Slack CLI")]
-    [string]$Version = "latest"
   )
 
   delay 0.6 "Hello and welcome! Now beginning to install the..."
