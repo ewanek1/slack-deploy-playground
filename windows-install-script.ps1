@@ -416,6 +416,8 @@ if ([string]::IsNullOrEmpty($Alias)) {
 }
 
 Write-Host "Proceeding with alias: '$Alias'"
+Write-Host "Slack CLI installation completed successfully!"
+Write-Host "You can now use 'slack' commands in your workflow."
 #feedback_message $Alias
 #terms_of_service $Alias
 #next_step_message $Alias
