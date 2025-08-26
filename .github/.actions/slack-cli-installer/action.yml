@@ -76,8 +76,6 @@ runs:
 
         Write-Host "Script completed with exit code: $LASTEXITCODE"
 
-
-
   
     - name: Run Slack CLI Command
       id: run-slack-cli-command

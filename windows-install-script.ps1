@@ -12,58 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-$SLACK_CLI_VERSION = "3.6.0"
-
 param(
-    [Parameter(HelpMessage = "Alias of Slack CLI")]
-    [string]$Alias = "slack",
+  [Parameter(HelpMessage = "Alias of Slack CLI")]
+  [string]$Alias,
 
-    [Parameter(HelpMessage = "Skip Git installation")]
-    [bool]$SkipGit = $false,
+  [Parameter(HelpMessage = "Version of Slack CLI")]
+  [string]$Version,
 
-    [Parameter(HelpMessage = "Skip Deno installation")]
-    [bool]$SkipDeno = $false
+  [Parameter(HelpMessage = "Skip Git installation")]
+  [bool]$SkipGit = $false
 )
-
-
-# Add this right after the param block
-Write-Host "=== SCRIPT PARAMETER DEBUG ==="
-Write-Host "Alias: '$Alias'"
-#Write-Host "Version: '$Version'"
-Write-Host "SkipGit: '$SkipGit'"
-Write-Host "SkipDeno: '$SkipDeno'"
-Write-Host "=== END PARAMETER DEBUG ==="
-
-# Also add this to see where it's failing
-Write-Host "About to set environment variable..."
-try {
-    [System.Environment]::SetEnvironmentVariable('SLACK_DISABLE_TELEMETRY', $true)
-    Write-Host "Environment variable set successfully"
-} catch {
-    Write-Host "Warning: Could not set environment variable: $($_.Exception.Message)"
-}
-
-# IMMEDIATELY ADD THIS DEBUG CODE
-Write-Host "=== PARAMETER DEBUG ==="
-Write-Host "Alias parameter received: '$Alias'"
-#Write-Host "Version parameter received: '$Version'"
-Write-Host "SkipGit parameter received: '$SkipGit'"
-Write-Host "SkipDeno parameter received: '$SkipDeno'"
-Write-Host "=== END PARAMETER DEBUG ==="
-
-# Also add this to see where it's failing
-Write-Host "About to set environment variable..."
-[System.Environment]::SetEnvironmentVariable('SLACK_DISABLE_TELEMETRY', $true)
-Write-Host "Environment variable set successfully"
-
-Write-Host "About to call delay function..."
-Function delay ([float]$seconds, [string]$message, [string]$newlineOption) {
-  # ... existing code ...
-}
-Write-Host "Delay function defined successfully"
-
-# As this script is for internal usage only, we should set SLACK_DISABLE_TELEMETRY environment variable
-[System.Environment]::SetEnvironmentVariable('SLACK_DISABLE_TELEMETRY', $true)
 
 Function delay ([float]$seconds, [string]$message, [string]$newlineOption) {
   if ($newlineOption -eq "-n") {
@@ -110,9 +68,9 @@ function check_slack_binary_exist() {
       }
     }
     $message = "It is the same Slack CLI! Upgrading to the latest version..."
-    if ("latest") {
-      $SLACK_CLI_VERSION = "latest"
-      $message = "It is the same Slack CLI! Switching over to v..."
+    if ($Version) {
+      $SLACK_CLI_VERSION = $Version
+      $message = "It is the same Slack CLI! Switching over to v$Version..."
     }
     if ($Diagnostics) {
       delay 0.3 "$message`n"
@@ -123,11 +81,11 @@ function check_slack_binary_exist() {
 
 function install_slack_cli {
   param(
-    [Parameter(HelpMessage = "alias of Slack CLI")]
-    [string]$Alias = "slack",
+    [Parameter(HelpMessage = "Alias of Slack CLI")]
+    [string]$Alias,
 
     [Parameter(HelpMessage = "Version of Slack CLI")]
-    [string]$Version = "latest"
+    [string]$Version
   )
 
   delay 0.6 "Hello and welcome! Now beginning to install the..."
@@ -139,10 +97,17 @@ function install_slack_cli {
   delay 0.1 "   /_______ /|______/  \_\ ____/_| \__\    _____/______/_____/"
   delay 0.2 ""
 
-  $confirmed_alias = check_slack_binary_exist $Alias "latest" $true
+  $confirmed_alias = check_slack_binary_exist $Alias $Version $true
   $error.clear()
   try {
-      $SLACK_CLI_VERSION = "3.6.0"
+    if ($Version) {
+      $SLACK_CLI_VERSION = $Version
+    }
+    else {
+      Write-Host "Finding the latest Slack CLI release version"
+      $cli_info = Invoke-RestMethod -Uri "https://api.slack.com/slackcli/metadata.json"
+      $SLACK_CLI_VERSION = $cli_info.'slack-cli'.releases.version[0]
+    }
   }
   catch {
     Write-Error "Installer cannot find latest Slack CLI release version"
@@ -150,6 +115,7 @@ function install_slack_cli {
   }
 
   $slack_cli_dir = "${Home}\AppData\Local\slack-cli"
+  Write-Host "Downloading Slack CLI v$SLACK_CLI_VERSION..."
   try {
     if (!(Test-Path $slack_cli_dir)) {
       try {
@@ -173,13 +139,6 @@ function install_slack_cli {
   catch {
     Write-Error "Installer cannot create folder for Slack CLI, `nPlease manually create $($slack_cli_dir) folder and re-run the installation script"
     throw
-  }
-
-  if ("latest" -eq "dev") {
-    Write-Host "Downloading the latest development build..."
-  }
-  else {
-    Write-Host "Downloading Slack CLI v$SLACK_CLI_VERSION..."
   }
   try {
     Invoke-WebRequest -Uri "https://downloads.slack-edge.com/slack-cli/slack_cli_$($SLACK_CLI_VERSION)_windows_64-bit.zip" -OutFile "$($slack_cli_dir)\slack_cli.zip"
@@ -245,97 +204,14 @@ function install_git {
   }
 }
 
-function install_deno {
+function terms_of_service {
   param(
-    [Parameter(HelpMessage = "Skip Deno installation")]
-    [bool]$SkipDeno = $false
+    [Parameter(HelpMessage = "Alias of Slack CLI")]
+    [string]$Alias
   )
-  if ($SkipDeno) {
-    Write-Host "`nSkipping the Deno installation!"
-  }
-  else {
-    Write-Host "`nChecking for a compatible Deno installation..."
-    $cli_info = Invoke-RestMethod -Uri "https://api.slack.com/slackcli/metadata.json"
-    $MIN_DENO_VERSION = $cli_info.'deno-runtime'.releases.version
-    try {
-      $deno_version_latest = ""
-      $deno_version_local = ""
-      try {
-        $githubApiUrl = "https://api.github.com/repos/denoland/deno/releases/latest"
-        $response = Invoke-RestMethod -Uri $githubApiUrl -Headers @{Accept = "application/vnd.github.v3+json" }
-        $deno_version_latest = $response.tag_name
-        Write-Host "Searching for the latest released Deno version... Found: $deno_version_latest"
-      }
-      catch {
-        Write-Host "Failed to gather the latest released Deno version!"
-      }
-
-      $deno_version_output = deno --version 2>&1
-      if ($LASTEXITCODE -eq 0) {
-        $deno_version_local = ($deno_version_output -split ' ')[1]
-        Write-Host "Comparing the currently installed Deno version... Found: v$deno_version_local"
-      }
-      else {
-        Write-Error "Deno is not installed! Please install Deno to at least v$MIN_DENO_VERSION and try again."
-        throw
-      }
-
-      if ($deno_version_latest -eq "v$deno_version_local") {
-        Write-Host "You already have the latest Deno version!"
-        return
-      }
-
-      Write-Host "Contrasting the minimum supported Deno version... Found: v$MIN_DENO_VERSION"
-      if ([System.Version]$deno_version_local -lt [System.Version]$MIN_DENO_VERSION) {
-        Write-Host "Upgrading Deno to the latest version..."
-
-        iex ((New-Object System.Net.WebClient).DownloadString('https://deno.land/install.ps1'))
-
-        try {
-          deno --version | Out-Null
-          Write-Host "Nice! Your Deno version has been updated and is ready!"
-        }
-        catch {
-          Write-Error "Deno is not installed, please install deno manually to at least $MIN_DENO_VERSION and re-run this script."
-          throw
-        }
-      }
-      else {
-        Write-Host "Your Deno version is compatible with the Slack CLI!"
-      }
-    }
-    catch [System.Management.Automation.CommandNotFoundException] {
-      Write-Host "Comparing the currently installed Deno version... Found: None!"
-      Write-Host "Installing Deno now..."
-
-      iex ((New-Object System.Net.WebClient).DownloadString('https://deno.land/install.ps1'))
-
-      try {
-        deno | Out-Null
-        Write-Host "Your Deno version is compatible with the Slack CLI!"
-      }
-      catch {
-        Write-Error "Deno is not installed, please install Deno manually to at least $MIN_DENO_VERSION and re-run this script."
-        throw
-      }
-    }
-  }
-}
-
-function install_deno_vscode_extension {
-  param(
-    [Parameter(HelpMessage = "Skip Deno installation")]
-    [bool]$SkipDeno = $false
-  )
-  if ($SkipDeno) {
-    Write-Host "Skipping the Deno Visual Studio Code extension installation!"
-  }
-  else {
-    if ($env:TERM_PROGRAM -eq 'vscode') {
-      Write-Host "Installing the Deno extension to Visual Studio Code..."
-      code --install-extension denoland.vscode-deno
-    }
-  }
+   #$confirmed_alias = check_slack_binary_exist $Alias $Version $false
+   Write-Host "`nUse of the Slack CLI should comply with the Slack API Terms of Service:"
+   Write-Host "   https://slack.com/terms-of-service/api"
 }
 
 function feedback_message {
@@ -343,23 +219,10 @@ function feedback_message {
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias
   )
-  $confirmed_alias = check_slack_binary_exist $Alias "latest" $false
-  if (Get-Command $confirmed_alias) {
-    Write-Host "`nWe would love to know how things are going. Really. All of it."
-    Write-Host "   Survey your development experience with ``$confirmed_alias feedback``"
-  }
-}
-
-function terms_of_service {
-  param(
-    [Parameter(HelpMessage = "Alias of Slack CLI")]
-    [string]$Alias
-  )
-  $confirmed_alias = check_slack_binary_exist $Alias "latest" $false
-  if (Get-Command $confirmed_alias) {
-    Write-Host "`nUse of the Slack CLI should comply with the Slack API Terms of Service:"
-    Write-Host "   https://slack.com/terms-of-service/api"
-  }
+  $confirmed_alias = check_slack_binary_exist $Alias $Version $false
+  # if (Get-Command $confirmed_alias) {
+  Write-Host "`nWe would love to know how things are going. Really. All of it."
+  Write-Host "   Survey your development experience with ``$confirmed_alias feedback``"
 }
 
 function next_step_message {
@@ -367,8 +230,8 @@ function next_step_message {
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias
   )
-  $confirmed_alias = check_slack_binary_exist $Alias "latest" $false
-  if ( (Get-Command "deno" -ErrorAction SilentlyContinue) -and (Get-Command $confirmed_alias -ErrorAction SilentlyContinue) ) {
+  $confirmed_alias = check_slack_binary_exist $Alias $Version $false
+  if (Get-Command $confirmed_alias -ErrorAction SilentlyContinue) {
     try {
       $confirmed_alias | Out-Null
       Write-Host "`nYou're all set! Relaunch your terminal to ensure changes take effect."
@@ -385,28 +248,13 @@ function next_step_message {
 trap {
   Write-Host "`nWe would love to know how things are going. Really. All of it."
   Write-Host "Submit installation issues: https://github.com/slackapi/slack-cli/issues"
+  exit 1
 }
 
-install_slack_cli $Alias "latest"
-[Console]::Error.WriteLine("`n`e[1mWarning: Starting on September 1, 2025, Deno will no longer be installed with this script!`e[0m")
-[Console]::Error.WriteLine("Warning: Apps built with Deno should install Deno separately:")
-[Console]::Error.WriteLine("Warning: https://docs.deno.com/runtime/getting_started/installation/")
-install_deno $SkipDeno
+install_slack_cli $Alias $Version
 Write-Host "`nAdding developer tooling for an enhanced experience..."
 install_git $SkipGit
-install_deno_vscode_extension $SkipDeno
 Write-Host "Sweet! You're all set to start developing!"
-
-
-Write-Host "Checking what commands exist:"
-Write-Host "Alias value: '$Alias'"
-Write-Host "Deno command exists: $(Get-Command 'deno' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)"
-Write-Host "Slack CLI command exists: $(Get-Command $Alias -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)"
-
-
-Write-Host "Proceeding with alias: '$Alias'"
-Write-Host "Slack CLI installation completed successfully!"
-exit 0 
+terms_of_service $Alias
 #feedback_message $Alias
-#terms_of_service $Alias
 #next_step_message $Alias
