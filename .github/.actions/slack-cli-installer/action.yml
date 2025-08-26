@@ -53,7 +53,7 @@ runs:
         (steps.cache-cli.outputs.cache-hit != 'true')
       shell: pwsh 
       run: |
-        .\windows-install-script.ps1 -Alias "slack" -v ${{ inputs.cli_version }} -SkipDeno $true
+        .\windows-install-script.ps1 -Alias "slack" -Version "latest" -SkipDeno $true
   
     - name: Run Slack CLI Command
       id: run-slack-cli-command
