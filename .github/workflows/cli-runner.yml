@@ -27,10 +27,10 @@ jobs:
       success: ${{ steps.run-slack-cli-command.outputs.success }}
       command_executed: ${{ steps.run-slack-cli-command.outputs.command_executed }}
       stdout: ${{ steps.run-slack-cli-command.outputs.stdout }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest]
+    runs-on: windows-latest
+    #strategy:
+      #matrix:
+        #os: [macos-latest, ubuntu-latest]
     timeout-minutes: 10
 
     steps:

@@ -52,9 +52,8 @@ runs:
         runner.os == 'Windows' && 
         (steps.cache-cli.outputs.cache-hit != 'true')
       shell: pwsh 
-      #irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
       run: |
-        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -outfile 'install-windows-dev.ps1' | iex
+        .\windows-install-script.ps1 -Version ${{ inputs.cli_version }} -SkipDeno $true
   
     - name: Run Slack CLI Command
       id: run-slack-cli-command
@@ -70,4 +69,6 @@ runs:
         else
           slack ${{ inputs.command }} --skip-update
         fi
+
+        
 
