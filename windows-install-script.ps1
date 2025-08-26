@@ -141,14 +141,7 @@ function install_slack_cli {
   $confirmed_alias = check_slack_binary_exist $Alias "latest" $true
   $error.clear()
   try {
-    if ($Version) {
-      $SLACK_CLI_VERSION = $Version
-    }
-    else {
-      Write-Host "Finding the latest Slack CLI release version"
-      $cli_info = Invoke-RestMethod -Uri "https://api.slack.com/slackcli/metadata.json"
-      $SLACK_CLI_VERSION = $cli_info.'slack-cli'.releases.version[0]
-    }
+      $SLACK_CLI_VERSION = "3.6.0"
   }
   catch {
     Write-Error "Installer cannot find latest Slack CLI release version"
@@ -181,7 +174,7 @@ function install_slack_cli {
     throw
   }
 
-  if ($Version -eq "dev") {
+  if ("latest" -eq "dev") {
     Write-Host "Downloading the latest development build..."
   }
   else {
@@ -349,7 +342,7 @@ function feedback_message {
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias
   )
-  $confirmed_alias = check_slack_binary_exist $Alias $Version $false
+  $confirmed_alias = check_slack_binary_exist $Alias "latest" $false
   if (Get-Command $confirmed_alias) {
     Write-Host "`nWe would love to know how things are going. Really. All of it."
     Write-Host "   Survey your development experience with ``$confirmed_alias feedback``"
@@ -361,7 +354,7 @@ function terms_of_service {
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias
   )
-  $confirmed_alias = check_slack_binary_exist $Alias $Version $false
+  $confirmed_alias = check_slack_binary_exist $Alias "latest" $false
   if (Get-Command $confirmed_alias) {
     Write-Host "`nUse of the Slack CLI should comply with the Slack API Terms of Service:"
     Write-Host "   https://slack.com/terms-of-service/api"
@@ -373,7 +366,7 @@ function next_step_message {
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias
   )
-  $confirmed_alias = check_slack_binary_exist $Alias $Version $false
+  $confirmed_alias = check_slack_binary_exist $Alias "latest" $false
   if ( (Get-Command "deno" -ErrorAction SilentlyContinue) -and (Get-Command $confirmed_alias -ErrorAction SilentlyContinue) ) {
     try {
       $confirmed_alias | Out-Null
