@@ -51,9 +51,27 @@ runs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        Copy-Item ".\windows-install-script.ps1" "$env:RUNNER_TEMP\install.ps1"
-        Write-Host "Script copied to: $env:RUNNER_TEMP\install.ps1"
-        Write-Host "Script exists: $(Test-Path '$env:RUNNER_TEMP\install.ps1')"
+        Write-Host "=== COPY DEBUG ==="
+        Write-Host "Current directory: $(Get-Location)"
+        Write-Host "GitHub workspace: $env:GITHUB_WORKSPACE"
+        Write-Host "Repo contents:"
+        Get-ChildItem -Recurse -Name | Select-Object -First 20
+        Write-Host "=== END REPO CONTENTS ==="
+        
+        Write-Host "Looking for windows-install-script.ps1..."
+        $scriptPath = Join-Path $env:GITHUB_WORKSPACE "windows-install-script.ps1"
+        Write-Host "Full script path: $scriptPath"
+        Write-Host "Script exists at full path: $(Test-Path $scriptPath)"
+        
+        if (Test-Path $scriptPath) {
+          Copy-Item $scriptPath "$env:RUNNER_TEMP\install.ps1"
+          Write-Host "Copy successful"
+          Write-Host "Script copied to: $env:RUNNER_TEMP\install.ps1"
+          Write-Host "Script exists: $(Test-Path '$env:RUNNER_TEMP\install.ps1')"
+        } else {
+          Write-Host "ERROR: Script not found at $scriptPath"
+          exit 1
+        }
 
     - name: Install Slack CLI (Windows)
       if: 
