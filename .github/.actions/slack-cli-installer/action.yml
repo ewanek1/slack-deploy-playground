@@ -84,7 +84,6 @@ runs:
       env:
         SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
         SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
-        VERBOSE: ${{ inputs.verbose }}
       run: |
         Write-Host "Running command: ${{ inputs.command }}"
         
@@ -99,15 +98,17 @@ runs:
         }
         $exitCode = $LASTEXITCODE
         
-        Write-Host "Command output: $output"
         Write-Host "Exit code: $exitCode"
         
         # Set outputs for GitHub Actions
         $success = if ($exitCode -eq 0) { "true" } else { "false" }
-        
         Add-Content -Path $env:GITHUB_OUTPUT -Value "success=$success"
         Add-Content -Path $env:GITHUB_OUTPUT -Value "exit_code=$exitCode"
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "stdout<<EOF"
-        Add-Content -Path $env:GITHUB_OUTPUT -Value $output
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "EOF"
+        
+        # Handle multi-line output correctly
+        $eof = [Guid]::NewGuid().ToString()
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "stdout<<$eof"
+        $output | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "$eof"
+
 
