@@ -69,19 +69,15 @@ runs:
         (steps.cache-cli.outputs.cache-hit != 'true')
       shell: pwsh 
       run: |
-        Write-Host "=== INSTALL DEBUG ==="
         $scriptPath = "$env:RUNNER_TEMP\install.ps1"
-        Write-Host "Script exists: $(Test-Path $scriptPath)"
-        
-        # Test the script with a simple command first
-        Write-Host "Testing script parameters..."
-        & $scriptPath -Alias "slack" -SkipDeno $true -Verbose
-        
-        # If that fails, try running it directly with positional parameters
-        Write-Host "Trying positional parameters..."
-        & $scriptPath "slack" "latest" $false $true
-        
+        Write-Host "Running Windows install script..."
+        & $scriptPath -Alias "slack" -Version "latest" -SkipDeno $true
         Write-Host "Script completed with exit code: $LASTEXITCODE"
+        
+        # Verify installation
+        Write-Host "Verifying Slack CLI installation..."
+        slack --version
+        Write-Host "Slack CLI is ready!"
   
     - name: Run Slack CLI Command
       id: run-slack-cli-command
