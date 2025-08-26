@@ -34,9 +34,6 @@ param(
   [Parameter(HelpMessage = "Alias of Slack CLI")]
   [string]$Alias,
 
-  [Parameter(HelpMessage = "Version of Slack CLI")]
-  [string]$Version = "dev",
-
   [Parameter(HelpMessage = "Skip Git installation")]
   [bool]$SkipGit = $false,
 
