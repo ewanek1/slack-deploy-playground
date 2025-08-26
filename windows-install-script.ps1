@@ -41,6 +41,13 @@ param(
   [bool]$SkipDeno = $false
 )
 
+Write-Host "=== PARAMETER DEBUG ==="
+Write-Host "Alias parameter received: '$Alias'"
+Write-Host "Version parameter received: '$Version'"
+Write-Host "SkipGit parameter received: '$SkipGit'"
+Write-Host "SkipDeno parameter received: '$SkipDeno'"
+Write-Host "=== END PARAMETER DEBUG ==="
+
 # As this script is for internal usage only, we should set SLACK_DISABLE_TELEMETRY environment variable
 [System.Environment]::SetEnvironmentVariable('SLACK_DISABLE_TELEMETRY', $true)
 
