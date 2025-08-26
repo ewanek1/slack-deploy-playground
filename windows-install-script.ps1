@@ -393,12 +393,6 @@ trap {
   Write-Host "Submit installation issues: https://github.com/slackapi/slack-cli/issues"
 }
 
-if ($script:HasErrors) {
-  exit 1
-} else {
-  exit 0
-}
-
 install_slack_cli $Alias $Version
 [Console]::Error.WriteLine("`n`e[1mWarning: Starting on September 1, 2025, Deno will no longer be installed with this script!`e[0m")
 [Console]::Error.WriteLine("Warning: Apps built with Deno should install Deno separately:")
@@ -418,6 +412,7 @@ Write-Host "Slack CLI command exists: $(Get-Command $Alias -ErrorAction Silently
 
 Write-Host "Proceeding with alias: '$Alias'"
 Write-Host "Slack CLI installation completed successfully!"
-feedback_message $Alias
-terms_of_service $Alias
-next_step_message $Alias
+exit 0 
+#feedback_message $Alias
+#terms_of_service $Alias
+#next_step_message $Alias
