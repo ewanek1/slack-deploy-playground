@@ -26,7 +26,9 @@ runs:
       id: cache-cli
       uses: actions/cache@v4
       with:
-        path: ~/.slack/bin
+        path: |
+          ${{ runner.os == 'Windows' && format('{0}/AppData/Local/slack-cli', env.USERPROFILE) || '~/.slack/bin' }}
+          ${{ runner.os == 'Windows' && format('{0}/.slack-cli', env.USERPROFILE) || '' }}
         key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ inputs.cli_version }}
 
     - name: Add Slack CLI to PATH (Linux/macOS)
@@ -86,7 +88,28 @@ runs:
     - name: Test _fingerprint command
       shell: pwsh
       run: |
+        Write-Host "=== PATH DEBUG ==="
+        Write-Host "Current PATH: $env:PATH"
+        Write-Host "GITHUB_PATH contents:"
+        Get-Content $env:GITHUB_PATH | ForEach-Object { Write-Host "  $_" }
+        
+        Write-Host "`n=== SLACK CLI DEBUG ==="
         $SLACK_CLI_NAME = "slack"
+        Write-Host "Looking for command: $SLACK_CLI_NAME"
+        
+        # Check specific paths
+        $paths = @(
+            "$env:USERPROFILE\AppData\Local\slack-cli\bin",
+            "$env:USERPROFILE\.slack-cli\bin"
+        )
+        
+        foreach ($path in $paths) {
+            $exePath = Join-Path $path "$SLACK_CLI_NAME.exe"
+            Write-Host "Checking: $exePath"
+            Write-Host "  Exists: $(Test-Path $exePath)"
+        }
+        
+        Write-Host "`n=== COMMAND TEST ==="
         try {
             $fp = & $SLACK_CLI_NAME _fingerprint
             Write-Host "Fingerprint output type: $($fp.GetType())"
