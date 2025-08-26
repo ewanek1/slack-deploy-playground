@@ -52,31 +52,16 @@ runs:
       shell: pwsh
       run: |
         Write-Host "=== COPY DEBUG ==="
-        Write-Host "Current directory: $(Get-Location)"
-        Write-Host "GitHub workspace: $env:GITHUB_WORKSPACE"
-        
         $scriptPath = Join-Path $env:GITHUB_WORKSPACE "windows-install-script.ps1"
-        Write-Host "Source script path: $scriptPath"
-        Write-Host "Source script exists: $(Test-Path $scriptPath)"
-        Write-Host "Source script size: $(Get-Item $scriptPath).Length bytes"
-        
         $destPath = "$env:RUNNER_TEMP\install.ps1"
-        Write-Host "Destination path: $destPath"
         
-        # Try different copy methods
-        try {
-          Copy-Item $scriptPath $destPath -Force
-          Write-Host "Copy-Item completed"
-        } catch {
-          Write-Host "Copy-Item failed: $($_.Exception.Message)"
-        }
-        
+        Copy-Item $scriptPath $destPath -Force
+        Write-Host "Copy-Item completed"
         Write-Host "Destination exists after copy: $(Test-Path $destPath)"
-        if (Test-Path $destPath) {
-          Write-Host "Destination size: $(Get-Item $destPath).Length bytes"
-          Write-Host "Destination content preview:"
-          Get-Content $destPath | Select-Object -First 5
-        }
+        
+        # Set this as an output so we can verify it persists
+        echo "script_path=$destPath" >> $env:GITHUB_OUTPUT
+        echo "script_exists=true" >> $env:GITHUB_OUTPUT
 
     - name: Install Slack CLI (Windows)
       if: 
@@ -84,11 +69,26 @@ runs:
         (steps.cache-cli.outputs.cache-hit != 'true')
       shell: pwsh 
       run: |
-        Write-Host "About to run Windows install script..."
-        Write-Host "Script path: $env:RUNNER_TEMP\install.ps1"
-        Write-Host "Script exists: $(Test-Path '$env:RUNNER_TEMP\install.ps1')"
-        & "$env:RUNNER_TEMP\install.ps1" -Alias "slack" -Version "latest" -SkipDeno $true
-        Write-Host "Script completed with exit code: $LASTEXITCODE"
+        Write-Host "=== INSTALL DEBUG ==="
+        Write-Host "Script path from previous step: ${{ steps.copy-windows-script.outputs.script_path }}"
+        Write-Host "Script existed in previous step: ${{ steps.copy-windows-script.outputs.script_exists }}"
+        
+        $scriptPath = "$env:RUNNER_TEMP\install.ps1"
+        Write-Host "Current script path: $scriptPath"
+        Write-Host "Script exists now: $(Test-Path $scriptPath)"
+        
+        # List temp directory contents
+        Write-Host "Temp directory contents:"
+        Get-ChildItem $env:RUNNER_TEMP | Select-Object Name, Length, LastWriteTime
+        
+        if (Test-Path $scriptPath) {
+          Write-Host "About to run Windows install script..."
+          & $scriptPath -Alias "slack" -Version "latest" -SkipDeno $true
+          Write-Host "Script completed with exit code: $LASTEXITCODE"
+        } else {
+          Write-Host "ERROR: Script not found!"
+          exit 1
+        }
   
     - name: Run Slack CLI Command
       id: run-slack-cli-command
