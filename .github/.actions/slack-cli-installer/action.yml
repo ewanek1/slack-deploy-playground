@@ -73,20 +73,11 @@ runs:
 
         # Use named parameters only
         Write-Host "Running install script..."
+        & $scriptPath -Alias "slack" -SkipGit $false -SkipDeno $true -Verbose
 
-        # Convert GitHub Actions input (string) to boolean safely
-        $skipGitBool = if ($env:INPUT_SKIP_GIT -eq "true") { $true } else { $false }
-
-        $skipDenoBool = if ($env:INPUT_SKIP_DENO -eq "true") { $true } else { $false }
-
-        # Call script with proper boolean
-        & $scriptPath -Alias "slack" -Version "${{ inputs.cli_version }}" -SkipGit:$skipGitBool -SkipDeno:$skipDenoBool -Verbose
-
+        Write-Host "Script completed with exit code: $LASTEXITCODE"
 
       
-
-
-
     - name: Run Slack CLI Command
       id: run-slack-cli-command
       shell: pwsh
