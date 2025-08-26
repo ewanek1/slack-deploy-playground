@@ -12,6 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+
+$VerbosePreference = "Continue"
+Write-Verbose "Starting installation..."
+
+# Add logging before each function call
+Write-Verbose "About to call feedback_message with alias: $Alias"
+feedback_message $Alias
+Write-Verbose "feedback_message completed"
+
+Write-Verbose "About to call terms_of_service with alias: $Alias"
+terms_of_service $Alias
+Write-Verbose "terms_of_service completed"
+
+Write-Verbose "About to call next_step_message with alias: $Alias"
+next_step_message $Alias
+Write-Verbose "next_step_message completed"
+
 param(
   [Parameter(HelpMessage = "Alias of Slack CLI")]
   [string]$Alias,
@@ -368,6 +386,24 @@ Write-Host "`nAdding developer tooling for an enhanced experience..."
 install_git $SkipGit
 install_deno_vscode_extension $SkipDeno
 Write-Host "Sweet! You're all set to start developing!"
+
+
+Write-Host "Checking what commands exist:"
+Write-Host "Alias value: '$Alias'"
+Write-Host "Deno command exists: $(Get-Command 'deno' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)"
+Write-Host "Slack CLI command exists: $(Get-Command $Alias -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)"
+
+if ([string]::IsNullOrEmpty($Alias)) {
+    Write-Host "Warning: Alias is null or empty, skipping final steps"
+    exit 0
+}
+
+Write-Host "Proceeding with alias: '$Alias'"
 feedback_message $Alias
-#terms_of_service $Alias
-#next_step_message $Alias
+terms_of_service $Alias
+next_step_message $Alias
+
+
+feedback_message $Alias
+terms_of_service $Alias
+next_step_message $Alias
