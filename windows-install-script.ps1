@@ -61,32 +61,9 @@ function check_slack_binary_exist {
 
     Write-Host "[Debug] CLI command found."
 
-    # -----------------------------
-    # Fingerprint check with timeout
-    # -----------------------------
-    $get_finger_print = $null
-    try {
-        $job = Start-Job { & $using:SLACK_CLI_NAME _fingerprint }
-
-        # Wait max 2 seconds
-        if (Wait-Job $job -Timeout 2) {
-            $get_finger_print = Receive-Job $job
-            Write-Host "[Debug] Fingerprint result: $get_finger_print"
-        } else {
-            Write-Host "[Debug] Fingerprint check timed out!"
-            Stop-Job $job
-            Remove-Job $job
-        }
-    } catch {
-        Write-Host "[Debug] Error running fingerprint: $_"
-    }
-
-    # -----------------------------
-    # Check fingerprint match
-    # -----------------------------
-    if ($get_finger_print -ne $FINGERPRINT -and $get_finger_print) {
-        Write-Host "Existing $SLACK_CLI_NAME command is different from this Slack CLI. Skipping overwrite."
-    }
+    # Skip fingerprint check to avoid hanging
+    Write-Host "[Debug] Skipping fingerprint check to avoid hanging"
+    return $SLACK_CLI_NAME
 
     # Show version info if requested
     if ($Version) {
@@ -95,7 +72,6 @@ function check_slack_binary_exist {
 
     return $SLACK_CLI_NAME
 }
-
 
 
 
