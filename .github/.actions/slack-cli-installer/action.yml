@@ -98,10 +98,12 @@ runs:
         Write-Host "Exit code: $exitCode"
         
         # Set outputs for GitHub Actions
-        echo "success=$([ $exitCode -eq 0 ] && echo 'true' || echo 'false')" >> $env:GITHUB_OUTPUT
-        echo "exit_code=$exitCode" >> $env:GITHUB_OUTPUT
-        echo "stdout<<EOF" >> $env:GITHUB_OUTPUT
-        echo "$output" >> $env:GITHUB_OUTPUT
-        echo "EOF" >> $env:GITHUB_OUTPUT
+        $success = if ($exitCode -eq 0) { "true" } else { "false" }
+        
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "success=$success"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "exit_code=$exitCode"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "stdout<<EOF"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value $output
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "EOF"
         
 
