@@ -22,16 +22,16 @@ jobs:
   deploy: # Change this?
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
     outputs:
       success: ${{ steps.run-slack-cli-command.outputs.success }}
       command_executed: ${{ steps.run-slack-cli-command.outputs.command_executed }}
       stdout: ${{ steps.run-slack-cli-command.outputs.stdout }}
-    #runs-on: ${{ matrix.os }}
-    #strategy:
-    #  matrix:
-    #    os: [windows-latest]
-    #    node: [16, 18, 20, 22, 24]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+        node: [16, 18, 20, 22, 24]
     timeout-minutes: 10
 
     steps:
