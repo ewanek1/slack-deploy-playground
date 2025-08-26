@@ -262,3 +262,4 @@ Write-Host "Done with feedback_message"
 Write-Host "Calling next_step..."
 next_step_message $Alias
 Write-Host "Done with next_step"
+exit 0
