@@ -416,11 +416,6 @@ if ([string]::IsNullOrEmpty($Alias)) {
 }
 
 Write-Host "Proceeding with alias: '$Alias'"
-feedback_message $Alias
-terms_of_service $Alias
-next_step_message $Alias
-
-
-feedback_message $Alias
-terms_of_service $Alias
-next_step_message $Alias
+#feedback_message $Alias
+#terms_of_service $Alias
+#next_step_message $Alias
