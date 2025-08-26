@@ -123,7 +123,7 @@ function check_slack_binary_exist() {
 function install_slack_cli {
   param(
     [Parameter(HelpMessage = "Alias of Slack CLI")]
-    [string]$Alias = "slack",
+    [string]$Alias = "slack"
   )
 
   delay 0.6 "Hello and welcome! Now beginning to install the..."
