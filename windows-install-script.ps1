@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SLACK_CLI_VERSION = "3.6.0"
+$SLACK_CLI_VERSION = "3.6.0"
 
 param(
   [Parameter(HelpMessage = "Alias of Slack CLI")]
-  [string]$Alias = "slack",
+  [string]$Alias = "slack"
 
   [Parameter(HelpMessage = "Skip Git installation")]
   [bool]$SkipGit = $false,
