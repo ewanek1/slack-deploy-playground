@@ -18,9 +18,6 @@ param(
     [Parameter(HelpMessage = "Skip installing Git")]
     [bool]$SkipGit = $false,
 
-    [Parameter(HelpMessage = "Skip installing Deno")]
-    [bool]$SkipDeno = $false,
-
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias,
 
