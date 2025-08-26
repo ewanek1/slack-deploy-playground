@@ -138,7 +138,7 @@ function install_slack_cli {
   delay 0.1 "   /_______ /|______/  \_\ ____/_| \__\    _____/______/_____/"
   delay 0.2 ""
 
-  $confirmed_alias = check_slack_binary_exist $Alias $Version $true
+  $confirmed_alias = check_slack_binary_exist $Alias "latest" $true
   $error.clear()
   try {
     if ($Version) {
