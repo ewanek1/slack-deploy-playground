@@ -22,7 +22,7 @@ param(
   [string]$Version,
 
   [Parameter(HelpMessage = "Skip Git installation")]
-  [bool]$SkipGit = $false  # ← Remove the comma!
+  [bool]$SkipGit = $false 
 
   [Parameter(HelpMessage = "Skip Deno installation")]
   [bool]$SkipDeno = $false
