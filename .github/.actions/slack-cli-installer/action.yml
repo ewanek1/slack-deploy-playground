@@ -70,25 +70,18 @@ runs:
       shell: pwsh 
       run: |
         Write-Host "=== INSTALL DEBUG ==="
-        Write-Host "Script path from previous step: ${{ steps.copy-windows-script.outputs.script_path }}"
-        Write-Host "Script existed in previous step: ${{ steps.copy-windows-script.outputs.script_exists }}"
-        
         $scriptPath = "$env:RUNNER_TEMP\install.ps1"
-        Write-Host "Current script path: $scriptPath"
-        Write-Host "Script exists now: $(Test-Path $scriptPath)"
+        Write-Host "Script exists: $(Test-Path $scriptPath)"
         
-        # List temp directory contents
-        Write-Host "Temp directory contents:"
-        Get-ChildItem $env:RUNNER_TEMP | Select-Object Name, Length, LastWriteTime
+        # Test the script with a simple command first
+        Write-Host "Testing script parameters..."
+        & $scriptPath -Alias "slack" -Version "latest" -SkipDeno $true -Verbose
         
-        if (Test-Path $scriptPath) {
-          Write-Host "About to run Windows install script..."
-          & $scriptPath -Alias "slack" -Version "latest" -SkipDeno $true
-          Write-Host "Script completed with exit code: $LASTEXITCODE"
-        } else {
-          Write-Host "ERROR: Script not found!"
-          exit 1
-        }
+        # If that fails, try running it directly with positional parameters
+        Write-Host "Trying positional parameters..."
+        & $scriptPath "slack" "latest" $false $true
+        
+        Write-Host "Script completed with exit code: $LASTEXITCODE"
   
     - name: Run Slack CLI Command
       id: run-slack-cli-command
