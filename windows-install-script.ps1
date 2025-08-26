@@ -209,9 +209,11 @@ function terms_of_service {
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias
   )
-   #$confirmed_alias = check_slack_binary_exist $Alias $Version $false
-   Write-Host "`nUse of the Slack CLI should comply with the Slack API Terms of Service:"
-   Write-Host "   https://slack.com/terms-of-service/api"
+  $confirmed_alias = check_slack_binary_exist $Alias $Version $false
+  if (Get-Command $confirmed_alias) {
+    Write-Host "`nUse of the Slack CLI should comply with the Slack API Terms of Service:"
+    Write-Host "   https://slack.com/terms-of-service/api"
+  }
 }
 
 function feedback_message {
@@ -220,9 +222,10 @@ function feedback_message {
     [string]$Alias
   )
   $confirmed_alias = check_slack_binary_exist $Alias $Version $false
-  # if (Get-Command $confirmed_alias) {
-  Write-Host "`nWe would love to know how things are going. Really. All of it."
-  Write-Host "   Survey your development experience with ``$confirmed_alias feedback``"
+  if (Get-Command $confirmed_alias) {
+    Write-Host "`nWe would love to know how things are going. Really. All of it."
+    Write-Host "   Survey your development experience with ``$confirmed_alias feedback``"
+  }
 }
 
 function next_step_message {
@@ -256,5 +259,5 @@ Write-Host "`nAdding developer tooling for an enhanced experience..."
 install_git $SkipGit
 Write-Host "Sweet! You're all set to start developing!"
 terms_of_service $Alias
-#feedback_message $Alias
-#next_step_message $Alias
+feedback_message $Alias
+next_step_message $Alias
