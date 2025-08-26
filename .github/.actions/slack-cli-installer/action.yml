@@ -47,13 +47,25 @@ runs:
       run: |
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v ${{ inputs.cli_version }} --skip-update
 
+    - name: Copy Windows Install Script
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        Copy-Item ".\windows-install-script.ps1" "$env:RUNNER_TEMP\install.ps1"
+        Write-Host "Script copied to: $env:RUNNER_TEMP\install.ps1"
+        Write-Host "Script exists: $(Test-Path '$env:RUNNER_TEMP\install.ps1')"
+
     - name: Install Slack CLI (Windows)
       if: 
         runner.os == 'Windows' && 
         (steps.cache-cli.outputs.cache-hit != 'true')
       shell: pwsh 
       run: |
-        .\windows-install-script.ps1 -Alias "slack" -Version "latest" -SkipDeno $true
+        Write-Host "About to run Windows install script..."
+        Write-Host "Script path: $env:RUNNER_TEMP\install.ps1"
+        Write-Host "Script exists: $(Test-Path '$env:RUNNER_TEMP\install.ps1')"
+        & "$env:RUNNER_TEMP\install.ps1" -Alias "slack" -Version "latest" -SkipDeno $true
+        Write-Host "Script completed with exit code: $LASTEXITCODE"
   
     - name: Run Slack CLI Command
       id: run-slack-cli-command
