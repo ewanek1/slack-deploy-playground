@@ -63,6 +63,8 @@ function check_slack_binary_exist() {
     # Skip fingerprint check entirely
     & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
 
+    
+
     $message = "Existing Slack CLI detected. Upgrading to the latest version..."
     if ($Version) {
       $SLACK_CLI_VERSION = $Version

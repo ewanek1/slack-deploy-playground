@@ -63,6 +63,20 @@ runs:
         echo "script_path=$destPath" >> $env:GITHUB_OUTPUT
         echo "script_exists=true" >> $env:GITHUB_OUTPUT
 
+
+    - name: Test _fingerprint command
+      shell: pwsh
+      run: |
+        $SLACK_CLI_NAME = "slack"
+        try {
+            $fp = & $SLACK_CLI_NAME _fingerprint
+            Write-Host "Fingerprint output type: $($fp.GetType())"
+            Write-Host "Fingerprint value: $fp"
+        } catch {
+            Write-Host "Error running _fingerprint: $_"
+        }
+
+
     - name: Install Slack CLI (Windows)
       if: runner.os == 'Windows' && (steps.cache-cli.outputs.cache-hit != 'true')
       shell: pwsh
