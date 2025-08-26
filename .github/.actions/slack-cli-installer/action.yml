@@ -63,20 +63,14 @@ runs:
         echo "script_path=$destPath" >> $env:GITHUB_OUTPUT
         echo "script_exists=true" >> $env:GITHUB_OUTPUT
 
+
+
     - name: Install Slack CLI (Windows)
       if: runner.os == 'Windows' && (steps.cache-cli.outputs.cache-hit != 'true')
       shell: pwsh
       run: |
-        Write-Host "=== INSTALL DEBUG ==="
-        $scriptPath = Join-Path $env:GITHUB_WORKSPACE "windows-install-script.ps1"
-        Write-Host "Script exists: $(Test-Path $scriptPath)"
-
-        Write-Host "Running install script..."
-        & $scriptPath -SkipDeno $true -Verbose
-
-        Write-Host "Script completed with exit code: $LASTEXITCODE"
-
-
+        $scriptPath = "$env:RUNNER_TEMP\windows-install-script.ps1"
+        & $scriptPath -Verbose
 
   
     - name: Run Slack CLI Command
