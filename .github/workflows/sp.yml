@@ -32,5 +32,7 @@ jobs:
             });
             github.rest.issues.addLabels({
               owner,
-              repo
+              repo,
+              issue_number: result.data.number,
+              labels: ['feature', 'automated pr']
             });
