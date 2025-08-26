@@ -16,7 +16,7 @@
 
 param(
   [Parameter(HelpMessage = "Alias of Slack CLI")]
-  [string]$Alias,
+  [string]$Alias = "slack",
 
   [Parameter(HelpMessage = "Skip Git installation")]
   [bool]$SkipGit = $false,
@@ -393,7 +393,7 @@ trap {
   Write-Host "Submit installation issues: https://github.com/slackapi/slack-cli/issues"
 }
 
-install_slack_cli $Alias $Version
+install_slack_cli $Alias "latest"
 [Console]::Error.WriteLine("`n`e[1mWarning: Starting on September 1, 2025, Deno will no longer be installed with this script!`e[0m")
 [Console]::Error.WriteLine("Warning: Apps built with Deno should install Deno separately:")
 [Console]::Error.WriteLine("Warning: https://docs.deno.com/runtime/getting_started/installation/")
