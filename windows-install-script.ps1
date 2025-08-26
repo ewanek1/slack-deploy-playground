@@ -28,7 +28,7 @@ param(
 # Add this right after the param block
 Write-Host "=== SCRIPT PARAMETER DEBUG ==="
 Write-Host "Alias: '$Alias'"
-Write-Host "Version: '$Version'"
+#Write-Host "Version: '$Version'"
 Write-Host "SkipGit: '$SkipGit'"
 Write-Host "SkipDeno: '$SkipDeno'"
 Write-Host "=== END PARAMETER DEBUG ==="
@@ -45,7 +45,7 @@ try {
 # IMMEDIATELY ADD THIS DEBUG CODE
 Write-Host "=== PARAMETER DEBUG ==="
 Write-Host "Alias parameter received: '$Alias'"
-Write-Host "Version parameter received: '$Version'"
+#Write-Host "Version parameter received: '$Version'"
 Write-Host "SkipGit parameter received: '$SkipGit'"
 Write-Host "SkipDeno parameter received: '$SkipDeno'"
 Write-Host "=== END PARAMETER DEBUG ==="
