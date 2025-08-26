@@ -22,10 +22,11 @@ param(
   [string]$Version,
 
   [Parameter(HelpMessage = "Skip Git installation")]
-  [bool]$SkipGit = $false
+  [bool]$SkipGit = $false,
+
+  [Parameter(HelpMessage = "Skip Deno installation")]
+  [bool]$SkipDeno = $false
 )
-
-
 
 # Add this right after the param block
 Write-Host "=== SCRIPT PARAMETER DEBUG ==="
