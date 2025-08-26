@@ -15,15 +15,16 @@
 $ErrorActionPreference = "Stop"
 
 param(
-    [Parameter(HelpMessage = "Skip installing Git")]
-    [bool]$SkipGit = $false,
+  [Parameter(HelpMessage = "Alias of Slack CLI")]
+  [string]$Alias,
 
-    [Parameter(HelpMessage = "Alias of Slack CLI")]
-    [string]$Alias,
+  [Parameter(HelpMessage = "Version of Slack CLI")]
+  [string]$Version,
 
-    [Parameter(HelpMessage = "Version of Slack CLI")]
-    [string]$Version
+  [Parameter(HelpMessage = "Skip Git installation")]
+  [bool]$SkipGit = $false
 )
+
 
 
 # Add this right after the param block
