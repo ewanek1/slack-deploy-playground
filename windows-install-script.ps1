@@ -124,9 +124,9 @@ function install_slack_cli {
   param(
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias = "slack",
-
+    
     [Parameter(HelpMessage = "Version of Slack CLI")]
-    [string]$Version = "dev"
+    [string]$Version = "latest"
   )
 
   delay 0.6 "Hello and welcome! Now beginning to install the..."
