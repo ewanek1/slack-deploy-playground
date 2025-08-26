@@ -17,6 +17,7 @@ jobs:
         with:
           script: |
             const { repo, owner } = context.repo;
+            const branch = context.ref.replace('refs/heads/', '');
             const version = branch.replace('release/', '');  
             const result = await github.rest.pulls.create({
               title: `Release ${version}`,
