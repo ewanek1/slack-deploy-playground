@@ -86,12 +86,22 @@ runs:
         SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
         VERBOSE: ${{ inputs.verbose }}
       run: |
-        echo "Running command: ${{ inputs.command }}"
-        if [ "${{ inputs.verbose }}" == "true" ]; then
-          slack ${{ inputs.command }} --verbose --skip-update
-        else
-          slack ${{ inputs.command }} --skip-update
-        fi
-
+        Write-Host "Running command: ${{ inputs.command }}"
+        if ("${{ inputs.verbose }}" -eq "true") {
+          $output = slack ${{ inputs.command }} --verbose --skip-update 2>&1
+        } else {
+          $output = slack ${{ inputs.command }} --skip-update 2>&1
+        }
+        $exitCode = $LASTEXITCODE
+        
+        Write-Host "Command output: $output"
+        Write-Host "Exit code: $exitCode"
+        
+        # Set outputs for GitHub Actions
+        echo "success=$([ $exitCode -eq 0 ] && echo 'true' || echo 'false')" >> $env:GITHUB_OUTPUT
+        echo "exit_code=$exitCode" >> $env:GITHUB_OUTPUT
+        echo "stdout<<EOF" >> $env:GITHUB_OUTPUT
+        echo "$output" >> $env:GITHUB_OUTPUT
+        echo "EOF" >> $env:GITHUB_OUTPUT
         
 
