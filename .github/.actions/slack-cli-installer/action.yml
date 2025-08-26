@@ -72,7 +72,7 @@ runs:
         Write-Host "Script exists: $(Test-Path $scriptPath)"
 
         Write-Host "Running install script..."
-        & $scriptPath -Verbose
+        & $scriptPath -Alias "slack" -Verbose
 
         Write-Host "Script completed with exit code: $LASTEXITCODE"
 
