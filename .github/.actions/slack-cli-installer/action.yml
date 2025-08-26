@@ -74,14 +74,14 @@ runs:
         # Use named parameters only
         Write-Host "Running install script..."
 
-        if ("${{ inputs.skip_git }}" -eq "true") {
-            $skipGitBool = $true
-        } else {
-            $skipGitBool = $false
-        }
-        & $scriptPath -Alias "slack" -Version "${{ inputs.cli_version }}" -SkipGit:$skipGitBool -Verbose
+        # Convert GitHub Actions input (string) to boolean safely
+        $skipGitBool = if ($env:INPUT_SKIP_GIT -eq "true") { $true } else { $false }
 
-        Write-Host "Script completed with exit code: $LASTEXITCODE"
+        $skipDenoBool = if ($env:INPUT_SKIP_DENO -eq "true") { $true } else { $false }
+
+        # Call script with proper boolean
+        & $scriptPath -Alias "slack" -Version "${{ inputs.cli_version }}" -SkipGit:$skipGitBool -SkipDeno:$skipDenoBool -Verbose
+
 
       
 
