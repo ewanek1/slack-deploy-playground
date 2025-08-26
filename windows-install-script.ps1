@@ -393,6 +393,12 @@ trap {
   Write-Host "Submit installation issues: https://github.com/slackapi/slack-cli/issues"
 }
 
+if ($script:HasErrors) {
+  exit 1
+} else {
+  exit 0
+}
+
 install_slack_cli $Alias $Version
 [Console]::Error.WriteLine("`n`e[1mWarning: Starting on September 1, 2025, Deno will no longer be installed with this script!`e[0m")
 [Console]::Error.WriteLine("Warning: Apps built with Deno should install Deno separately:")
