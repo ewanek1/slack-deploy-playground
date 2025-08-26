@@ -412,7 +412,7 @@ Write-Host "Slack CLI command exists: $(Get-Command $Alias -ErrorAction Silently
 
 Write-Host "Proceeding with alias: '$Alias'"
 Write-Host "Slack CLI installation completed successfully!"
-Write-Host "You can now use 'slack' commands in your workflow."
+exit 0 
 #feedback_message $Alias
 #terms_of_service $Alias
 #next_step_message $Alias
