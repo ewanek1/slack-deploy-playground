@@ -14,22 +14,6 @@
 
 
 
-$VerbosePreference = "Continue"
-Write-Verbose "Starting installation..."
-
-# Add logging before each function call
-Write-Verbose "About to call feedback_message with alias: $Alias"
-feedback_message $Alias
-Write-Verbose "feedback_message completed"
-
-Write-Verbose "About to call terms_of_service with alias: $Alias"
-terms_of_service $Alias
-Write-Verbose "terms_of_service completed"
-
-Write-Verbose "About to call next_step_message with alias: $Alias"
-next_step_message $Alias
-Write-Verbose "next_step_message completed"
-
 param(
   [Parameter(HelpMessage = "Alias of Slack CLI")]
   [string]$Alias,
@@ -41,12 +25,24 @@ param(
   [bool]$SkipDeno = $false
 )
 
+# IMMEDIATELY ADD THIS DEBUG CODE
 Write-Host "=== PARAMETER DEBUG ==="
 Write-Host "Alias parameter received: '$Alias'"
 Write-Host "Version parameter received: '$Version'"
 Write-Host "SkipGit parameter received: '$SkipGit'"
 Write-Host "SkipDeno parameter received: '$SkipDeno'"
 Write-Host "=== END PARAMETER DEBUG ==="
+
+# Also add this to see where it's failing
+Write-Host "About to set environment variable..."
+[System.Environment]::SetEnvironmentVariable('SLACK_DISABLE_TELEMETRY', $true)
+Write-Host "Environment variable set successfully"
+
+Write-Host "About to call delay function..."
+Function delay ([float]$seconds, [string]$message, [string]$newlineOption) {
+  # ... existing code ...
+}
+Write-Host "Delay function defined successfully"
 
 # As this script is for internal usage only, we should set SLACK_DISABLE_TELEMETRY environment variable
 [System.Environment]::SetEnvironmentVariable('SLACK_DISABLE_TELEMETRY', $true)
