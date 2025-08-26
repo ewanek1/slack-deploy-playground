@@ -409,10 +409,6 @@ Write-Host "Alias value: '$Alias'"
 Write-Host "Deno command exists: $(Get-Command 'deno' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)"
 Write-Host "Slack CLI command exists: $(Get-Command $Alias -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)"
 
-if ([string]::IsNullOrEmpty($Alias)) {
-    Write-Host "Warning: Alias is null or empty, skipping final steps"
-    exit 0
-}
 
 Write-Host "Proceeding with alias: '$Alias'"
 Write-Host "Slack CLI installation completed successfully!"
