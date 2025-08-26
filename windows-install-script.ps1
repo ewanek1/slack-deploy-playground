@@ -33,51 +33,76 @@ Function delay ([float]$seconds, [string]$message, [string]$newlineOption) {
   Start-Sleep -Seconds $seconds
 }
 
-function check_slack_binary_exist() {
-  param(
-    [Parameter(HelpMessage = "Alias of Slack CLI")]
-    [string]$Alias,
+function check_slack_binary_exist_debug {
+    param(
+        [Parameter(HelpMessage = "Alias of Slack CLI")]
+        [string]$Alias,
 
-    [Parameter(HelpMessage = "Version of Slack CLI")]
-    [string]$Version,
+        [Parameter(HelpMessage = "Version of Slack CLI")]
+        [string]$Version,
 
-    [Parameter(HelpMessage = "Display diagnostic information")]
-    [boolean]$Diagnostics
-  )
-  $FINGERPRINT = "d41d8cd98f00b204e9800998ecf8427e"
-  $SLACK_CLI_NAME = "slack"
-  if ($alias) {
-    $SLACK_CLI_NAME = $alias
-  }
-  if (Get-Command $SLACK_CLI_NAME -ErrorAction SilentlyContinue) {
-    if ($Diagnostics) {
-      delay 0.3 "Checking if ``$SLACK_CLI_NAME`` already exists on this system..."
-      delay 0.2 "Heads up! A binary called ``$SLACK_CLI_NAME`` was found!"
-      delay 0.3 "Now checking if it's the same Slack CLI..."
+        [Parameter(HelpMessage = "Display diagnostic information")]
+        [boolean]$Diagnostics
+    )
+
+    $FINGERPRINT = "d41d8cd98f00b204e9800998ecf8427e"
+    $SLACK_CLI_NAME = if ($Alias) { $Alias } else { "slack" }
+
+    Write-Host "`n[Debug] Using CLI alias: $SLACK_CLI_NAME"
+
+    if (-not (Get-Command $SLACK_CLI_NAME -ErrorAction SilentlyContinue)) {
+        Write-Host "[Debug] CLI command not found. Returning alias only."
+        return $SLACK_CLI_NAME
     }
-    & $SLACK_CLI_NAME _fingerprint | Tee-Object -Variable get_finger_print | Out-Null
-    if ($get_finger_print -ne $FINGERPRINT) {
-      & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
-      if (!($slack_cli_version -contains "Using ${SLACK_CLI_NAME}.exe v")) {
-        Write-Host "Error: Your existing ``$SLACK_CLI_NAME`` command is different from this Slack CLI!"
-        Write-Host "Halting the install to avoid accidentally overwriting it."
 
-        Write-Host "`nTry using an alias when installing to avoid name conflicts:"
-        Write-Host "`nirm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -Alias your-preferred-alias | iex"
-        throw
-      }
+    Write-Host "[Debug] CLI command found."
+
+    # Run fingerprint with timeout
+    try {
+        Write-Host "[Debug] Running _fingerprint..."
+        $job = Start-Job { & $using:SLACK_CLI_NAME _fingerprint }
+        if (Wait-Job $job -Timeout 2) {
+            $get_finger_print = Receive-Job $job
+            Write-Host "[Debug] Fingerprint result: $get_finger_print"
+        } else {
+            Write-Warning "[Debug] Fingerprint check timed out!"
+            Stop-Job $job
+            Remove-Job $job
+            $get_finger_print = $null
+        }
+    } catch {
+        Write-Warning "[Debug] Error running fingerprint: $_"
+        $get_finger_print = $null
     }
-    $message = "It is the same Slack CLI! Upgrading to the latest version..."
+
+    # Check fingerprint
+    if ($get_finger_print -ne $FINGERPRINT -and $get_finger_print) {
+        Write-Host "[Debug] Fingerprint mismatch. Running --version..."
+        try {
+            $job = Start-Job { & $using:SLACK_CLI_NAME --version }
+            if (Wait-Job $job -Timeout 2) {
+                $slack_cli_version = Receive-Job $job
+                Write-Host "[Debug] Version result: $slack_cli_version"
+            } else {
+                Write-Warning "[Debug] Version check timed out!"
+                Stop-Job $job
+                Remove-Job $job
+                $slack_cli_version = $null
+            }
+        } catch {
+            Write-Warning "[Debug] Error running version: $_"
+            $slack_cli_version = $null
+        }
+    }
+
     if ($Version) {
-      $SLACK_CLI_VERSION = $Version
-      $message = "It is the same Slack CLI! Switching over to v$Version..."
+        Write-Host "[Debug] Requested version: $Version"
     }
-    if ($Diagnostics) {
-      delay 0.3 "$message`n"
-    }
-  }
-  return $SLACK_CLI_NAME
+
+    Write-Host "[Debug] Returning CLI alias: $SLACK_CLI_NAME`n"
+    return $SLACK_CLI_NAME
 }
+
 
 function install_slack_cli {
   param(
@@ -260,9 +285,9 @@ Write-Host "Calling terms_of_service..."
 terms_of_service $Alias
 Write-Host "Done with terms_of_service"
 
-#Write-Host "Calling feedback_message..."
-#feedback_message $Alias
-#Write-Host "Done with feedback_message"
+Write-Host "Calling feedback_message..."
+feedback_message $Alias
+Write-Host "Done with feedback_message"
 
 Write-Host "Calling next_step..."
 next_step_message $Alias
