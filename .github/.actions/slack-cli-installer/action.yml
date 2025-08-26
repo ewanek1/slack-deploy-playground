@@ -77,6 +77,7 @@ runs:
 
         Write-Host "Script completed with exit code: $LASTEXITCODE"
 
+  
     - name: Run Slack CLI Command
       id: run-slack-cli-command
       shell: pwsh
@@ -86,39 +87,8 @@ runs:
       run: |
         Write-Host "Running command: ${{ inputs.command }}"
         
-        # Use the path that matches your install script exactly
-        $slackExe = "$env:USERPROFILE\AppData\Local\slack-cli\bin\slack.exe"
+        $slackExe = "C:\Users\runneradmin\AppData\Local\slack-cli\bin\slack.exe"
         Write-Host "Using Slack CLI at: $slackExe"
-        
-        # Check if the file actually exists
-        if (!(Test-Path $slackExe)) {
-          Write-Host "ERROR: Slack CLI not found at expected path!"
-          Write-Host "Checking alternative locations..."
-          
-          # Try alternative paths that match your script
-          $altPaths = @(
-            "$env:USERPROFILE\.slack-cli\bin\slack.exe",  # ← This matches your script's fallback
-            "$env:LOCALAPPDATA\slack-cli\bin\slack.exe"
-          )
-          
-          foreach ($path in $altPaths) {
-            Write-Host "Checking: $path"
-            if (Test-Path $path) {
-              $slackExe = $path
-              Write-Host "Found Slack CLI at: $slackExe"
-              break
-            }
-          }
-          
-          if (!(Test-Path $slackExe)) {
-            Write-Host "All paths checked. Slack CLI not found anywhere."
-            Write-Host "Expected locations:"
-            Write-Host "  - $env:USERPROFILE\AppData\Local\slack-cli\bin\slack.exe"
-            Write-Host "  - $env:USERPROFILE\.slack-cli\bin\slack.exe"
-            Write-Error "Slack CLI not found in any expected location!"
-            exit 1
-          }
-        }
         
         # If user passed "version", translate it to "--version"
         $cmd = "${{ inputs.command }}"
