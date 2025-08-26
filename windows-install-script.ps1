@@ -260,9 +260,9 @@ Write-Host "Calling terms_of_service..."
 terms_of_service $Alias
 Write-Host "Done with terms_of_service"
 
-Write-Host "Calling feedback_message..."
-feedback_message $Alias
-Write-Host "Done with feedback_message"
+#Write-Host "Calling feedback_message..."
+#feedback_message $Alias
+#Write-Host "Done with feedback_message"
 
 Write-Host "Calling next_step..."
 next_step_message $Alias
