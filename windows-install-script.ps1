@@ -65,14 +65,17 @@ function check_slack_binary_exist() {
     # Detailed investigation of where _fingerprint hangs
     Write-Host "DEBUG: === STARTING _FINGERPRINT INVESTIGATION ==="
     
-    # Test 1: Progressive timeout testing to pinpoint exact hang location
-    Write-Host "DEBUG: Test 1: Progressive timeout testing..."
+    # Test 1: Ultra-Precise Millisecond Timeout Testing
+    Write-Host "DEBUG: Test 1: Ultra-Precise Millisecond Timeout Testing..."
     
-    $timeouts = @(1, 2, 3, 5, 10)
+    # Test with millisecond precision to pinpoint exact hang moment
+    $timeouts = @(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.5, 2.0, 3.0, 5.0)
     $hangLocation = "UNKNOWN"
+    $exactHangTime = "UNKNOWN"
     
     foreach ($timeout in $timeouts) {
-      Write-Host "DEBUG: Testing with $timeout second timeout..."
+      $timeoutMs = [math]::Round($timeout * 1000)
+      Write-Host "DEBUG: Testing with ${timeout}s (${timeoutMs}ms) timeout..."
       
       $job = Start-Job -ScriptBlock { 
         param($cliName) 
@@ -83,16 +86,61 @@ function check_slack_binary_exist() {
       $result = Wait-Job -Job $job -Timeout $timeout
       if ($result) {
         $output = Receive-Job -Job $job
-        Write-Host "DEBUG: _fingerprint completed within $timeout seconds: $output"
+        Write-Host "DEBUG: _fingerprint completed within ${timeout}s (${timeoutMs}ms): $output"
         Remove-Job -Job $job
         $hangLocation = "COMPLETED_IN_${timeout}S"
         break
       } else {
-        Write-Host "DEBUG: _fingerprint hung within $timeout seconds"
+        Write-Host "DEBUG: _fingerprint hung within ${timeout}s (${timeoutMs}ms)"
         Stop-Job -Job $job
         Remove-Job -Job $job
         $hangLocation = "HANGED_IN_${timeout}S"
+        $exactHangTime = "${timeout}s (${timeoutMs}ms)"
       }
+    }
+    
+    # Test 1.5: Process State Monitoring During Hang
+    Write-Host "DEBUG: Test 1.5: Process State Monitoring During Hang..."
+    
+    try {
+      Write-Host "DEBUG: Starting _fingerprint with process monitoring..."
+      $startTime = Get-Date
+      $process = Start-Process -FilePath $SLACK_CLI_NAME -ArgumentList "_fingerprint" -PassThru -NoNewWindow
+      
+      # Monitor process state at millisecond intervals
+      $monitorIntervals = @(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+      $lastResponsiveTime = "UNKNOWN"
+      
+      foreach ($interval in $monitorIntervals) {
+        Start-Sleep -Milliseconds ($interval * 1000)
+        $currentTime = Get-Date
+        $elapsed = ($currentTime - $startTime).TotalSeconds
+        
+        if ($process.HasExited) {
+          Write-Host "DEBUG: Process exited after ${elapsed}s - completed successfully!"
+          $lastResponsiveTime = "${elapsed}s"
+          break
+        }
+        
+        $isResponsive = $process.Responding
+        Write-Host "DEBUG: At ${elapsed}s: Process responding = $isResponsive, HasExited = $($process.HasExited)"
+        
+        if ($isResponsive) {
+          $lastResponsiveTime = "${elapsed}s"
+        } else {
+          Write-Host "DEBUG: Process became unresponsive at ${elapsed}s - HANG DETECTED!"
+          break
+        }
+      }
+      
+      # Clean up process if it's still running
+      if (!$process.HasExited) {
+        Write-Host "DEBUG: Force killing hanging process..."
+        Stop-Process -Id $process.Id -Force
+      }
+      
+    } catch {
+      Write-Host "DEBUG: Process monitoring failed: $_"
     }
     
     # Test 2: Direct execution with detailed logging
