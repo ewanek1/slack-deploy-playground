@@ -26,7 +26,9 @@ runs:
       id: cache-cli
       uses: actions/cache@v4
       with:
-        path: ~/.slack/bin
+        path: |
+          ${{ runner.os == 'Windows' && format('{0}/AppData/Local/slack-cli', env.USERPROFILE) || '~/.slack/bin' }}
+          ${{ runner.os == 'Windows' && format('{0}/.slack-cli', env.USERPROFILE) || '' }}
         key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ inputs.cli_version }}
 
     - name: Add Slack CLI to PATH (Linux/macOS)
@@ -37,7 +39,11 @@ runs:
     - name: Add Slack CLI to PATH (Windows)
       if: runner.os == 'Windows'
       shell: pwsh
-      run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack\bin"
+      run: |
+        # Add both possible installation paths
+        Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\AppData\Local\slack-cli\bin"
+        Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.slack-cli\bin"
+        Write-Host "Added Slack CLI paths to GITHUB_PATH"
 
     - name: Install Slack CLI (Linux/macOS)
       if:
