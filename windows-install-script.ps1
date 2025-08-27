@@ -64,7 +64,7 @@ function check_slack_binary_exist() {
 
     # Use --verbose flag to prevent hanging
     Write-Host "DEBUG: Using _fingerprint --help to prevent hanging..."
-    & $SLACK_CLI_NAME _fingerprint -help | Tee-Object -Variable get_finger_print | Out-Null
+    & $SLACK_CLI_NAME _fingerprint | Tee-Object -Variable get_finger_print | Out-Null
     Write-Host "DEBUG: _fingerprint --help completed: $get_finger_print"
 
     #if ($get_finger_print -ne $FINGERPRINT) {
