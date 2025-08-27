@@ -109,37 +109,48 @@ function check_slack_binary_exist() {
        
                 $get_finger_print = "TIMEOUT"
          
-         # Test 3: Try to see what happens in the first few seconds
-         Write-Host "DEBUG: Testing _fingerprint with real-time output capture..."
-         try {
-           $job3 = Start-Job -ScriptBlock { 
-             param($cliName) 
-             # Try to capture output as it happens
-             $process = Start-Process -FilePath $cliName -ArgumentList "_fingerprint" -RedirectStandardOutput "stdout.txt" -RedirectStandardError "stderr.txt" -NoNewWindow -PassThru
-             Start-Sleep -Seconds 2
-             if ($process.HasExited) {
-               $stdout = Get-Content "stdout.txt" -ErrorAction SilentlyContinue
-               $stderr = Get-Content "stderr.txt" -ErrorAction SilentlyContinue
-               return @{stdout=$stdout; stderr=$stderr; exitCode=$process.ExitCode}
-             } else {
-               Stop-Process -Id $process.Id -Force
-               return "HANGING"
-             }
-           } -ArgumentList $SLACK_CLI_NAME
+         # Test 3: Compare multiple Slack CLI commands to find the pattern
+         Write-Host "DEBUG: Testing various Slack CLI commands to find the hanging pattern..."
+         
+         $commands = @("--version", "auth list", "apps list", "_fingerprint")
+         $results = @{}
+         
+         foreach ($cmd in $commands) {
+           Write-Host "DEBUG: Testing 'slack $cmd' with 5 second timeout..."
            
-           $result3 = Wait-Job -Job $job3 -Timeout 8
-           if ($result3) {
-             $realTimeOutput = Receive-Job -Job $job3
-             Write-Host "DEBUG: Real-time capture result: $realTimeOutput"
-             Remove-Job -Job $job3
-           } else {
-             Write-Host "DEBUG: Real-time capture also timed out"
-             Stop-Job -Job $job3
-             Remove-Job -Job $job3
+           try {
+             $job = Start-Job -ScriptBlock { 
+               param($cliName, $command) 
+               $output = & $cliName $command 2>&1
+               return $output
+             } -ArgumentList $SLACK_CLI_NAME, $cmd
+             
+             $result = Wait-Job -Job $job -Timeout 5
+             if ($result) {
+               $output = Receive-Job -Job $job
+               $results[$cmd] = "SUCCESS: $($output -join ' ')"
+               Write-Host "DEBUG: '$cmd' completed successfully"
+               Remove-Job -Job $job
+             } else {
+               Write-Host "DEBUG: '$cmd' hung within 5 seconds"
+               Stop-Job -Job $job
+               Remove-Job -Job $job
+               $results[$cmd] = "HANGING"
+             }
+           } catch {
+             Write-Host "DEBUG: '$cmd' failed with error: $_"
+             $results[$cmd] = "ERROR: $_"
            }
-         } catch {
-           Write-Host "DEBUG: Real-time capture failed: $_"
          }
+         
+         # Display results summary
+         Write-Host "DEBUG: Command test results summary:"
+         foreach ($cmd in $commands) {
+           Write-Host "DEBUG:   $cmd`: $($results[$cmd])"
+         }
+         
+         # Set fingerprint result based on test
+         $get_finger_print = if ($results["_fingerprint"] -eq "HANGING") { "TIMEOUT" } else { $results["_fingerprint"] }
      }
     
     if ($get_finger_print -ne $FINGERPRINT) {
