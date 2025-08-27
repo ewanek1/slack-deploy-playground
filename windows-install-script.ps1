@@ -48,9 +48,7 @@ function check_slack_binary_exist() {
     [boolean]$Diagnostics
   )
 
-  $FINGERPRINT = "d41d8cd98f00b204e9800998ecf8427e"
   $SLACK_CLI_NAME = "slack"
-
   if ($alias) {
     $SLACK_CLI_NAME = $alias
   }
@@ -59,7 +57,17 @@ function check_slack_binary_exist() {
     # Refresh PATH for current session
     $User = [System.EnvironmentVariableTarget]::User
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path", $User)
-    & $SLACK_CLI_NAME _fingerprint | Tee-Object -Variable get_finger_print | Out-Null
+    & $SLACK_CLI_NAME _fingerprint | Tee-Object -Variable | Out-Null
+
+
+    $message = "Existing Slack CLI detected. Upgrading to the latest version..."
+    if ($Version) {
+      $SLACK_CLI_VERSION = $Version
+      $message = "Existing Slack CLI detected. Switching over to v$Version..."
+    }
+    if ($Diagnostics) {
+      delay 0.3 "$message`n"
+    }
   }
 
   return $SLACK_CLI_NAME
