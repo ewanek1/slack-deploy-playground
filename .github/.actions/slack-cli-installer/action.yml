@@ -80,43 +80,6 @@ runs:
 
         Write-Host "Script completed with exit code: $LASTEXITCODE"
       
-
-    - name: Test _fingerprint command
-      shell: pwsh
-      env:
-        SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
-        SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
-      run: |
-        Write-Host "=== PATH DEBUG ==="
-        Write-Host "Current PATH: $env:PATH"
-        Write-Host "GITHUB_PATH contents:"
-        Get-Content $env:GITHUB_PATH | ForEach-Object { Write-Host "  $_" }
-        
-        Write-Host "`n=== SLACK CLI DEBUG ==="
-        $SLACK_CLI_NAME = "slack"
-        Write-Host "Looking for command: $SLACK_CLI_NAME"
-        
-        # Check specific paths
-        $paths = @(
-            "$env:USERPROFILE\AppData\Local\slack-cli\bin",
-            "$env:USERPROFILE\.slack-cli\bin"
-        )
-        
-        foreach ($path in $paths) {
-            $exePath = Join-Path $path "$SLACK_CLI_NAME.exe"
-            Write-Host "Checking: $exePath"
-            Write-Host "  Exists: $(Test-Path $exePath)"
-        }
-        
-        Write-Host "`n=== COMMAND TEST ==="
-        try {
-            $fp = & $SLACK_CLI_NAME _fingerprint
-            Write-Host "Fingerprint output type: $($fp.GetType())"
-            Write-Host "Fingerprint value: $fp"
-        } catch {
-            Write-Host "Error running _fingerprint: $_"
-        }
-        
     - name: Run Slack CLI Command
       id: run-slack-cli-command
       shell: pwsh
@@ -159,4 +122,3 @@ runs:
         Add-Content -Path $env:GITHUB_OUTPUT -Value "stdout<<$eof"
         $output | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
         Add-Content -Path $env:GITHUB_OUTPUT -Value "$eof"
-
