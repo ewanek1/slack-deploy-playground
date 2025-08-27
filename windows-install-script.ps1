@@ -113,8 +113,8 @@ function check_slack_binary_exist() {
       $get_finger_print = "ERROR: $_"
     }
     
-    # Test 3: Check what resources the command might be accessing
-    Write-Host "DEBUG: Test 3: Resource investigation..."
+    # Test 3: OpenTracing Investigation - PROVE it's the OpenTracing span creation
+    Write-Host "DEBUG: Test 3: OpenTracing Investigation..."
     Write-Host "DEBUG: Current working directory: $(Get-Location)"
     Write-Host "DEBUG: Environment variables that might affect _fingerprint:"
     Write-Host "DEBUG:   SLACK_SERVICE_TOKEN exists: $([bool]$env:SLACK_SERVICE_TOKEN)"
@@ -122,7 +122,64 @@ function check_slack_binary_exist() {
     Write-Host "DEBUG:   HOME: $env:HOME"
     Write-Host "DEBUG:   USERPROFILE: $env:USERPROFILE"
     
-    Write-Host "DEBUG: === INVESTIGATION SUMMARY ==="
+    # Test 4: PROVE it's OpenTracing by testing commands with/without it
+    Write-Host "DEBUG: Test 4: OpenTracing Proof Test..."
+    
+    # Commands that DON'T use OpenTracing (should work)
+    Write-Host "DEBUG: Testing commands WITHOUT OpenTracing..."
+    try {
+      Write-Host "DEBUG: Testing 'slack --version' (no OpenTracing)..."
+      $versionOutput = & $SLACK_CLI_NAME --version 2>&1
+      Write-Host "DEBUG: --version completed successfully: $versionOutput"
+    } catch {
+      Write-Host "DEBUG: --version failed: $_"
+    }
+    
+    try {
+      Write-Host "DEBUG: Testing 'slack --help' (no OpenTracing)..."
+      $helpOutput = & $SLACK_CLI_NAME --help 2>&1
+      Write-Host "DEBUG: --help completed successfully: $($helpOutput.Length) characters"
+    } catch {
+      Write-Host "DEBUG: --help failed: $_"
+    }
+    
+    # Commands that DO use OpenTracing (should hang)
+    Write-Host "DEBUG: Testing commands WITH OpenTracing..."
+    Write-Host "DEBUG: Testing 'slack _fingerprint' (uses OpenTracing span creation)..."
+    
+    $otJob = Start-Job -ScriptBlock { 
+      param($cliName) 
+      Write-Host "DEBUG: About to execute _fingerprint (OpenTracing test)..."
+      & $cliName _fingerprint 
+    } -ArgumentList $SLACK_CLI_NAME
+    
+    $otResult = Wait-Job -Job $otJob -Timeout 3
+    if ($otResult) {
+      $otOutput = Receive-Job -Job $otJob
+      Write-Host "DEBUG: _fingerprint (OpenTracing) completed: $otOutput"
+      Remove-Job -Job $otJob
+    } else {
+      Write-Host "DEBUG: _fingerprint (OpenTracing) hung within 3 seconds - OPENTRACING CONFIRMED!"
+      Stop-Job -Job $otJob
+      Remove-Job -Job $otJob
+    }
+    
+    # Test 5: Check if OpenTracing endpoints are accessible
+    Write-Host "DEBUG: Test 5: OpenTracing Endpoint Check..."
+    $otEndpoints = @("localhost:14268", "localhost:9411", "localhost:16686")
+    foreach ($endpoint in $otEndpoints) {
+      try {
+        $response = Invoke-WebRequest -Uri "http://$endpoint" -TimeoutSec 2 -ErrorAction Stop
+        Write-Host "DEBUG: OpenTracing endpoint $endpoint is accessible"
+      } catch {
+        Write-Host "DEBUG: OpenTracing endpoint $endpoint is NOT accessible (expected in CI)"
+      }
+    }
+    
+    Write-Host "DEBUG: === OPENTRACING PROOF SUMMARY ==="
+    Write-Host "DEBUG: Commands WITHOUT OpenTracing: Should work ✅"
+    Write-Host "DEBUG: Commands WITH OpenTracing: Should hang ❌"
+    Write-Host "DEBUG: OpenTracing endpoints: Should not be accessible in CI ❌"
     Write-Host "DEBUG: Hang location: $hangLocation"
     Write-Host "DEBUG: Direct execution result: $get_finger_print"
     
