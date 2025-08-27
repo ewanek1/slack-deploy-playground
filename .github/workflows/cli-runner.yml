@@ -16,7 +16,7 @@ on:
         default: "latest"
 
 env:
-  SLACK_DISABLE_TELEMETRY: "true"
+  #SLACK_DISABLE_TELEMETRY: "true"
 
 jobs:
   deploy: # Change this?
