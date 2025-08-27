@@ -76,7 +76,7 @@ runs:
 
         # Use named parameters only
         Write-Host "Running install script..."
-        & $scriptPath -SkipGit $false -Verbose
+        & $scriptPath -Alias "slack" -SkipGit $false -Verbose
 
         Write-Host "Script completed with exit code: $LASTEXITCODE"
       
