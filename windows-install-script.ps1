@@ -61,13 +61,9 @@ function check_slack_binary_exist() {
     }
 
     # Skip fingerprint check entirely
-    #& $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
-
-    # Refresh PATH for current session
-    #$User = [System.EnvironmentVariableTarget]::User
-    #$env:Path = [System.Environment]::GetEnvironmentVariable("Path", $User)
     & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
 
+    
 
     $message = "Existing Slack CLI detected. Upgrading to the latest version..."
     if ($Version) {
@@ -215,7 +211,7 @@ function terms_of_service {
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias
   )
-  $confirmed_alias = check_slack_binary_exist $Alias $Version $false
+   #$confirmed_alias = check_slack_binary_exist $Alias $Version $false
    Write-Host "`nUse of the Slack CLI should comply with the Slack API Terms of Service:"
    Write-Host "   https://slack.com/terms-of-service/api"
 }
@@ -225,7 +221,7 @@ function feedback_message {
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias
   )
-  $confirmed_alias = check_slack_binary_exist $Alias $Version $false
+  $confirmed_alias = check_slack_binary_exist $Alias $null $false
   # if (Get-Command $confirmed_alias) {
   Write-Host "`nWe would love to know how things are going. Really. All of it."
   Write-Host "   Survey your development experience with ``$confirmed_alias feedback``"
@@ -236,7 +232,7 @@ function next_step_message {
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias
   )
-  $confirmed_alias = check_slack_binary_exist $Alias $Version $false
+  $confirmed_alias = check_slack_binary_exist $Alias $null $false
   if (Get-Command $confirmed_alias -ErrorAction SilentlyContinue) {
     try {
       $confirmed_alias | Out-Null
