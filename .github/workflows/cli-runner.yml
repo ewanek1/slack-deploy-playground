@@ -14,9 +14,10 @@ on:
         description: 'Slack CLI version'
         required: false
         default: "latest"
-
-#env:
-  #SLACK_DISABLE_TELEMETRY: "true"
+        
+env:
+  SLACK_DISABLE_TELEMETRY: "true"
+  JAEGER_DISABLED: "true"
 
 jobs:
   deploy: # Change this?
