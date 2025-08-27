@@ -62,21 +62,86 @@ function check_slack_binary_exist() {
       delay 0.3 "Now checking if it's the same Slack CLI..."
     }
 
-    # Use --verbose flag to prevent hanging
-    Write-Host "DEBUG: Using _fingerprint --help to prevent hanging..."
-    & $SLACK_CLI_NAME _fingerprint | Tee-Object -Variable get_finger_print | Out-Null
-    Write-Host "DEBUG: _fingerprint --help completed: $get_finger_print"
-
-    #if ($get_finger_print -ne $FINGERPRINT) {
-      #& $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
-      #if (!($slack_cli_version -contains "Using ${SLACK_CLI_NAME}.exe v")) {
-        #Write-Host "Error: Your existing ``$SLACK_CLI_NAME`` command is different from this Slack CLI!"
-        #Write-Host "Halting the install to avoid accidentally overwriting it."
-        #Write-Host "`nTry using an alias when installing to avoid name conflicts:"
-        #Write-Host "`nirm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -Alias your-preferred-alias | iex"
-        #throw
-      #}
-    #}
+    # Detailed investigation of where _fingerprint hangs
+    Write-Host "DEBUG: === STARTING _FINGERPRINT INVESTIGATION ==="
+    
+    # Test 1: Progressive timeout testing to pinpoint exact hang location
+    Write-Host "DEBUG: Test 1: Progressive timeout testing..."
+    
+    $timeouts = @(1, 2, 3, 5, 10)
+    $hangLocation = "UNKNOWN"
+    
+    foreach ($timeout in $timeouts) {
+      Write-Host "DEBUG: Testing with $timeout second timeout..."
+      
+      $job = Start-Job -ScriptBlock { 
+        param($cliName) 
+        Write-Host "DEBUG: Job started, about to execute _fingerprint..."
+        & $cliName _fingerprint 
+      } -ArgumentList $SLACK_CLI_NAME
+      
+      $result = Wait-Job -Job $job -Timeout $timeout
+      if ($result) {
+        $output = Receive-Job -Job $job
+        Write-Host "DEBUG: _fingerprint completed within $timeout seconds: $output"
+        Remove-Job -Job $job
+        $hangLocation = "COMPLETED_IN_${timeout}S"
+        break
+      } else {
+        Write-Host "DEBUG: _fingerprint hung within $timeout seconds"
+        Stop-Job -Job $job
+        Remove-Job -Job $job
+        $hangLocation = "HANGED_IN_${timeout}S"
+      }
+    }
+    
+    # Test 2: Direct execution with detailed logging
+    Write-Host "DEBUG: Test 2: Direct execution with logging..."
+    try {
+      Write-Host "DEBUG: About to execute _fingerprint directly..."
+      $startTime = Get-Date
+      
+      $output = & $SLACK_CLI_NAME _fingerprint 2>&1
+      
+      $endTime = Get-Date
+      $duration = ($endTime - $startTime).TotalSeconds
+      Write-Host "DEBUG: Direct execution completed in $duration seconds: $output"
+      $get_finger_print = $output
+      
+    } catch {
+      Write-Host "DEBUG: Direct execution failed with error: $_"
+      $get_finger_print = "ERROR: $_"
+    }
+    
+    # Test 3: Check what resources the command might be accessing
+    Write-Host "DEBUG: Test 3: Resource investigation..."
+    Write-Host "DEBUG: Current working directory: $(Get-Location)"
+    Write-Host "DEBUG: Environment variables that might affect _fingerprint:"
+    Write-Host "DEBUG:   SLACK_SERVICE_TOKEN exists: $([bool]$env:SLACK_SERVICE_TOKEN)"
+    Write-Host "DEBUG:   SLACK_BOT_TOKEN exists: $([bool]$env:SLACK_BOT_TOKEN)"
+    Write-Host "DEBUG:   HOME: $env:HOME"
+    Write-Host "DEBUG:   USERPROFILE: $env:USERPROFILE"
+    
+    Write-Host "DEBUG: === INVESTIGATION SUMMARY ==="
+    Write-Host "DEBUG: Hang location: $hangLocation"
+    Write-Host "DEBUG: Direct execution result: $get_finger_print"
+    
+    # For now, assume it's the same CLI to continue with installation
+    if ($get_finger_print -eq "ERROR:" -or $get_finger_print -like "*HANGED*") {
+      Write-Host "DEBUG: Fingerprint check failed, assuming same CLI to continue..."
+      $get_finger_print = $FINGERPRINT
+    }
+    
+    if ($get_finger_print -ne $FINGERPRINT) {
+      & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
+      if (!($slack_cli_version -contains "Using ${SLACK_CLI_NAME}.exe v")) {
+        Write-Host "Error: Your existing ``$SLACK_CLI_NAME`` command is different from this Slack CLI!"
+        Write-Host "Halting the install to avoid accidentally overwriting it."
+        Write-Host "`nTry using an alias when installing to avoid name conflicts:"
+        Write-Host "`nirm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -Alias your-preferred-alias | iex"
+        throw
+      }
+    }
 
     $message = "It is the same Slack CLI! Upgrading to the latest version..."
     if ($Version) {
