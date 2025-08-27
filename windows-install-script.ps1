@@ -115,11 +115,11 @@ function check_slack_binary_exist() {
            $job3 = Start-Job -ScriptBlock { 
              param($cliName) 
              # Try to capture output as it happens
-             $process = Start-Process -FilePath $cliName -ArgumentList "_fingerprint" -RedirectStandardOutput -RedirectStandardError -NoNewWindow -PassThru
+             $process = Start-Process -FilePath $cliName -ArgumentList "_fingerprint" -RedirectStandardOutput "stdout.txt" -RedirectStandardError "stderr.txt" -NoNewWindow -PassThru
              Start-Sleep -Seconds 2
              if ($process.HasExited) {
-               $stdout = Get-Content $process.StandardOutput -ErrorAction SilentlyContinue
-               $stderr = Get-Content $process.StandardError -ErrorAction SilentlyContinue
+               $stdout = Get-Content "stdout.txt" -ErrorAction SilentlyContinue
+               $stderr = Get-Content "stderr.txt" -ErrorAction SilentlyContinue
                return @{stdout=$stdout; stderr=$stderr; exitCode=$process.ExitCode}
              } else {
                Stop-Process -Id $process.Id -Force
