@@ -48,271 +48,29 @@ function check_slack_binary_exist() {
     [Parameter(HelpMessage = "Display diagnostic information")]
     [boolean]$Diagnostics
   )
-
   $FINGERPRINT = "d41d8cd98f00b204e9800998ecf8427e"
   $SLACK_CLI_NAME = "slack"
-  if ($Alias) {
-    $SLACK_CLI_NAME = $Alias
+  if ($alias) {
+    $SLACK_CLI_NAME = $alias
   }
-
   if (Get-Command $SLACK_CLI_NAME -ErrorAction SilentlyContinue) {
     if ($Diagnostics) {
       delay 0.3 "Checking if ``$SLACK_CLI_NAME`` already exists on this system..."
       delay 0.2 "Heads up! A binary called ``$SLACK_CLI_NAME`` was found!"
       delay 0.3 "Now checking if it's the same Slack CLI..."
     }
-
-    # Detailed investigation of where _fingerprint hangs
-    Write-Host "DEBUG: === STARTING _FINGERPRINT INVESTIGATION ==="
-    
-    # Test 1: Ultra-Precise Millisecond Timeout Testing
-    Write-Host "DEBUG: Test 1: Ultra-Precise Millisecond Timeout Testing..."
-    
-    # Test with millisecond precision to pinpoint exact hang moment
-    $timeouts = @(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.5, 2.0, 3.0, 5.0)
-    $hangLocation = "UNKNOWN"
-    $exactHangTime = "UNKNOWN"
-    
-    foreach ($timeout in $timeouts) {
-      $timeoutMs = [math]::Round($timeout * 1000)
-      Write-Host "DEBUG: Testing with ${timeout}s (${timeoutMs}ms) timeout..."
-      
-      $job = Start-Job -ScriptBlock { 
-        param($cliName) 
-        Write-Host "DEBUG: Job started, about to execute _fingerprint..."
-        & $cliName _fingerprint 
-      } -ArgumentList $SLACK_CLI_NAME
-      
-      $result = Wait-Job -Job $job -Timeout $timeout
-      if ($result) {
-        $output = Receive-Job -Job $job
-        Write-Host "DEBUG: _fingerprint completed within ${timeout}s (${timeoutMs}ms): $output"
-        Remove-Job -Job $job
-        $hangLocation = "COMPLETED_IN_${timeout}S"
-        break
-      } else {
-        Write-Host "DEBUG: _fingerprint hung within ${timeout}s (${timeoutMs}ms)"
-        Stop-Job -Job $job
-        Remove-Job -Job $job
-        $hangLocation = "HANGED_IN_${timeout}S"
-        $exactHangTime = "${timeout}s (${timeoutMs}ms)"
-      }
-    }
-    
-    # Test 1.5: Process State Monitoring During Hang
-    Write-Host "DEBUG: Test 1.5: Process State Monitoring During Hang..."
-    
-    try {
-      Write-Host "DEBUG: Starting _fingerprint with process monitoring..."
-      $startTime = Get-Date
-      $process = Start-Process -FilePath $SLACK_CLI_NAME -ArgumentList "_fingerprint" -PassThru -NoNewWindow
-      
-      # Monitor process state at millisecond intervals
-      $monitorIntervals = @(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
-      $lastResponsiveTime = "UNKNOWN"
-      
-      foreach ($interval in $monitorIntervals) {
-        Start-Sleep -Milliseconds ($interval * 1000)
-        $currentTime = Get-Date
-        $elapsed = ($currentTime - $startTime).TotalSeconds
-        
-        if ($process.HasExited) {
-          Write-Host "DEBUG: Process exited after ${elapsed}s - completed successfully!"
-          $lastResponsiveTime = "${elapsed}s"
-          break
-        }
-        
-        $isResponsive = $process.Responding
-        Write-Host "DEBUG: At ${elapsed}s: Process responding = $isResponsive, HasExited = $($process.HasExited)"
-        
-        if ($isResponsive) {
-          $lastResponsiveTime = "${elapsed}s"
-        } else {
-          Write-Host "DEBUG: Process became unresponsive at ${elapsed}s - HANG DETECTED!"
-          break
-        }
-      }
-      
-      # Clean up process if it's still running
-      if (!$process.HasExited) {
-        Write-Host "DEBUG: Force killing hanging process..."
-        Stop-Process -Id $process.Id -Force
-      }
-      
-    } catch {
-      Write-Host "DEBUG: Process monitoring failed: $_"
-    }
-    
-    # Test 2: Detailed Investigation of What's Making It Slow
-    Write-Host "DEBUG: Test 2: Detailed Slow Operation Investigation..."
-    
-    # Test 2a: Let it run longer to see if it eventually completes
-    Write-Host "DEBUG: Test 2a: Extended execution test (30 second timeout)..."
-    try {
-      Write-Host "DEBUG: Starting _fingerprint with extended timeout..."
-      $startTime = Get-Date
-      
-      $extendedJob = Start-Job -ScriptBlock { 
-        param($cliName) 
-        Write-Host "DEBUG: Extended job started, executing _fingerprint..."
-        $output = & $cliName _fingerprint 2>&1
-        return $output
-      } -ArgumentList $SLACK_CLI_NAME
-      
-      $extendedResult = Wait-Job -Job $extendedJob -Timeout 30
-      if ($extendedResult) {
-        $extendedOutput = Receive-Job -Job $extendedJob
-        $endTime = Get-Date
-        $duration = ($endTime - $startTime).TotalSeconds
-        Write-Host "DEBUG: Extended execution completed in $duration seconds: $extendedOutput"
-        $get_finger_print = $extendedOutput
-        Remove-Job -Job $extendedJob
-      } else {
-        Write-Host "DEBUG: Extended execution still running after 30 seconds - investigating further..."
-        Stop-Job -Job $extendedJob
-        Remove-Job -Job $extendedJob
-        
-        # Test 2b: Network connection investigation
-        Write-Host "DEBUG: Test 2b: Network connection investigation..."
-        Write-Host "DEBUG: Checking what network connections the process might be trying to make..."
-        
-        # Check common tracing endpoints
-        $tracingEndpoints = @(
-          "http://localhost:14268",  # Jaeger collector
-          "http://localhost:9411",   # Zipkin
-          "http://localhost:16686",  # Jaeger UI
-          "http://127.0.0.1:14268",
-          "http://127.0.0.1:9411"
-        )
-        
-        foreach ($endpoint in $tracingEndpoints) {
-          try {
-            Write-Host "DEBUG: Testing endpoint: $endpoint"
-            $response = Invoke-WebRequest -Uri $endpoint -TimeoutSec 3 -ErrorAction Stop
-            Write-Host "DEBUG: ✅ $endpoint is accessible (unexpected in CI)"
-          } catch {
-            Write-Host "DEBUG: ❌ $endpoint is NOT accessible (expected in CI)"
-          }
-        }
-        
-        # Test 2c: Process resource investigation
-        Write-Host "DEBUG: Test 2c: Process resource investigation..."
-        Write-Host "DEBUG: Checking what resources the process might be waiting for..."
-        
-        # Check if it's trying to access specific files or directories
-        $potentialPaths = @(
-          "$env:USERPROFILE\.slack",
-          "$env:USERPROFILE\AppData\Local\slack-cli",
-          "$env:USERPROFILE\.config",
-          "$env:USERPROFILE\.jaeger",
-          "$env:USERPROFILE\.zipkin"
-        )
-        
-        foreach ($path in $potentialPaths) {
-          if (Test-Path $path) {
-            Write-Host "DEBUG: ✅ Path exists: $path"
-          } else {
-            Write-Host "DEBUG: DEBUG: ❌ Path does not exist: $path"
-          }
-        }
-        
-        $get_finger_print = "SLOW_OPERATION_30S_TIMEOUT"
-      }
-      
-    } catch {
-      Write-Host "DEBUG: Extended execution investigation failed: $_"
-      $get_finger_print = "ERROR: $_"
-    }
-    
-    # Test 3: OpenTracing Investigation - PROVE it's the OpenTracing span creation
-    Write-Host "DEBUG: Test 3: OpenTracing Investigation..."
-    Write-Host "DEBUG: Current working directory: $(Get-Location)"
-    Write-Host "DEBUG: Environment variables that might affect _fingerprint:"
-    Write-Host "DEBUG:   SLACK_SERVICE_TOKEN exists: $([bool]$env:SLACK_SERVICE_TOKEN)"
-    Write-Host "DEBUG:   SLACK_BOT_TOKEN exists: $([bool]$env:SLACK_BOT_TOKEN)"
-    Write-Host "DEBUG:   HOME: $env:HOME"
-    Write-Host "DEBUG:   USERPROFILE: $env:USERPROFILE"
-    
-    # Test 4: PROVE it's OpenTracing by testing commands with/without it
-    Write-Host "DEBUG: Test 4: OpenTracing Proof Test..."
-    
-    # Commands that DON'T use OpenTracing (should work)
-    Write-Host "DEBUG: Testing commands WITHOUT OpenTracing..."
-    try {
-      Write-Host "DEBUG: Testing 'slack --version' (no OpenTracing)..."
-      $versionOutput = & $SLACK_CLI_NAME --version 2>&1
-      Write-Host "DEBUG: --version completed successfully: $versionOutput"
-    } catch {
-      Write-Host "DEBUG: --version failed: $_"
-    }
-    
-    try {
-      Write-Host "DEBUG: Testing 'slack --help' (no OpenTracing)..."
-      $helpOutput = & $SLACK_CLI_NAME --help 2>&1
-      Write-Host "DEBUG: --help completed successfully: $($helpOutput.Length) characters"
-    } catch {
-      Write-Host "DEBUG: --help failed: $_"
-    }
-    
-    # Commands that DO use OpenTracing (should hang)
-    Write-Host "DEBUG: Testing commands WITH OpenTracing..."
-    Write-Host "DEBUG: Testing 'slack _fingerprint' (uses OpenTracing span creation)..."
-    
-    $otJob = Start-Job -ScriptBlock { 
-      param($cliName) 
-      Write-Host "DEBUG: About to execute _fingerprint (OpenTracing test)..."
-      & $cliName _fingerprint 
-    } -ArgumentList $SLACK_CLI_NAME
-    
-    $otResult = Wait-Job -Job $otJob -Timeout 3
-    if ($otResult) {
-      $otOutput = Receive-Job -Job $otJob
-      Write-Host "DEBUG: _fingerprint (OpenTracing) completed: $otOutput"
-      Remove-Job -Job $otJob
-    } else {
-      Write-Host "DEBUG: _fingerprint (OpenTracing) hung within 3 seconds - OPENTRACING CONFIRMED!"
-      Stop-Job -Job $otJob
-      Remove-Job -Job $otJob
-    }
-    
-    # Test 5: Check if OpenTracing endpoints are accessible
-    Write-Host "DEBUG: Test 5: OpenTracing Endpoint Check..."
-    $otEndpoints = @("localhost:14268", "localhost:9411", "localhost:16686")
-    foreach ($endpoint in $otEndpoints) {
-      try {
-        $response = Invoke-WebRequest -Uri "http://$endpoint" -TimeoutSec 2 -ErrorAction Stop
-        Write-Host "DEBUG: OpenTracing endpoint $endpoint is accessible"
-      } catch {
-        Write-Host "DEBUG: OpenTracing endpoint $endpoint is NOT accessible (expected in CI)"
-      }
-    }
-    
-    Write-Host "DEBUG: === OPENTRACING PROOF SUMMARY ==="
-    Write-Host "DEBUG: Commands WITHOUT OpenTracing: Should work ✅"
-    Write-Host "DEBUG: Commands WITH OpenTracing: Should hang ❌"
-    Write-Host "DEBUG: OpenTracing endpoints: Should not be accessible in CI ❌"
-    Write-Host "DEBUG: Hang location: $hangLocation"
-    Write-Host "DEBUG: Exact hang time: $exactHangTime"
-    Write-Host "DEBUG: Last responsive time: $lastResponsiveTime"
-    Write-Host "DEBUG: Direct execution result: $get_finger_print"
-    
-    # For now, assume it's the same CLI to continue with installation
-    if ($get_finger_print -eq "ERROR:" -or $get_finger_print -like "*HANGED*") {
-      Write-Host "DEBUG: Fingerprint check failed, assuming same CLI to continue..."
-      $get_finger_print = $FINGERPRINT
-    }
-    
+    & $SLACK_CLI_NAME _fingerprint | Tee-Object -Variable get_finger_print | Out-Null
     if ($get_finger_print -ne $FINGERPRINT) {
       & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
       if (!($slack_cli_version -contains "Using ${SLACK_CLI_NAME}.exe v")) {
         Write-Host "Error: Your existing ``$SLACK_CLI_NAME`` command is different from this Slack CLI!"
         Write-Host "Halting the install to avoid accidentally overwriting it."
+
         Write-Host "`nTry using an alias when installing to avoid name conflicts:"
         Write-Host "`nirm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -Alias your-preferred-alias | iex"
         throw
       }
     }
-
     $message = "It is the same Slack CLI! Upgrading to the latest version..."
     if ($Version) {
       $SLACK_CLI_VERSION = $Version
@@ -322,7 +80,6 @@ function check_slack_binary_exist() {
       delay 0.3 "$message`n"
     }
   }
-
   return $SLACK_CLI_NAME
 }
 
