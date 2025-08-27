@@ -89,6 +89,7 @@ function check_slack_binary_exist() {
   }
   return $SLACK_CLI_NAME
 }
+}
 
 
 
