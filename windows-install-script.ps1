@@ -64,17 +64,7 @@ function check_slack_binary_exist() {
          $get_finger_print = $FINGERPRINT  # Assume it's the same CLI
          
          # Skip the version check since we're assuming same CLI
-         if ($false) {
-      & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
-      if (!($slack_cli_version -contains "Using ${SLACK_CLI_NAME}.exe v")) {
-        Write-Host "Error: Your existing ``$SLACK_CLI_NAME`` command is different from this Slack CLI!"
-        Write-Host "Halting the install to avoid accidentally overwriting it."
-
-        Write-Host "`nTry using an alias when installing to avoid name conflicts:"
-        Write-Host "`nirm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -Alias your-preferred-alias | iex"
-        throw
-      }
-    }
+      & $SLACK_CLI_NAME --fingerprint | Tee-Object -Variable _fingerprint | Out-Null
 
     $message = "It is the same Slack CLI! Upgrading to the latest version..."
     if ($Version) {
