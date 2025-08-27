@@ -83,6 +83,9 @@ runs:
 
     - name: Test _fingerprint command
       shell: pwsh
+      env:
+        SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
+        SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
       run: |
         Write-Host "=== PATH DEBUG ==="
         Write-Host "Current PATH: $env:PATH"
