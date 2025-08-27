@@ -211,7 +211,7 @@ function terms_of_service {
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias
   )
-   #$confirmed_alias = check_slack_binary_exist $Alias $Version $false
+   $confirmed_alias = check_slack_binary_exist $Alias $Version $false
    Write-Host "`nUse of the Slack CLI should comply with the Slack API Terms of Service:"
    Write-Host "   https://slack.com/terms-of-service/api"
 }
