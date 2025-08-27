@@ -107,7 +107,39 @@ function check_slack_binary_exist() {
          Write-Host "DEBUG: stderr capture failed: $_"
        }
        
-       $get_finger_print = "TIMEOUT"
+                $get_finger_print = "TIMEOUT"
+         
+         # Test 3: Try to see what happens in the first few seconds
+         Write-Host "DEBUG: Testing _fingerprint with real-time output capture..."
+         try {
+           $job3 = Start-Job -ScriptBlock { 
+             param($cliName) 
+             # Try to capture output as it happens
+             $process = Start-Process -FilePath $cliName -ArgumentList "_fingerprint" -RedirectStandardOutput -RedirectStandardError -NoNewWindow -PassThru
+             Start-Sleep -Seconds 2
+             if ($process.HasExited) {
+               $stdout = Get-Content $process.StandardOutput -ErrorAction SilentlyContinue
+               $stderr = Get-Content $process.StandardError -ErrorAction SilentlyContinue
+               return @{stdout=$stdout; stderr=$stderr; exitCode=$process.ExitCode}
+             } else {
+               Stop-Process -Id $process.Id -Force
+               return "HANGING"
+             }
+           } -ArgumentList $SLACK_CLI_NAME
+           
+           $result3 = Wait-Job -Job $job3 -Timeout 8
+           if ($result3) {
+             $realTimeOutput = Receive-Job -Job $job3
+             Write-Host "DEBUG: Real-time capture result: $realTimeOutput"
+             Remove-Job -Job $job3
+           } else {
+             Write-Host "DEBUG: Real-time capture also timed out"
+             Stop-Job -Job $job3
+             Remove-Job -Job $job3
+           }
+         } catch {
+           Write-Host "DEBUG: Real-time capture failed: $_"
+         }
      }
     
     if ($get_finger_print -ne $FINGERPRINT) {
