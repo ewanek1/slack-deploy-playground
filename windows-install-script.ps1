@@ -67,7 +67,7 @@ function check_slack_binary_exist() {
         # Refresh PATH for current session
         $User = [System.EnvironmentVariableTarget]::User
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path", $User)
-        & $SLACK_CLI_NAME _fingerprint | Tee-Object -Variable get_finger_print | Out-Null
+        & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
     
     }
 
