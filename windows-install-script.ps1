@@ -36,6 +36,7 @@ Function delay ([float]$seconds, [string]$message, [string]$newlineOption) {
   Start-Sleep -Seconds $seconds
 }
 
+
 function check_slack_binary_exist() {
   param(
     [Parameter(HelpMessage = "Alias of Slack CLI")]
@@ -47,42 +48,48 @@ function check_slack_binary_exist() {
     [Parameter(HelpMessage = "Display diagnostic information")]
     [boolean]$Diagnostics
   )
-
+  $FINGERPRINT = "d41d8cd98f00b204e9800998ecf8427e"
   $SLACK_CLI_NAME = "slack"
   if ($alias) {
     $SLACK_CLI_NAME = $alias
   }
-
   if (Get-Command $SLACK_CLI_NAME -ErrorAction SilentlyContinue) {
     if ($Diagnostics) {
       delay 0.3 "Checking if ``$SLACK_CLI_NAME`` already exists on this system..."
       delay 0.2 "Heads up! A binary called ``$SLACK_CLI_NAME`` was found!"
       delay 0.3 "Now checking if it's the same Slack CLI..."
     }
-    
-    # Refresh PATH for current session to ensure we can execute the command
-    $User = [System.EnvironmentVariableTarget]::User
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", $User)
-    
-    # Also add the specific Slack CLI directory to current session PATH
-    $slackCliBinDir = "$env:USERPROFILE\AppData\Local\slack-cli\bin"
-    if (Test-Path $slackCliBinDir) {
-      $env:Path = "$slackCliBinDir;$env:Path"
+         # Try to get fingerprint with error handling to see what fails
+     try {
+       Write-Host "DEBUG: Attempting to run _fingerprint command..."
+       & $SLACK_CLI_NAME _fingerprint | Tee-Object -Variable get_finger_print | Out-Null
+       Write-Host "DEBUG: _fingerprint completed successfully: $get_finger_print"
+     } catch {
+       Write-Host "DEBUG: _fingerprint failed with error: $_"
+       $get_finger_print = "ERROR: $_"
+     }
+     
+     if ($get_finger_print -ne $FINGERPRINT) {
+      & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
+      if (!($slack_cli_version -contains "Using ${SLACK_CLI_NAME}.exe v")) {
+        Write-Host "Error: Your existing ``$SLACK_CLI_NAME`` command is different from this Slack CLI!"
+        Write-Host "Halting the install to avoid accidentally overwriting it."
+
+        Write-Host "`nTry using an alias when installing to avoid name conflicts:"
+        Write-Host "`nirm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -Alias your-preferred-alias | iex"
+        throw
+      }
     }
-    
-    # Now try to run the fingerprint command
-    try {
-      & $SLACK_CLI_NAME _fingerprint | Tee-Object -Variable get_finger_print | Out-Null
-      if ($Diagnostics) {
-        delay 0.3 "Fingerprint check completed successfully"
-      }
-    } catch {
-      if ($Diagnostics) {
-        delay 0.3 "Fingerprint check failed, but continuing with installation..."
-      }
+
+    $message = "It is the same Slack CLI! Upgrading to the latest version..."
+    if ($Version) {
+      $SLACK_CLI_VERSION = $Version
+      $message = "It is the same Slack CLI! Switching over to v$Version..."
+    }
+    if ($Diagnostics) {
+      delay 0.3 "$message`n"
     }
   }
-
   return $SLACK_CLI_NAME
 }
 
