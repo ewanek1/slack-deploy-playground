@@ -15,7 +15,7 @@ on:
         required: false
         default: "latest"
 
-env:
+#env:
   #SLACK_DISABLE_TELEMETRY: "true"
 
 jobs:
