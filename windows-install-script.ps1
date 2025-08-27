@@ -53,32 +53,35 @@ function check_slack_binary_exist() {
     $SLACK_CLI_NAME = $alias
   }
 
-  #if (Get-Command $SLACK_CLI_NAME -ErrorAction SilentlyContinue) {
-    #if ($Diagnostics) {
-     # delay 0.3 "Checking if ``$SLACK_CLI_NAME`` already exists on this system..."
-      #delay 0.2 "Heads up! A binary called ``$SLACK_CLI_NAME`` was found!"
-      #delay 0.3 "Skipping fingerprint check..."
-    #}
-
-    # Skip fingerprint check entirely
-    #& $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
-
-    if (Get-Command $SLACK_CLI_NAME -ErrorAction SilentlyContinue) {
-        # Refresh PATH for current session
-        $User = [System.EnvironmentVariableTarget]::User
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", $User)
-        & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
-    
-    }
-
-    $message = "Existing Slack CLI detected. Upgrading to the latest version..."
-    if ($Version) {
-      $SLACK_CLI_VERSION = $Version
-      $message = "Existing Slack CLI detected. Switching over to v$Version..."
-    }
+  if (Get-Command $SLACK_CLI_NAME -ErrorAction SilentlyContinue) {
     if ($Diagnostics) {
-      delay 0.3 "$message`n"
+      delay 0.3 "Checking if ``$SLACK_CLI_NAME`` already exists on this system..."
+      delay 0.2 "Heads up! A binary called ``$SLACK_CLI_NAME`` was found!"
+      delay 0.3 "Now checking if it's the same Slack CLI..."
     }
+    
+    # Refresh PATH for current session to ensure we can execute the command
+    $User = [System.EnvironmentVariableTarget]::User
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", $User)
+    
+    # Also add the specific Slack CLI directory to current session PATH
+    $slackCliBinDir = "$env:USERPROFILE\AppData\Local\slack-cli\bin"
+    if (Test-Path $slackCliBinDir) {
+      $env:Path = "$slackCliBinDir;$env:Path"
+    }
+    
+    # Now try to run the fingerprint command
+    try {
+      & $SLACK_CLI_NAME _fingerprint | Tee-Object -Variable get_finger_print | Out-Null
+      if ($Diagnostics) {
+        delay 0.3 "Fingerprint check completed successfully"
+      }
+    } catch {
+      if ($Diagnostics) {
+        delay 0.3 "Fingerprint check failed, but continuing with installation..."
+      }
+    }
+  }
 
   return $SLACK_CLI_NAME
 }
