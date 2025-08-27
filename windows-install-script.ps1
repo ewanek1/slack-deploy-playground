@@ -68,28 +68,46 @@ function check_slack_binary_exist() {
       Write-Host "DEBUG: --help --verbose failed: $_"
     }
     
-         # Now try the original _fingerprint command with timeout
-     Write-Host "DEBUG: Testing _fingerprint command with 10 second timeout..."
-     try {
-       $job = Start-Job -ScriptBlock { 
-         param($cliName) 
-         & $cliName _fingerprint 
-       } -ArgumentList $SLACK_CLI_NAME
+         # Now try the original _fingerprint command with detailed diagnostics
+     Write-Host "DEBUG: Testing _fingerprint command with detailed diagnostics..."
+     
+     # Test 1: Try with different timeout values to see when it hangs
+     Write-Host "DEBUG: Testing _fingerprint with 5 second timeout..."
+     $job1 = Start-Job -ScriptBlock { param($cliName) & $cliName _fingerprint } -ArgumentList $SLACK_CLI_NAME
+     $result1 = Wait-Job -Job $job1 -Timeout 5
+     if ($result1) {
+       $get_finger_print = Receive-Job -Job $job1
+       Write-Host "DEBUG: _fingerprint completed in under 5 seconds: $get_finger_print"
+       Remove-Job -Job $job1
+     } else {
+       Write-Host "DEBUG: _fingerprint hung within 5 seconds"
+       Stop-Job -Job $job1
+       Remove-Job -Job $job1
        
-       $result = Wait-Job -Job $job -Timeout 10
-       if ($result) {
-         $get_finger_print = Receive-Job -Job $job
-         Write-Host "DEBUG: _fingerprint completed successfully: $get_finger_print"
-         Remove-Job -Job $job
-       } else {
-         Write-Host "DEBUG: _fingerprint timed out after 10 seconds"
-         Stop-Job -Job $job
-         Remove-Job -Job $job
-         $get_finger_print = "TIMEOUT"
+       # Test 2: Try with stderr capture to see if there are error messages
+       Write-Host "DEBUG: Testing _fingerprint with stderr capture..."
+       try {
+         $job2 = Start-Job -ScriptBlock { 
+           param($cliName) 
+           $output = & $cliName _fingerprint 2>&1
+           return $output
+         } -ArgumentList $SLACK_CLI_NAME
+         
+         $result2 = Wait-Job -Job $job2 -Timeout 3
+         if ($result2) {
+           $stderrOutput = Receive-Job -Job $job2
+           Write-Host "DEBUG: _fingerprint stderr output: $stderrOutput"
+           Remove-Job -Job $job2
+         } else {
+           Write-Host "DEBUG: _fingerprint hung even with stderr capture"
+           Stop-Job -Job $job2
+           Remove-Job -Job $job2
+         }
+       } catch {
+         Write-Host "DEBUG: stderr capture failed: $_"
        }
-     } catch {
-       Write-Host "DEBUG: _fingerprint error: $_"
-       $get_finger_print = "ERROR: $_"
+       
+       $get_finger_print = "TIMEOUT"
      }
     
     if ($get_finger_print -ne $FINGERPRINT) {
