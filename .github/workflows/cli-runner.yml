@@ -17,7 +17,6 @@ on:
         
 env:
   SLACK_DISABLE_TELEMETRY: "true"
-  JAEGER_DISABLED: "true"
 
 jobs:
   deploy: # Change this?
@@ -36,6 +35,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      #- name: ensure tokens are set
+      #if: ${{ secrets.SLACK_SERVICE_TOKEN }} == null
+          #echo "You haven't set a slack service token. Action may fail"
 
       - name: Install Slack CLI and Run Command
         uses: ./.github/.actions/slack-cli-installer

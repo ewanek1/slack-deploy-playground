@@ -17,14 +17,14 @@ param(
   [string]$Alias,
 
   [Parameter(HelpMessage = "Version of Slack CLI")]
-  [string]$Version,
+  [string]$Version = "dev",
 
   [Parameter(HelpMessage = "Skip Git installation")]
-  [bool]$SkipGit = $false,
-
-  [Parameter(HelpMessage = "Skip Deno installation")]
-  [bool]$SkipDeno = $false
+  [bool]$SkipGit = $false
 )
+
+# As this script is for internal usage only, we should set SLACK_DISABLE_TELEMETRY environment variable
+[System.Environment]::SetEnvironmentVariable('SLACK_DISABLE_TELEMETRY', $true)
 
 Function delay ([float]$seconds, [string]$message, [string]$newlineOption) {
   if ($newlineOption -eq "-n") {
@@ -35,7 +35,6 @@ Function delay ([float]$seconds, [string]$message, [string]$newlineOption) {
   }
   Start-Sleep -Seconds $seconds
 }
-
 
 function check_slack_binary_exist() {
   param(
@@ -83,10 +82,6 @@ function check_slack_binary_exist() {
   return $SLACK_CLI_NAME
 }
 
-
-
-
-
 function install_slack_cli {
   param(
     [Parameter(HelpMessage = "Alias of Slack CLI")]
@@ -123,7 +118,6 @@ function install_slack_cli {
   }
 
   $slack_cli_dir = "${Home}\AppData\Local\slack-cli"
-  Write-Host "Downloading Slack CLI v$SLACK_CLI_VERSION..."
   try {
     if (!(Test-Path $slack_cli_dir)) {
       try {
@@ -147,6 +141,13 @@ function install_slack_cli {
   catch {
     Write-Error "Installer cannot create folder for Slack CLI, `nPlease manually create $($slack_cli_dir) folder and re-run the installation script"
     throw
+  }
+
+  if ($Version -eq "dev") {
+    Write-Host "Downloading the latest development build..."
+  }
+  else {
+    Write-Host "Downloading Slack CLI v$SLACK_CLI_VERSION..."
   }
   try {
     Invoke-WebRequest -Uri "https://downloads.slack-edge.com/slack-cli/slack_cli_$($SLACK_CLI_VERSION)_windows_64-bit.zip" -OutFile "$($slack_cli_dir)\slack_cli.zip"
@@ -217,9 +218,11 @@ function terms_of_service {
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias
   )
-  $confirmed_alias = check_slack_binary_exist $Alias $Version $false
-   Write-Host "`nUse of the Slack CLI should comply with the Slack API Terms of Service:"
-   Write-Host "   https://slack.com/terms-of-service/api"
+  # $confirmed_alias = check_slack_binary_exist $Alias $Version $false
+  # if (Get-Command $confirmed_alias) {
+  Write-Host "`nUse of the Slack CLI should comply with the Slack API Terms of Service:"
+  Write-Host "   https://slack.com/terms-of-service/api"
+  # }
 }
 
 function feedback_message {
@@ -228,9 +231,10 @@ function feedback_message {
     [string]$Alias
   )
   $confirmed_alias = check_slack_binary_exist $Alias $Version $false
-  # if (Get-Command $confirmed_alias) {
-  Write-Host "`nWe would love to know how things are going. Really. All of it."
-  Write-Host "   Survey your development experience with ``$confirmed_alias feedback``"
+  if (Get-Command $confirmed_alias) {
+    Write-Host "`nWe would love to know how things are going. Really. All of it."
+    Write-Host "   Survey your development experience with ``$confirmed_alias feedback``"
+  }
 }
 
 function next_step_message {
@@ -256,18 +260,13 @@ function next_step_message {
 trap {
   Write-Host "`nWe would love to know how things are going. Really. All of it."
   Write-Host "Submit installation issues: https://github.com/slackapi/slack-cli/issues"
+  exit 1
 }
 
 install_slack_cli $Alias $Version
 Write-Host "`nAdding developer tooling for an enhanced experience..."
 install_git $SkipGit
 Write-Host "Sweet! You're all set to start developing!"
-
 terms_of_service $Alias
-Write-Host "LASTEXITCODE after terms_of_service: $LASTEXITCODE"
-
-feedback_message $Alias
-Write-Host "LASTEXITCODE after feedback_message: $LASTEXITCODE"
-
-next_step_message $Alias
-Write-Host "LASTEXITCODE after next_step_message: $LASTEXITCODE"
+# feedback_message $Alias
+# next_step_message $Alias
