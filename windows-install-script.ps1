@@ -59,7 +59,20 @@ function check_slack_binary_exist() {
       delay 0.2 "Heads up! A binary called ``$SLACK_CLI_NAME`` was found!"
       delay 0.3 "Now checking if it's the same Slack CLI..."
     }
+    # Test verbose mode to see startup options and OpenTracing behavior
+    Write-Host "DEBUG: Testing 'slack --help --verbose' to see startup options..."
+    try {
+      $verboseOutput = & $SLACK_CLI_NAME --help --verbose 2>&1
+      Write-Host "DEBUG: --help --verbose output: $verboseOutput"
+    } catch {
+      Write-Host "DEBUG: --help --verbose failed: $_"
+    }
+    
+    # Now try the original _fingerprint command
+    Write-Host "DEBUG: Testing _fingerprint command..."
     & $SLACK_CLI_NAME _fingerprint | Tee-Object -Variable get_finger_print | Out-Null
+    Write-Host "DEBUG: _fingerprint completed: $get_finger_print"
+    
     if ($get_finger_print -ne $FINGERPRINT) {
       & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
       if (!($slack_cli_version -contains "Using ${SLACK_CLI_NAME}.exe v")) {
