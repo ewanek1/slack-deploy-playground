@@ -68,10 +68,29 @@ function check_slack_binary_exist() {
       Write-Host "DEBUG: --help --verbose failed: $_"
     }
     
-    # Now try the original _fingerprint command
-    Write-Host "DEBUG: Testing _fingerprint command..."
-    & $SLACK_CLI_NAME _fingerprint | Tee-Object -Variable get_finger_print | Out-Null
-    Write-Host "DEBUG: _fingerprint completed: $get_finger_print"
+         # Now try the original _fingerprint command with timeout
+     Write-Host "DEBUG: Testing _fingerprint command with 10 second timeout..."
+     try {
+       $job = Start-Job -ScriptBlock { 
+         param($cliName) 
+         & $cliName _fingerprint 
+       } -ArgumentList $SLACK_CLI_NAME
+       
+       $result = Wait-Job -Job $job -Timeout 10
+       if ($result) {
+         $get_finger_print = Receive-Job -Job $job
+         Write-Host "DEBUG: _fingerprint completed successfully: $get_finger_print"
+         Remove-Job -Job $job
+       } else {
+         Write-Host "DEBUG: _fingerprint timed out after 10 seconds"
+         Stop-Job -Job $job
+         Remove-Job -Job $job
+         $get_finger_print = "TIMEOUT"
+       }
+     } catch {
+       Write-Host "DEBUG: _fingerprint error: $_"
+       $get_finger_print = "ERROR: $_"
+     }
     
     if ($get_finger_print -ne $FINGERPRINT) {
       & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
