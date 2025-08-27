@@ -143,21 +143,84 @@ function check_slack_binary_exist() {
       Write-Host "DEBUG: Process monitoring failed: $_"
     }
     
-    # Test 2: Direct execution with detailed logging
-    Write-Host "DEBUG: Test 2: Direct execution with logging..."
+    # Test 2: Detailed Investigation of What's Making It Slow
+    Write-Host "DEBUG: Test 2: Detailed Slow Operation Investigation..."
+    
+    # Test 2a: Let it run longer to see if it eventually completes
+    Write-Host "DEBUG: Test 2a: Extended execution test (30 second timeout)..."
     try {
-      Write-Host "DEBUG: About to execute _fingerprint directly..."
+      Write-Host "DEBUG: Starting _fingerprint with extended timeout..."
       $startTime = Get-Date
       
-      $output = & $SLACK_CLI_NAME _fingerprint 2>&1
+      $extendedJob = Start-Job -ScriptBlock { 
+        param($cliName) 
+        Write-Host "DEBUG: Extended job started, executing _fingerprint..."
+        $output = & $cliName _fingerprint 2>&1
+        return $output
+      } -ArgumentList $SLACK_CLI_NAME
       
-      $endTime = Get-Date
-      $duration = ($endTime - $startTime).TotalSeconds
-      Write-Host "DEBUG: Direct execution completed in $duration seconds: $output"
-      $get_finger_print = $output
+      $extendedResult = Wait-Job -Job $extendedJob -Timeout 30
+      if ($extendedResult) {
+        $extendedOutput = Receive-Job -Job $extendedJob
+        $endTime = Get-Date
+        $duration = ($endTime - $startTime).TotalSeconds
+        Write-Host "DEBUG: Extended execution completed in $duration seconds: $extendedOutput"
+        $get_finger_print = $extendedOutput
+        Remove-Job -Job $extendedJob
+      } else {
+        Write-Host "DEBUG: Extended execution still running after 30 seconds - investigating further..."
+        Stop-Job -Job $extendedJob
+        Remove-Job -Job $extendedJob
+        
+        # Test 2b: Network connection investigation
+        Write-Host "DEBUG: Test 2b: Network connection investigation..."
+        Write-Host "DEBUG: Checking what network connections the process might be trying to make..."
+        
+        # Check common tracing endpoints
+        $tracingEndpoints = @(
+          "http://localhost:14268",  # Jaeger collector
+          "http://localhost:9411",   # Zipkin
+          "http://localhost:16686",  # Jaeger UI
+          "http://127.0.0.1:14268",
+          "http://127.0.0.1:9411"
+        )
+        
+        foreach ($endpoint in $tracingEndpoints) {
+          try {
+            Write-Host "DEBUG: Testing endpoint: $endpoint"
+            $response = Invoke-WebRequest -Uri $endpoint -TimeoutSec 3 -ErrorAction Stop
+            Write-Host "DEBUG: ✅ $endpoint is accessible (unexpected in CI)"
+          } catch {
+            Write-Host "DEBUG: ❌ $endpoint is NOT accessible (expected in CI)"
+          }
+        }
+        
+        # Test 2c: Process resource investigation
+        Write-Host "DEBUG: Test 2c: Process resource investigation..."
+        Write-Host "DEBUG: Checking what resources the process might be waiting for..."
+        
+        # Check if it's trying to access specific files or directories
+        $potentialPaths = @(
+          "$env:USERPROFILE\.slack",
+          "$env:USERPROFILE\AppData\Local\slack-cli",
+          "$env:USERPROFILE\.config",
+          "$env:USERPROFILE\.jaeger",
+          "$env:USERPROFILE\.zipkin"
+        )
+        
+        foreach ($path in $potentialPaths) {
+          if (Test-Path $path) {
+            Write-Host "DEBUG: ✅ Path exists: $path"
+          } else {
+            Write-Host "DEBUG: DEBUG: ❌ Path does not exist: $path"
+          }
+        }
+        
+        $get_finger_print = "SLOW_OPERATION_30S_TIMEOUT"
+      }
       
     } catch {
-      Write-Host "DEBUG: Direct execution failed with error: $_"
+      Write-Host "DEBUG: Extended execution investigation failed: $_"
       $get_finger_print = "ERROR: $_"
     }
     
@@ -229,6 +292,8 @@ function check_slack_binary_exist() {
     Write-Host "DEBUG: Commands WITH OpenTracing: Should hang ❌"
     Write-Host "DEBUG: OpenTracing endpoints: Should not be accessible in CI ❌"
     Write-Host "DEBUG: Hang location: $hangLocation"
+    Write-Host "DEBUG: Exact hang time: $exactHangTime"
+    Write-Host "DEBUG: Last responsive time: $lastResponsiveTime"
     Write-Host "DEBUG: Direct execution result: $get_finger_print"
     
     # For now, assume it's the same CLI to continue with installation
