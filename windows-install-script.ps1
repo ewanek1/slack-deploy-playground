@@ -112,7 +112,7 @@ function check_slack_binary_exist() {
          # Test 3: Compare multiple Slack CLI commands to find the pattern
          Write-Host "DEBUG: Testing various Slack CLI commands to find the hanging pattern..."
          
-         $commands = @("--version", "auth list", "apps list", "_fingerprint")
+         $commands = @("slack _fingerprint --help", "slack _fingerprint --version", "slack _fingerprint --verbose", "slack _fingerprint --debug")
          $results = @{}
          
          foreach ($cmd in $commands) {
