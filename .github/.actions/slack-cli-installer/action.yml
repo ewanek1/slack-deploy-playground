@@ -49,6 +49,7 @@ runs:
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v ${{ inputs.cli_version }} --skip-update
 
     - name: Check existing slack command
+      shell: pwsh
       run: Get-Command slack || echo "No existing slack command"
 
 
