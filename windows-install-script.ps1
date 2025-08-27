@@ -47,34 +47,38 @@ function check_slack_binary_exist() {
     [Parameter(HelpMessage = "Display diagnostic information")]
     [boolean]$Diagnostics
   )
-
+  $FINGERPRINT = "d41d8cd98f00b204e9800998ecf8427e"
   $SLACK_CLI_NAME = "slack"
   if ($alias) {
     $SLACK_CLI_NAME = $alias
   }
-
   if (Get-Command $SLACK_CLI_NAME -ErrorAction SilentlyContinue) {
     if ($Diagnostics) {
       delay 0.3 "Checking if ``$SLACK_CLI_NAME`` already exists on this system..."
       delay 0.2 "Heads up! A binary called ``$SLACK_CLI_NAME`` was found!"
-      delay 0.3 "Skipping fingerprint check..."
+      delay 0.3 "Now checking if it's the same Slack CLI..."
     }
+    & $SLACK_CLI_NAME _fingerprint | Tee-Object -Variable get_finger_print | Out-Null
+    if ($get_finger_print -ne $FINGERPRINT) {
+      & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
+      if (!($slack_cli_version -contains "Using ${SLACK_CLI_NAME}.exe v")) {
+        Write-Host "Error: Your existing ``$SLACK_CLI_NAME`` command is different from this Slack CLI!"
+        Write-Host "Halting the install to avoid accidentally overwriting it."
 
-    # Skip fingerprint check entirely
-    & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
-
-    
-
-    $message = "Existing Slack CLI detected. Upgrading to the latest version..."
+        Write-Host "`nTry using an alias when installing to avoid name conflicts:"
+        Write-Host "`nirm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -Alias your-preferred-alias | iex"
+        throw
+      }
+    }
+    $message = "It is the same Slack CLI! Upgrading to the latest version..."
     if ($Version) {
       $SLACK_CLI_VERSION = $Version
-      $message = "Existing Slack CLI detected. Switching over to v$Version..."
+      $message = "It is the same Slack CLI! Switching over to v$Version..."
     }
     if ($Diagnostics) {
       delay 0.3 "$message`n"
     }
   }
-
   return $SLACK_CLI_NAME
 }
 
