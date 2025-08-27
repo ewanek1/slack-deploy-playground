@@ -48,23 +48,21 @@ runs:
       run: |
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v ${{ inputs.cli_version }} --skip-update
 
-
-
-    #- name: Copy Windows Install Script
-     # if: runner.os == 'Windows'
-     # shell: pwsh
-     # run: |
-       # Write-Host "=== COPY DEBUG ==="
-      #  $scriptPath = Join-Path $env:GITHUB_WORKSPACE "windows-install-script.ps1"
-       # $destPath = "$env:RUNNER_TEMP\install.ps1"
+    - name: Copy Windows Install Script
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        Write-Host "=== COPY DEBUG ==="
+        $scriptPath = Join-Path $env:GITHUB_WORKSPACE "windows-install-script.ps1"
+        $destPath = "$env:RUNNER_TEMP\install.ps1"
         
-       # Copy-Item $scriptPath $destPath -Force
-       # Write-Host "Copy-Item completed"
-       #Write-Host "Destination exists after copy: $(Test-Path $destPath)"
+        Copy-Item $scriptPath $destPath -Force
+        Write-Host "Copy-Item completed"
+        Write-Host "Destination exists after copy: $(Test-Path $destPath)"
         
         # Set this as an output so we can verify it persists
-        #echo "script_path=$destPath" >> $env:GITHUB_OUTPUT
-        #echo "script_exists=true" >> $env:GITHUB_OUTPUT
+        echo "script_path=$destPath" >> $env:GITHUB_OUTPUT
+        echo "script_exists=true" >> $env:GITHUB_OUTPUT
 
 
 
@@ -72,10 +70,15 @@ runs:
       if: runner.os == 'Windows' && (steps.cache-cli.outputs.cache-hit != 'true')
       shell: pwsh
       run: |
-        $scriptPath = "$env:RUNNER_TEMP\install-slack-cli.ps1"
-        Invoke-WebRequest -Uri https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -OutFile $scriptPath
-        & $scriptPath -Alias slackcli -SkipGit:$false -SkipDeno:$true -Verbose
+        Write-Host "=== INSTALL DEBUG ==="
+        $scriptPath = "$env:RUNNER_TEMP\install.ps1"
+        Write-Host "Script exists: $(Test-Path $scriptPath)"
 
+        # Use named parameters only
+        Write-Host "Running install script..."
+        & $scriptPath -SkipGit $false -Verbose
+
+        Write-Host "Script completed with exit code: $LASTEXITCODE"
       
     - name: Run Slack CLI Command
       id: run-slack-cli-command

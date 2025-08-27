@@ -63,6 +63,16 @@ function check_slack_binary_exist() {
          Write-Host "DEBUG: _fingerprint hangs in CI environment, bypassing check"
          $get_finger_print = $FINGERPRINT  # Assume it's the same CLI
          
+         # Test basic command execution
+         Write-Host "DEBUG: Testing basic Slack CLI commands..."
+         try {
+           Write-Host "DEBUG: Testing 'slack --help'..."
+           $helpOutput = & $SLACK_CLI_NAME --help 2>&1
+           Write-Host "DEBUG: --help command output: $helpOutput"
+         } catch {
+           Write-Host "DEBUG: --help command failed: $_"
+         }
+         
          # Skip the version check since we're assuming same CLI
          if ($false) {
       & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
