@@ -59,99 +59,13 @@ function check_slack_binary_exist() {
       delay 0.2 "Heads up! A binary called ``$SLACK_CLI_NAME`` was found!"
       delay 0.3 "Now checking if it's the same Slack CLI..."
     }
-    # Test verbose mode to see startup options and OpenTracing behavior
-    Write-Host "DEBUG: Testing 'slack --help --verbose' to see startup options..."
-    try {
-      $verboseOutput = & $SLACK_CLI_NAME --help --verbose 2>&1
-      Write-Host "DEBUG: --help --verbose output: $verboseOutput"
-    } catch {
-      Write-Host "DEBUG: --help --verbose failed: $_"
-    }
     
-         # Now try the original _fingerprint command with detailed diagnostics
-     Write-Host "DEBUG: Testing _fingerprint command with detailed diagnostics..."
-     
-     # Test 1: Try with different timeout values to see when it hangs
-     Write-Host "DEBUG: Testing _fingerprint with 5 second timeout..."
-     $job1 = Start-Job -ScriptBlock { param($cliName) & $cliName _fingerprint } -ArgumentList $SLACK_CLI_NAME
-     $result1 = Wait-Job -Job $job1 -Timeout 5
-     if ($result1) {
-       $get_finger_print = Receive-Job -Job $job1
-       Write-Host "DEBUG: _fingerprint completed in under 5 seconds: $get_finger_print"
-       Remove-Job -Job $job1
-     } else {
-       Write-Host "DEBUG: _fingerprint hung within 5 seconds"
-       Stop-Job -Job $job1
-       Remove-Job -Job $job1
-       
-       # Test 2: Try with stderr capture to see if there are error messages
-       Write-Host "DEBUG: Testing _fingerprint with stderr capture..."
-       try {
-         $job2 = Start-Job -ScriptBlock { 
-           param($cliName) 
-           $output = & $cliName _fingerprint 2>&1
-           return $output
-         } -ArgumentList $SLACK_CLI_NAME
-         
-         $result2 = Wait-Job -Job $job2 -Timeout 3
-         if ($result2) {
-           $stderrOutput = Receive-Job -Job $job2
-           Write-Host "DEBUG: _fingerprint stderr output: $stderrOutput"
-           Remove-Job -Job $job2
-         } else {
-           Write-Host "DEBUG: _fingerprint hung even with stderr capture"
-           Stop-Job -Job $job2
-           Remove-Job -Job $job2
-         }
-       } catch {
-         Write-Host "DEBUG: stderr capture failed: $_"
-       }
-       
-                $get_finger_print = "TIMEOUT"
-         
-         # Test 3: Compare multiple Slack CLI commands to find the pattern
-         Write-Host "DEBUG: Testing various Slack CLI commands to find the hanging pattern..."
-         
-         $commands = @("_fingerprint","_fingerprint --help", "_fingerprint --version", "_fingerprint --verbose", "_fingerprint --debug")
-         $results = @{}
-         
-         foreach ($cmd in $commands) {
-           Write-Host "DEBUG: Testing 'slack $cmd' with 5 second timeout..."
-           
-           try {
-             $job = Start-Job -ScriptBlock { 
-               param($cliName, $command) 
-               $output = & $cliName $command 2>&1
-               return $output
-             } -ArgumentList $SLACK_CLI_NAME, $cmd
-             
-             $result = Wait-Job -Job $job -Timeout 5
-             if ($result) {
-               $output = Receive-Job -Job $job
-               $results[$cmd] = "SUCCESS: $($output -join ' ')"
-               Write-Host "DEBUG: '$cmd' completed successfully"
-               Remove-Job -Job $job
-             } else {
-               Write-Host "DEBUG: '$cmd' hung within 5 seconds"
-               Stop-Job -Job $job
-               Remove-Job -Job $job
-               $results[$cmd] = "HANGING"
-             }
-           } catch {
-             Write-Host "DEBUG: '$cmd' failed with error: $_"
-             $results[$cmd] = "ERROR: $_"
-           }
-         }
-         
-         # Display results summary
-         Write-Host "DEBUG: Command test results summary:"
-         foreach ($cmd in $commands) {
-           Write-Host "DEBUG:   $cmd`: $($results[$cmd])"
-         }
-         
-         # Set fingerprint result based on test
-         $get_finger_print = if ($results["_fingerprint"] -eq "HANGING") { "TIMEOUT" } else { $results["_fingerprint"] }
-     }
+    # Use --verbose flag to prevent hanging (we discovered this prevents the hang)
+    Write-Host "DEBUG: Using _fingerprint --verbose to prevent hanging..."
+    & $SLACK_CLI_NAME _fingerprint --verbose | Tee-Object -Variable get_finger_print | Out-Null
+    Write-Host "DEBUG: _fingerprint --verbose completed: $get_finger_print"
+    
+    if ($get_finger_print -ne $FINGERPRINT) {
     
     if ($get_finger_print -ne $FINGERPRINT) {
       & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
