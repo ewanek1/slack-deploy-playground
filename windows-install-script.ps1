@@ -48,36 +48,36 @@ function check_slack_binary_exist() {
     [Parameter(HelpMessage = "Display diagnostic information")]
     [boolean]$Diagnostics
   )
+
   $FINGERPRINT = "d41d8cd98f00b204e9800998ecf8427e"
   $SLACK_CLI_NAME = "slack"
-  if ($alias) {
-    $SLACK_CLI_NAME = $alias
+  if ($Alias) {
+    $SLACK_CLI_NAME = $Alias
   }
+
   if (Get-Command $SLACK_CLI_NAME -ErrorAction SilentlyContinue) {
     if ($Diagnostics) {
       delay 0.3 "Checking if ``$SLACK_CLI_NAME`` already exists on this system..."
       delay 0.2 "Heads up! A binary called ``$SLACK_CLI_NAME`` was found!"
       delay 0.3 "Now checking if it's the same Slack CLI..."
     }
-    
-    # Use --verbose flag to prevent hanging (we discovered this prevents the hang)
+
+    # Use --verbose flag to prevent hanging
     Write-Host "DEBUG: Using _fingerprint --verbose to prevent hanging..."
     & $SLACK_CLI_NAME _fingerprint --verbose | Tee-Object -Variable get_finger_print | Out-Null
     Write-Host "DEBUG: _fingerprint --verbose completed: $get_finger_print"
-    
-    if ($get_finger_print -ne $FINGERPRINT) {
-    
+
     if ($get_finger_print -ne $FINGERPRINT) {
       & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
       if (!($slack_cli_version -contains "Using ${SLACK_CLI_NAME}.exe v")) {
         Write-Host "Error: Your existing ``$SLACK_CLI_NAME`` command is different from this Slack CLI!"
         Write-Host "Halting the install to avoid accidentally overwriting it."
-
         Write-Host "`nTry using an alias when installing to avoid name conflicts:"
         Write-Host "`nirm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -Alias your-preferred-alias | iex"
         throw
       }
     }
+
     $message = "It is the same Slack CLI! Upgrading to the latest version..."
     if ($Version) {
       $SLACK_CLI_VERSION = $Version
@@ -87,8 +87,10 @@ function check_slack_binary_exist() {
       delay 0.3 "$message`n"
     }
   }
+
   return $SLACK_CLI_NAME
 }
+
 
 
 
