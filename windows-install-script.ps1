@@ -76,7 +76,7 @@ function check_slack_binary_exist() {
         #Write-Host "`nirm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -Alias your-preferred-alias | iex"
         #throw
       #}
-    }
+    #}
 
     $message = "It is the same Slack CLI! Upgrading to the latest version..."
     if ($Version) {
