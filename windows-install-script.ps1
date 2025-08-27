@@ -64,9 +64,9 @@ function check_slack_binary_exist() {
     #& $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
 
     # Refresh PATH for current session
-    $User = [System.EnvironmentVariableTarget]::User
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", $User)
-    & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
+    #$User = [System.EnvironmentVariableTarget]::User
+    #$env:Path = [System.Environment]::GetEnvironmentVariable("Path", $User)
+    #& $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
 
 
     $message = "Existing Slack CLI detected. Upgrading to the latest version..."
