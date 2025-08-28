@@ -2,21 +2,7 @@ name: Slack CLI Runner Tests
 
 on:
   workflow_dispatch:
-    inputs:
-      command:
-        description: "Slack CLI command to run"
-        required: false
-      verbose:
-        description: "Verbose flag"
-        required: false
-        default: 'false'
-      cli_version:
-        description: "Slack CLI Version"
-        required: false
-        default: '3.6.0'
-      app_id: 
-        description: "App ID"
-        required: false
+
 
 jobs:
   test-basic-command:
