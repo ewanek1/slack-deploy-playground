@@ -109,7 +109,7 @@ jobs:
         id: help
         uses: ./.github/.actions/slack-cli-installer
         with:
-          command: "help"
+          command: "help --verbose"
           cli_version: "latest"
           verbose: "true"
         env:
