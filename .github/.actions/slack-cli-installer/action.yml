@@ -70,6 +70,7 @@ runs:
 
 
     - name: Show Log Links
+      shell: bash
       run: |
         echo "GitHub Actions logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         echo "Step logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}"
