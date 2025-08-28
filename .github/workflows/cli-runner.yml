@@ -11,6 +11,7 @@ on:
         type: boolean
         default: false
       cli_version:
+        description: 'CLI version'
         required: false
         default: "latest"
       app_id: 
@@ -50,7 +51,7 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
   tests:
-    needs: run-slack-cli 
+    #needs: run-slack-cli 
     #if: ${{ github.event_name == 'pull_request' }}
     strategy:
       matrix:
