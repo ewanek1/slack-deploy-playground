@@ -90,9 +90,10 @@ runs:
         SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
         VERBOSE: ${{ inputs.verbose }}
       run: |
-        echo "Running command: ${{ inputs.command }}"
         if [ "${{ inputs.verbose }}" == "true" ]; then
+          echo "${{ inputs.command }} --verbose --skip-update --app ${{ inputs.app_id }}"
           slack ${{ inputs.command }} --verbose --skip-update --app ${{ inputs.app_id }}
         else
-          slack ${{ inputs.command }} --skip-update --${{ inputs.app_id }}
+          echo "${{ inputs.command }} --skip-update --app ${{ inputs.app_id }}"
+          slack ${{ inputs.command }} --skip-update --app ${{ inputs.app_id }}
         fi
