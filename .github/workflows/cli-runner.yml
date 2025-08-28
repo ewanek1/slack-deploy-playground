@@ -35,7 +35,7 @@ jobs:
       success: ${{ steps.run-slack-cli-command.outputs.success }}
       command_executed: ${{ steps.run-slack-cli-command.outputs.command_executed }}
       stdout: ${{ steps.run-slack-cli-command.outputs.stdout }}
-    timeout-minutes: 10
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v4
@@ -46,6 +46,28 @@ jobs:
           command: ${{ github.event.inputs.command }}
           verbose: ${{ github.run_attempt > 1 }}
           cli_version: ${{ github.event.inputs.cli_version }}
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+  tests:
+    needs: run-slack-cli 
+    #if: ${{ github.event_name == 'pull_request' }}
+    strategy:
+      matrix:
+        test: [version, help]
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run tests
+        id: run-tests
+        uses: ./.github/.actions/slack-cli-installer
+        with:
+          command: ${{ matrix.test }}
+          cli_version: "latest"
+          verbose: "true"
         env:
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

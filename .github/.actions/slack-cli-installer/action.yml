@@ -3,24 +3,23 @@ description: Download and cache the Slack CLI and run the input command
 
 inputs:
   command:
-    description: "Slack CLI command to run"
     required: true
   verbose:
-    description: "Verbose flag"
     required: false
     default: 'false'
   cli_version:
-    description: "Slack CLI Version"
     required: false
     default: '3.6.0'
   app_id: 
-    description: "App ID"
     required: false
 
 outputs:
   success:
-    description: "Whether the command ran successfully"
     value: ${{ steps.run-slack-cli-command.outputs.success }}
+  stdout:
+    value: ${{ steps.run-slack-cli-command.outputs.stdout }}
+  command_executed:
+    value: ${{ steps.run-slack-cli-command.outputs.command_executed }}
 
 runs:
   using: composite
@@ -93,3 +92,16 @@ runs:
         else
           slack ${{ inputs.command }} --skip-update --${{ inputs.app_id }}
         fi
+        
+        exit_code=$?
+            
+        if [ $exit_code -eq 0 ]; then
+          echo "success=true" >> $GITHUB_OUTPUT
+        else
+          echo "success=false" >> $GITHUB_OUTPUT
+        fi
+            
+        echo "command_executed=slack ${{ inputs.command }}" >> $GITHUB_OUTPUT
+        echo "stdout<<EOF" >> $GITHUB_OUTPUT
+        echo "$output" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
