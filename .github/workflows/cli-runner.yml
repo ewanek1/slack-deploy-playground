@@ -52,11 +52,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Test workflow
-        uses: ./.github/workflows/integration-test-workflow.yml
-        with:
-          test_os: ${{ matrix.os }}
-          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+    uses: ./.github/workflows/integration-test-workflow.yml
+    with:
+      test_os: ${{ matrix.os }}
+      SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
