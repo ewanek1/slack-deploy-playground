@@ -47,7 +47,7 @@ jobs:
 Instead of manual dispatch, you can configure your workflow to run automatically on specific GitHub events. Note that commands must be hardcoded
 when using automatic triggers. The following examples show different trigger options:
 
-#### **On Pull Request:**
+#### On Pull Request:
 ```yaml
 name: Slack CLI Command Runner
 on:
@@ -69,7 +69,7 @@ jobs:
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
 ```
 
-#### **On Push to Main:**
+#### On Push to Main:
 ```yaml
 name: Slack CLI Command Runner
 on:

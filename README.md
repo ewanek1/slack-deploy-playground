@@ -1,64 +1,51 @@
-## Key Components
-
-### Composite Action (`.github/actions/slack-cli-installer/action.yml`)
-- Installs Slack CLI and executes commands
-- Handles installation across OS systems and caching
-- Inputs: `command`, `verbose`, `cli_version`
-- Outputs: `success`, `command_executed`, `stdout`, `stderr`
+## Components
 
 ### Workflow (`.github/workflows/slack-cli-github-action.yml`)
+- Functions by manual dispatch
+- Defines action inputs
 - Calls the composite action 
-- Includes manual dispatch and input types 
+- Calls the test workflow 
+- Inputs: `command`, `verbose`, `cli_version`, `app_id`
+- Outputs: `success`, `command_executed`, `stdout`
 
-### Test Suite (`test/cli-runner.test.js`)
-- Mocha + Chai + Sinon
-- Unit tests for input validation, integration tests, error handling
+### Composite Action (`.github/actions/slack-cli-installer/action.yml`)
+- Handles CLI caching and installation across OS systems
+- Executes commands
 
-## Testing
-
-### **Local Testing**
-```bash
-npm test
-```
+### Test Worklow (`.github/workflows/test-workflow.yml`)
+- Tests for valid/invalid inputs, CLI versions, flags, caching
+- Validates across OS systems 
 
 ## Common Errors
 
-### **Action Not Found**
+### Action Not Found
 - Check action path in workflow
 - Verify action.yml exists and is valid
 
-### **CLI Installation Fails**
+### CLI Installation Fails
 - Check installation link is valid
 - Use GitHub's [testing matrix](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/run-job-variations) for clearer outputs
 
-### **Command Execution Errors**
+### Command Execution Errors
 - Verify service token is valid and in GitHub secrets 
 - Make sure command does not have Slack prefix (e.g. `version` not `slack version`)
 
 ## Debugging
 
-Use the `--verbose` flag for detailed outputs and check GitHub Actions logs. 
+Check the `Verbose flag` for detailed outputs and check GitHub Actions logs. 
 Or, test locally with similar environment verify inputs are being passed correctly.
 
-### To Update When a New Slack CLI Version Releases
+## To Update When a New Slack CLI Version Releases
 
-### **1. Update CLI Version in Action**
-```yaml
-#.github/actions/slack-cli-installer/action.yml
-inputs:
-  cli_version:
-    description: "Slack CLI Version"
-    required: false
-    default: '3.6.0'  # Update here
-```
+- All components use `"latest"` for the Slack CLI version, so no hardcoded versioning update is needed.
 
 ## Changes to Watch For
 
-### **CLI Command Changes**
-- New authentication requirements
-
-### **Installation Changes**
+### Installation Changes
 - New dependencies 
 - Changed download URLs
 - New installation flags
+
+### CLI Command Changes
+- New authentication requirements
 
