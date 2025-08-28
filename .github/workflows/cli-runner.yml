@@ -65,6 +65,7 @@ jobs:
           command: ${{ matrix.test }}
           cli_version: "latest"
           verbose: "true"
+          app_id: ${{ github.event.inputs.app_id }}
         env:
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
