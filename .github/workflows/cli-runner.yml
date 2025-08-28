@@ -48,7 +48,7 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
   run-tests:
-    needs: run-slack-cli-command
+    needs: run-slack-cli
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
