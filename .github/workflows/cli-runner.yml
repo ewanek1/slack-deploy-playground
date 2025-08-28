@@ -54,7 +54,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }} 
     with:
       test_os: ${{ matrix.os }}
     secrets:
