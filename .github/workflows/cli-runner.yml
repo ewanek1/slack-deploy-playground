@@ -48,7 +48,6 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Run tests
-        run-tests:
         needs: run-slack-cli
         strategy:
           matrix:
