@@ -48,14 +48,17 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
 
-  run-integration-tests:
+jobs:
+  run-tests:
     needs: run-slack-cli
-    uses: ./.github/workflows/integration-test-workflow.yml
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-    with:
-      test_os: ${{ matrix.os }}
-    secrets:
-      SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
-      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+    steps:
+      - name: Test workflow
+        uses: ./.github/workflows/integration-test-workflow.yml
+        with:
+          test_os: ${{ matrix.os }}
+        secrets:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
