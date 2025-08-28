@@ -51,8 +51,12 @@ jobs:
   run-integration-tests:
     needs: run-slack-cli
     uses: ./.github/workflows/integration-test-workflow.yml
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }} 
     with:
-      test_os: [ubuntu-latest, macos-latest]
+      test_os: ${{ matrix.os }}
     secrets:
       SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
