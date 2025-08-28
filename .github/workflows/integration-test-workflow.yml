@@ -5,7 +5,7 @@ on:
     inputs:
       command:
         description: "Slack CLI command to run"
-        required: true
+        required: false
       verbose:
         description: "Verbose flag"
         required: false
