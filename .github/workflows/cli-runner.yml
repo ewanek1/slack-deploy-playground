@@ -4,14 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       command:
+        description: 'Slack CLI command to run'
         required: true
       verbose:
+        description: 'Verbose flag'
         type: boolean
         default: false
       cli_version:
         required: false
         default: "latest"
       app_id: 
+        description: "App ID"
         required: false
         
 env:

@@ -3,14 +3,17 @@ description: Download and cache the Slack CLI and run the input command
 
 inputs:
   command:
+    description: 'Slack CLI command to run'
     required: true
   verbose:
-    required: false
-    default: 'false'
+    description: 'Verbose flag'
+    type: boolean
+    default: false
   cli_version:
     required: false
-    default: '3.6.0'
+    default: "latest"
   app_id: 
+    description: "App ID"
     required: false
 
 outputs:
