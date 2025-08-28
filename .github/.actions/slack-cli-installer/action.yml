@@ -92,9 +92,9 @@ runs:
       run: |
         echo "Running command: ${{ inputs.command }}"
         if [ "${{ inputs.verbose }}" == "true" ]; then
-          slack ${{ inputs.command }} --verbose --skip-update --app ${{ inputs.app_id }}
+          slack ${{ inputs.command }} --verbose --app ${{ inputs.app_id }} --skip-update
         else
-          slack ${{ inputs.command }} --skip-update --${{ inputs.app_id }}
+          slack ${{ inputs.command }} --app ${{ inputs.app_id }} --skip-update 
         fi
         
         exit_code=$?
