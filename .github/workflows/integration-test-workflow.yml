@@ -1,31 +1,33 @@
 name: Slack CLI Runner Tests 
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
-      command:
+      test_os:
         required: false
-      verbose:
-        required: false
-        default: 'false'
-      cli_version:
-        required: false
-        default: 'latest'
-      app_id: 
-        required: false
+        type: string
+        default: 'ubuntu-latest'
+    secrets:
+      SLACK_SERVICE_TOKEN:
+        required: true
+      SLACK_BOT_TOKEN:
+        required: true
 
 jobs:
   test-basic-command:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.test_os }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Run slack version
         id: version
-        uses: ./.github/.actions/test-action
+        uses: ./.github/.actions/slack-cli-installer
         with:
           command: "version"
           cli_version: "latest"
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Debug outputs
         run: |
@@ -41,37 +43,49 @@ jobs:
             exit 1
 
   test-input-validation:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.test_os }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Empty command
         id: empty-command
-        uses: ./.github/.actions/test-action
+        uses: ./.github/.actions/slack-cli-installer
         with:
           command: ""
           cli_version: "latest"
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Command with whitespace
         id: command-with-whitespace
-        uses: ./.github/.actions/test-action
+        uses: ./.github/.actions/slack-cli-installer
         with:
           command: "  version"
           cli_version: "latest"
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Long command with flags 
         id: long-command
-        uses: ./.github/.actions/test-action
+        uses: ./.github/.actions/slack-cli-installer
         with:
           command: 'doctor --help --experiment string'
           cli_version: "latest"
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Special chars
         id: special-chars
-        uses: ./.github/.actions/test-action
+        uses: ./.github/.actions/slack-cli-installer
         with:
           command: 'doctor --help --experiment "release version@2.0.0"'
           cli_version: "latest"
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Ensure all inputs work
         if: steps.empty-command.outputs.success != 'true' || 
@@ -87,16 +101,20 @@ jobs:
           exit 1
 
   test-verbose-flag:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.test_os }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Run with verbose
         id: help
-        uses: ./.github/.actions/test-action
+        uses: ./.github/.actions/slack-cli-installer
         with:
-          command: "help --verbose"
+          command: "help"
           cli_version: "latest"
+          verbose: "true"
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Ensure verbose flag worked
         if: steps.help.outputs.success != 'true'
@@ -107,49 +125,51 @@ jobs:
           exit 1
 
   test-cache:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.test_os }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache Slack CLI
-        id: cli-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.slack/cli
-          key: slack-cli-${{ runner.os }}-${{ runner.arch }}-latest
-
       - name: First run (install if missing)
         id: no-cache
-        uses: ./.github/.actions/test-action
+        uses: ./.github/.actions/slack-cli-installer
         with:
           command: "version"
           cli_version: "latest"
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Second run (should use cache)
         id: cache-hit
-        uses: ./.github/.actions/test-action
+        uses: ./.github/.actions/slack-cli-installer
         with:
           command: "version"
           cli_version: "latest"
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Ensure cache worked
-        if: github.run_attempt > 1 && steps.cli-cache.outputs.cache-hit != 'true'
+        if: github.run_attempt > 1 && steps.cache-hit.outputs.success != 'true'
         run: |
           echo "cache failure"
           exit 1
 
   test-invalid-command:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.test_os }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Run with invalid command
         id: invalid-command
         continue-on-error: true
-        uses: ./.github/.actions/test-action
+        uses: ./.github/.actions/slack-cli-installer
         with:
           command: "invalid-command"
           cli_version: "latest"
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Expect failure
         if: steps.invalid-command.outputs.success == 'true'
@@ -160,16 +180,19 @@ jobs:
           exit 1
 
   test-cli-version:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.test_os }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Test specific version
         id: specific-version
-        uses: ./.github/.actions/test-action
+        uses: ./.github/.actions/slack-cli-installer
         with:
           command: "version"
           cli_version: "3.5.0"
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Ensure specific version 
         if: ${{ !contains(steps.specific-version.outputs.stdout, '3.5.0') }}
@@ -179,14 +202,14 @@ jobs:
           exit 1
 
   test-empty-env-vars:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.test_os }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Run with empty tokens
         id: empty-tokens
         continue-on-error: true
-        uses: ./.github/.actions/test-action
+        uses: ./.github/.actions/slack-cli-installer
         with:
           command: "version"
           cli_version: "latest"
@@ -195,11 +218,11 @@ jobs:
             SLACK_BOT_TOKEN: ""
 
       - name: Expect failure
-        if: steps.invalid-command.outputs.success == 'true'
+        if: steps.empty-tokens.outputs.success == 'true'
         run: |
-          echo "Expected failure with invalid command"
-          echo "stdout: '${{ steps.invalid-command.outputs.stdout }}'"
-          echo "success: '${{ steps.invalid-command.outputs.success }}'"
+          echo "Expected failure with empty tokens"
+          echo "stdout: '${{ steps.empty-tokens.outputs.stdout }}'"
+          echo "success: '${{ steps.empty-tokens.outputs.success }}'"
           exit 1
     
     
