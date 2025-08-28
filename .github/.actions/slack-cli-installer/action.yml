@@ -6,7 +6,7 @@ inputs:
     description: "Slack CLI command to run"
     required: true
   verbose:
-    description: "Enable verbose output"
+    description: "Verbose flag"
     required: false
     default: 'false'
   cli_version:
@@ -17,7 +17,6 @@ inputs:
     description: "App ID"
     required: false
 
-
 outputs:
   success:
     description: "Whether the command ran successfully"
@@ -26,12 +25,11 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Cache Slack CLI 
+    - name: Cache Slack CLI
       id: cache-cli
       uses: actions/cache@v4
       with:
-        path: |
-          ${{ runner.os == 'Windows' && format('{0}/AppData/Local/slack-cli', env.USERPROFILE) || '~/.slack/bin' }}
+        path: ~/.slack/bin
         key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ inputs.cli_version }}
 
     - name: Add Slack CLI to PATH (Linux/macOS)
@@ -68,7 +66,6 @@ runs:
         echo "script_path=$destPath" >> $env:GITHUB_OUTPUT
         echo "script_exists=true" >> $env:GITHUB_OUTPUT
 
-
     - name: Install Slack CLI (Windows)
       if: runner.os == 'Windows' && (steps.cache-cli.outputs.cache-hit != 'true')
       shell: pwsh
@@ -92,7 +89,6 @@ runs:
       run: |
         echo "Running command: ${{ inputs.command }}"
         if [ "${{ inputs.verbose }}" == "true" ]; then
-          echo "Verbose flag set"
           slack ${{ inputs.command }} --verbose --skip-update --app ${{ inputs.app_id }}
         else
           slack ${{ inputs.command }} --skip-update --${{ inputs.app_id }}

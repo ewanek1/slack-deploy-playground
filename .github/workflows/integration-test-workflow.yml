@@ -1,40 +1,41 @@
 name: Integration
 
-on:
-  workflow_dispatch:
-    inputs:
-      command:
-        description: 'Slack CLI command to run'
-        required: false
-      verbose:
-        description: 'Verbose flag'
-        type: boolean
-        default: false
-      cli_version:
-        description: 'Slack CLI version'
-        required: false
-        default: "latest"
+inputs:
+  command:
+    description: "Slack CLI command to run"
+    required: true
+  verbose:
+    description: "Verbose flag"
+    required: false
+    default: 'false'
+  cli_version:
+    description: "Slack CLI Version"
+    required: false
+    default: '3.6.0'
+  app_id: 
+    description: "App ID"
+    required: false
 
 jobs:
-  test-basic-commands:
+  test-basic-command:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: run slack version
+      - name: Run slack version
         id: version
         uses: ./.github/.actions/test-action
         with:
           command: "version"
           cli_version: "latest"
 
-      - name: debug outputs
+      - name: Debug outputs
         run: |
           echo "stdout: '${{ steps.version.outputs.stdout }}'"
           echo "success: '${{ steps.version.outputs.success }}'"
           echo "command executed: '${{ steps.version.outputs.command_executed }}'"
 
-      - name: verify CLI version
+      - name: Verify CLI version
         if: steps.version.outputs.success != 'true'
         run: |
             echo "CLI version command failure"
@@ -46,45 +47,45 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: empty command
+      - name: Empty command
         id: empty-command
         uses: ./.github/.actions/test-action
         with:
           command: ""
           cli_version: "latest"
 
-      - name: command with whitespace
+      - name: Command with whitespace
         id: command-with-whitespace
         uses: ./.github/.actions/test-action
         with:
           command: "  version"
           cli_version: "latest"
 
-      - name: long command with flags 
+      - name: Long command with flags 
         id: long-command
         uses: ./.github/.actions/test-action
         with:
           command: 'doctor --help --experiment string'
           cli_version: "latest"
 
-      - name: special chars
+      - name: Special chars
         id: special-chars
         uses: ./.github/.actions/test-action
         with:
           command: 'doctor --help --experiment "release version@2.0.0"'
           cli_version: "latest"
 
-      - name: ensure all inputs work
+      - name: Ensure all inputs work
         if: steps.empty-command.outputs.success != 'true' || 
             steps.command-with-whitespace.outputs.success != 'true' || 
             steps.long-command.outputs.success != 'true' || 
             steps.special-chars.outputs.success != 'true'
         run: |
-          echo "test-input-validation failure"
-          echo "empty command: ${{ steps.empty-command.outputs.success }}"
-          echo "command with whitespace: ${{ steps.command-with-whitespace.outputs.success }}"
-          echo "long command: ${{ steps.long-command.outputs.success }}"
-          echo "special chars: ${{ steps.special-chars.outputs.success }}"
+          echo "Test input validation failure"
+          echo "Empty command: ${{ steps.empty-command.outputs.success }}"
+          echo "Command with whitespace: ${{ steps.command-with-whitespace.outputs.success }}"
+          echo "Long command: ${{ steps.long-command.outputs.success }}"
+          echo "Special chars: ${{ steps.special-chars.outputs.success }}"
           exit 1
 
   test-verbose-flag:
@@ -92,17 +93,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: run slack help with verbose
+      - name: Run with verbose
         id: help
         uses: ./.github/.actions/test-action
         with:
           command: "help --verbose"
           cli_version: "latest"
 
-      - name: ensure verbose flag worked
+      - name: Ensure verbose flag worked
         if: steps.help.outputs.success != 'true'
         run: |
-          echo "verbose flag failure"
+          echo "Verbose flag failure"
           echo "success: '${{ steps.help.outputs.success }}'"
           echo "stdout: '${{ steps.help.outputs.stdout }}'"
           exit 1
@@ -112,28 +113,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: cache Slack CLI
+      - name: Cache Slack CLI
         id: cli-cache
         uses: actions/cache@v4
         with:
           path: ~/.slack/cli
           key: slack-cli-${{ runner.os }}-${{ runner.arch }}-latest
 
-      - name: first run (install if missing)
+      - name: First run (install if missing)
         id: no-cache
         uses: ./.github/.actions/test-action
         with:
           command: "version"
           cli_version: "latest"
 
-      - name: second run (should use cache)
+      - name: Second run (should use cache)
         id: cache-hit
         uses: ./.github/.actions/test-action
         with:
           command: "version"
           cli_version: "latest"
 
-      - name: ensure cache worked
+      - name: Ensure cache worked
         if: github.run_attempt > 1 && steps.cli-cache.outputs.cache-hit != 'true'
         run: |
           echo "cache failure"
@@ -144,7 +145,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: run with invalid command
+      - name: Run with invalid command
         id: invalid-command
         continue-on-error: true
         uses: ./.github/.actions/test-action
@@ -152,10 +153,10 @@ jobs:
           command: "invalid-command"
           cli_version: "latest"
 
-      - name: expect failure
+      - name: Expect failure
         if: steps.invalid-command.outputs.success == 'true'
         run: |
-          echo "expected failure with invalid command"
+          echo "Expected failure with invalid command"
           echo "stdout: '${{ steps.invalid-command.outputs.stdout }}'"
           echo "success: '${{ steps.invalid-command.outputs.success }}'"
           exit 1
@@ -165,24 +166,57 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: test specific version
+      - name: Test specific version
         id: specific-version
         uses: ./.github/.actions/test-action
         with:
           command: "version"
           cli_version: "3.5.0"
 
-      - name: test latest version
-        id: latest-version
+      - name: Test latest version
+        id: Latest-version
         uses: ./.github/.actions/test-action
         with:
           command: "version"
           cli_version: "latest"
 
-      - name: ensure specific versions
-        if: steps.specific-version.outputs.success != 'true' || steps.latest-version.outputs.success != 'true'
+      - name: Ensure specific version 
+        if: ${{ !contains(steps.specific-version.outputs.stdout, '3.5.0') }}
         run: |
-          echo "specific version failure"
-          echo "specific version: ${{ steps.specific-version.outputs.success }}"
-          echo "latest version: ${{ steps.latest-version.outputs.success }}"
+          echo "Specific version failure"
+          echo "Actual output: '${{ steps.specific-version.outputs.stdout }}'"
           exit 1
+
+      - name: Ensure latest version 
+        if: ${{ !contains(steps.latest-version.outputs.stdout, 'latest') }}
+        run: |
+          echo "Latest version failure"
+          echo "stdout: '${{ steps.latest-version.outputs.stdout }}'"
+          echo "success: '${{ steps.invalid-command.outputs.success }}'"
+          exit 1
+
+  test-empty-env-vars:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run with empty tokens
+        id: empty-tokens
+        continue-on-error: true
+        uses: ./.github/.actions/test-action
+        with:
+          command: "version"
+          cli_version: "latest"
+        env:
+            SLACK_SERVICE_TOKEN: ""
+            SLACK_BOT_TOKEN: ""
+
+      - name: Expect failure
+        if: steps.invalid-command.outputs.success == 'true'
+        run: |
+          echo "Expected failure with invalid command"
+          echo "stdout: '${{ steps.invalid-command.outputs.stdout }}'"
+          echo "success: '${{ steps.invalid-command.outputs.success }}'"
+          exit 1
+    
+    

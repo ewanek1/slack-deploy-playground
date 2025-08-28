@@ -22,27 +22,24 @@ env:
   SLACK_DISABLE_TELEMETRY: "true"
 
 jobs:
-  deploy: # Change this?
+  run-slack-cli: 
     permissions:
       contents: read
+  if: ${{ github.event_name == 'pull_request' }}
+  strategy:
+    matrix:
+      os: [macos-latest, ubuntu-latest]
+  else:
     runs-on: ubuntu-latest
     outputs:
       success: ${{ steps.run-slack-cli-command.outputs.success }}
       command_executed: ${{ steps.run-slack-cli-command.outputs.command_executed }}
       stdout: ${{ steps.run-slack-cli-command.outputs.stdout }}
-    #runs-on: windows-latest
-    #strategy:
-      #matrix:
-        #os: [macos-latest, ubuntu-latest]
     timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
-
-      #- name: ensure tokens are set
-      #if: ${{ secrets.SLACK_SERVICE_TOKEN }} == null
-          #echo "You haven't set a slack service token. Action may fail"
-
+      
       - name: Install Slack CLI and Run Command
         uses: ./.github/.actions/slack-cli-installer
         with:
