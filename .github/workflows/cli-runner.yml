@@ -25,13 +25,7 @@ jobs:
   run-slack-cli: 
     permissions:
       contents: read
-    if: ${{ github.event_name == 'pull_request' }}
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest]
-    runs-on: ${{ matrix.os }}
-    else:
-      runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
     outputs:
       success: ${{ steps.run-slack-cli-command.outputs.success }}
       command_executed: ${{ steps.run-slack-cli-command.outputs.command_executed }}
