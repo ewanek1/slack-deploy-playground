@@ -30,11 +30,14 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
+    else:
+      runs-on: ubuntu-latest
     outputs:
       success: ${{ steps.run-slack-cli-command.outputs.success }}
       command_executed: ${{ steps.run-slack-cli-command.outputs.command_executed }}
       stdout: ${{ steps.run-slack-cli-command.outputs.stdout }}
     timeout-minutes: 5
+
     steps:
       - uses: actions/checkout@v4
       
@@ -51,7 +54,7 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
   tests:
-    #needs: run-slack-cli 
+    needs: run-slack-cli 
     #if: ${{ github.event_name == 'pull_request' }}
     strategy:
       matrix:
