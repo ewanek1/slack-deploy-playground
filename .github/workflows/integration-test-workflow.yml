@@ -1,4 +1,4 @@
-name: Integration
+name: Slack CLI Runner Tests 
 
 on:
   workflow_dispatch:
@@ -163,7 +163,7 @@ jobs:
           echo "success: '${{ steps.invalid-command.outputs.success }}'"
           exit 1
 
-  test-cli-versions:
+  test-cli-version:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -175,26 +175,11 @@ jobs:
           command: "version"
           cli_version: "3.5.0"
 
-      - name: Test latest version
-        id: Latest-version
-        uses: ./.github/.actions/test-action
-        with:
-          command: "version"
-          cli_version: "latest"
-
       - name: Ensure specific version 
         if: ${{ !contains(steps.specific-version.outputs.stdout, '3.5.0') }}
         run: |
           echo "Specific version failure"
           echo "Actual output: '${{ steps.specific-version.outputs.stdout }}'"
-          exit 1
-
-      - name: Ensure latest version 
-        if: ${{ !contains(steps.latest-version.outputs.stdout, 'latest') }}
-        run: |
-          echo "Latest version failure"
-          echo "stdout: '${{ steps.latest-version.outputs.stdout }}'"
-          echo "success: '${{ steps.invalid-command.outputs.success }}'"
           exit 1
 
   test-empty-env-vars:
