@@ -218,7 +218,7 @@ function terms_of_service {
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias
   )
-  $confirmed_alias = check_slack_binary_exist $Alias $Version $false
+  # $confirmed_alias = check_slack_binary_exist $Alias $Version $false
   # if (Get-Command $confirmed_alias) {
   Write-Host "`nUse of the Slack CLI should comply with the Slack API Terms of Service:"
   Write-Host "   https://slack.com/terms-of-service/api"
@@ -268,5 +268,76 @@ Write-Host "`nAdding developer tooling for an enhanced experience..."
 install_git $SkipGit
 Write-Host "Sweet! You're all set to start developing!"
 terms_of_service $Alias
+
+# Show log links and information
+Write-Host "`n=== INSTALLATION COMPLETE - LOG LINKS BELOW ==="
+get_log_links $Alias
 # feedback_message $Alias
+# Function to get log file links and information
+function get_log_links() {
+  param(
+    [Parameter(HelpMessage = "Alias of Slack CLI")]
+    [string]$Alias
+  )
+  
+  Write-Host "=== LOG FILES AND LINKS ==="
+  
+  # Slack CLI debug logs
+  $slackLogPath = "$env:USERPROFILE\.slack\logs\slack-debug-$(Get-Date -Format 'yyyyMMdd').log"
+  if (Test-Path $slackLogPath) {
+    Write-Host "✅ Slack CLI Debug Log: $slackLogPath"
+    Write-Host "   Size: $((Get-Item $slackLogPath).Length) bytes"
+    Write-Host "   Last Modified: $(Get-Item $slackLogPath).LastWriteTime"
+  } else {
+    Write-Host "❌ Slack CLI Debug Log: Not found at $slackLogPath"
+  }
+  
+  # Installation logs
+  $installLogPath = "$env:TEMP\slack-cli-install-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
+  Write-Host "📝 Installation Log: $installLogPath"
+  
+  # GitHub Actions specific links (if running in CI)
+  if ($env:GITHUB_ACTIONS -eq "true") {
+    $repo = $env:GITHUB_REPOSITORY
+    $runId = $env:GITHUB_RUN_ID
+    $server = $env:GITHUB_SERVER_URL
+    
+    Write-Host "🌐 GitHub Actions Logs:"
+    Write-Host "   Run Logs: $server/$repo/actions/runs/$runId"
+    Write-Host "   Job Logs: $server/$repo/actions/runs/$runId/jobs"
+    
+    # Create a summary log for easy access
+    $summaryLog = @"
+# Slack CLI Installation Summary
+Date: $(Get-Date)
+Alias: $Alias
+Environment: GitHub Actions
+Run ID: $runId
+Repository: $repo
+
+## Log Files:
+- Slack CLI Debug: $slackLogPath
+- Installation Log: $installLogPath
+- GitHub Actions: $server/$repo/actions/runs/$runId
+
+## Installation Status:
+- CLI Binary: $(if (Get-Command $Alias -ErrorAction SilentlyContinue) { "✅ Installed" } else { "❌ Failed" })
+- Version: $(try { & $Alias --version 2>&1 } catch { "Unknown" })
+"@
+    
+    $summaryLog | Out-File -FilePath $installLogPath -Encoding UTF8
+    Write-Host "📋 Summary Log Created: $installLogPath"
+  }
+  
+  # Local environment links
+  else {
+    Write-Host "🏠 Local Environment:"
+    Write-Host "   Current Directory: $(Get-Location)"
+    Write-Host "   User Profile: $env:USERPROFILE"
+    Write-Host "   Temp Directory: $env:TEMP"
+  }
+  
+  Write-Host "=== END LOG LINKS ==="
+}
+
 # next_step_message $Alias

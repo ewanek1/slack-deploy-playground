@@ -13,6 +13,10 @@ inputs:
     description: "Slack CLI Version"
     required: false
     default: '3.6.0'
+  app_id: 
+    description: "App ID"
+    required: false
+
 
 outputs:
   success:
@@ -65,6 +69,10 @@ runs:
         echo "script_exists=true" >> $env:GITHUB_OUTPUT
 
 
+    - name: Show Log Links
+      run: |
+        echo "GitHub Actions logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        echo "Step logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}"
 
     - name: Install Slack CLI (Windows)
       if: runner.os == 'Windows' && (steps.cache-cli.outputs.cache-hit != 'true')
@@ -122,3 +130,20 @@ runs:
         Add-Content -Path $env:GITHUB_OUTPUT -Value "stdout<<$eof"
         $output | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
         Add-Content -Path $env:GITHUB_OUTPUT -Value "$eof"
+
+
+
+    #- name: Run Slack CLI Command
+      #id: run-slack-cli-command
+      #shell: bash
+      #env:
+        #SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
+        #SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
+        #VERBOSE: ${{ inputs.verbose }}
+      #run: |
+        #echo "Running command: ${{ inputs.command }}"
+        #if [ "${{ inputs.verbose }}" == "true" ]; then
+          #slack ${{ inputs.command }} --verbose --skip-update --${{ inputs.app_id }}
+       # else
+          #slack ${{ inputs.command }} --skip-update --${{ inputs.app_id }}
+        #fi
