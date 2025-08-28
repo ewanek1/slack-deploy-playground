@@ -47,12 +47,16 @@ jobs:
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-
-  run-integration-tests:
+  run-tests:
     needs: run-slack-cli
+    #if: ${{ github.event_name == 'pull_request' }} 
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     uses: ./.github/workflows/integration-test-workflow.yml
     with:
-      test_os: ubuntu-latest
+      test_os: ${{ matrix.os }}
     secrets:
       SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

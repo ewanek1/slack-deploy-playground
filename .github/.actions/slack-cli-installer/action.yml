@@ -109,7 +109,3 @@ runs:
         echo "stdout<<EOF" >> $GITHUB_OUTPUT
         echo "$output" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
-
-        echo "Command output captured:"
-        echo "$output"
-        echo "Exit code: $exit_code"

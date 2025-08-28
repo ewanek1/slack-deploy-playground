@@ -4,9 +4,6 @@ on:
   workflow_call:
     inputs:
       test_os:
-        required: false
-        type: string
-        default: 'ubuntu-latest'
     secrets:
       SLACK_SERVICE_TOKEN:
         required: true
