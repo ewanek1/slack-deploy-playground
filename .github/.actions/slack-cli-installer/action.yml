@@ -61,48 +61,4 @@ runs:
 
 
       
-    - name: Run Slack CLI Command
-      id: run-slack-cli-command
-      shell: pwsh
-      env:
-        SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
-        SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
-        VERBOSE: ${{ inputs.verbose }}
-      run: |
-        Write-Host "Running command: ${{ inputs.command }}"
-        
-        $slackExe = "C:\Users\runneradmin\AppData\Local\slack-cli\bin\slack.exe"
-        Write-Host "Using Slack CLI at: $slackExe"
-        
-        # Convert 'version' to '--version' if needed
-        $cmd = "${{ inputs.command }}"
-        if ($cmd -eq "version") { $cmd = "--version" }
-
-        # Build argument array
-        $args = @()
-        $args += $cmd
-        if ("${{ inputs.verbose }}" -eq "true") { $args += "--verbose" }
-        $args += "--skip-update"
-
-        # Run the command, capturing both stdout and stderr
-        $output = & $slackExe @args 2>&1
-        $exitCode = $LASTEXITCODE
-
-        # Print output line by line in GitHub logs
-        Write-Host "Command output:"
-        $output | ForEach-Object { Write-Host $_ }
-        Write-Host "Exit code: $exitCode"
-
-        # Set success output
-        $success = if ($exitCode -eq 0) { "true" } else { "false" }
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "success=$success"
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "exit_code=$exitCode"
-
-        # Capture full stdout for workflow output
-        $eof = [Guid]::NewGuid().ToString()
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "stdout<<$eof"
-        $output | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "$eof"
-
-
-
+    
