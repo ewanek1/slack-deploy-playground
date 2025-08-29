@@ -1,12 +1,7 @@
 name: Slack CLI Runner Tests 
 
 on:
-  workflow_call:
-    inputs:
-      test_os:
-        required: false
-        type: string
-        default: 'ubuntu-latest'
+  workflow_dispatch
 
 jobs:
   test-basic-command:
