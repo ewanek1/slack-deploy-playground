@@ -48,7 +48,7 @@ jobs:
         uses: ./.github/.actions/slack-cli-installer
         with:
           command: ${{ github.event.inputs.command }}
-          verbose: ${{ github.event.inputs.verbose || github.run_attempt > 1 }}
+          verbose: ${{ github.event.inputs.verbose && 'true' || 'false' }}
           cli_version: ${{ github.event.inputs.cli_version }}
           app_id: ${{ github.event.inputs.app_id }}
         env:
