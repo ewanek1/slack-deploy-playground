@@ -10,7 +10,6 @@ inputs:
     description: 'Verbose flag'
     type: boolean
     default: false
-    type: string
   cli_version:
     description: 'CLI version'
     required: false
