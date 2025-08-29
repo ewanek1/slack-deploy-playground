@@ -59,7 +59,6 @@ runs:
         Write-Host "Installing Slack CLI version: ${{ inputs.cli_version }}"
         
         try {
-          # Install with version parameter
           if ("${{ inputs.cli_version }}" -eq "latest") {
             irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
           } else {
@@ -85,42 +84,3 @@ runs:
         }
         
 
-
-    - name: Run Slack CLI Command
-      id: run-slack-cli-command
-      shell: pwsh
-      env:
-        SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
-        SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
-        VERBOSE: ${{ inputs.verbose }}
-      run: |
-        Write-Host "Running command: ${{ inputs.command }}"
-        
-        $slackExe = "C:\Users\runneradmin\AppData\Local\slack-cli\bin\slack.exe"
-        Write-Host "Using Slack CLI at: $slackExe"
-        
-        # Build argument array
-        $args = @()
-        $args += "${{ inputs.command }}"  # Use original command
-        if ("${{ inputs.verbose }}" -eq "true") { $args += "--verbose" }
-        if ("${{ inputs.app_id }}" -ne "") { $args += "--app"; $args += "${{ inputs.app_id }}" }
-        $args += "--skip-update"
-
-        # Run the command, capturing both stdout and stderr
-        $output = & $slackExe @args 2>&1
-        $exitCode = $LASTEXITCODE
-
-        # Print output line by line in GitHub logs
-        Write-Host "Command output:"
-        $output | ForEach-Object { Write-Host $_ }
-        Write-Host "Exit code: $exitCode"
-
-        # Set all required outputs
-        $success = if ($exitCode -eq 0) { "true" } else { "false" }
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "success=$success"
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "command_executed=slack $($args -join ' ')"
-        
-        # Capture stdout using proper GitHub Actions syntax
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "stdout<<EOF"
-        $output | ForEach-Object { Add-Content -Path $env:GITHUB_OUTPUT -Value $_ }
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "EOF"
