@@ -48,7 +48,7 @@ jobs:
         uses: ewanek1/slack-deploy-playground/.github/.actions/slack-cli-installer@main
         with:
           command: ${{ github.event.inputs.command }}
-          verbose: ${{ github.run_attempt > 1 }}
+          verbose: ${{ github.event.inputs.verbose }}
           cli_version: ${{ github.event.inputs.cli_version }}
           app_id: ${{ github.event.inputs.app_id }}
         env:
