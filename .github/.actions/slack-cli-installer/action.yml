@@ -52,28 +52,14 @@ runs:
       run: |
         curl -fsSL https://downloads.slack-edge.com/slack-cli/install.sh | bash -s -- -v ${{ inputs.cli_version }} --skip-update
 
-    - name: Copy Windows Install Script
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        Write-Host "=== COPY DEBUG ==="
-        $scriptPath = Join-Path $env:GITHUB_WORKSPACE "windows-install-script.ps1"
-        $destPath = "$env:RUNNER_TEMP\install.ps1"
-        
-        Copy-Item $scriptPath $destPath -Force
-        Write-Host "Copy-Item completed"
-        Write-Host "Destination exists after copy: $(Test-Path $destPath)"
-        
-        # Set this as an output so we can verify it persists
-        echo "script_path=$destPath" >> $env:GITHUB_OUTPUT
-        echo "script_exists=true" >> $env:GITHUB_OUTPUT
-
     - name: Install Slack CLI (Windows)
       if: runner.os == 'Windows' && (steps.cache-cli.outputs.cache-hit != 'true')
       shell: pwsh
       run: |
         irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 | iex
-        
+    
+
+
       
     - name: Run Slack CLI Command
       id: run-slack-cli-command
