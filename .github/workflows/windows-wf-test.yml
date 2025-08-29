@@ -1,0 +1,56 @@
+name: Windows test
+
+on:
+  workflow_dispatch:
+  #workflow_call:
+    inputs:
+      command:
+        description: 'Slack CLI command to run'
+        required: true
+        type: string
+      verbose:
+        description: 'Verbose flag'
+        type: boolean
+        default: false
+      cli_version:
+        description: 'CLI version'
+        required: false
+        type: string
+        default: "latest"
+      app_id: 
+        description: "App ID"
+        required: false
+        type: string
+        
+env:
+  SLACK_DISABLE_TELEMETRY: "true"
+
+jobs:
+  run-slack-cli: 
+    permissions:
+      contents: read
+    #runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [windows-latest]
+    runs-on: ${{ matrix.os }}
+    outputs:
+      success: ${{ steps.run-slack-cli-command.outputs.success }}
+      command_executed: ${{ steps.run-slack-cli-command.outputs.command_executed }}
+      stdout: ${{ steps.run-slack-cli-command.outputs.stdout }}
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Slack CLI and Run Command
+        id: run-slack-cli-command
+        uses: ewanek1/slack-deploy-playground/.github/.actions/slack-cli-installer@main
+        with:
+          command: ${{ github.event.inputs.command }}
+          verbose: ${{ github.run_attempt > 1 }}
+          cli_version: ${{ github.event.inputs.cli_version }}
+          app_id: ${{ github.event.inputs.app_id }}
+        env:
+          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
