@@ -32,7 +32,7 @@ jobs:
     #runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     outputs:
       success: ${{ steps.run-slack-cli-command.outputs.success }}
