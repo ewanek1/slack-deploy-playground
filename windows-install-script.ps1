@@ -17,14 +17,14 @@ param(
   [string]$Alias,
 
   [Parameter(HelpMessage = "Version of Slack CLI")]
-  [string]$Version = "dev",
+  [string]$Version,
 
   [Parameter(HelpMessage = "Skip Git installation")]
-  [bool]$SkipGit = $false
-)
+  [bool]$SkipGit = $false,
 
-# As this script is for internal usage only, we should set SLACK_DISABLE_TELEMETRY environment variable
-[System.Environment]::SetEnvironmentVariable('SLACK_DISABLE_TELEMETRY', $true)
+  [Parameter(HelpMessage = "Skip Deno installation")]
+  [bool]$SkipDeno = $false
+)
 
 Function delay ([float]$seconds, [string]$message, [string]$newlineOption) {
   if ($newlineOption -eq "-n") {
@@ -47,40 +47,39 @@ function check_slack_binary_exist() {
     [Parameter(HelpMessage = "Display diagnostic information")]
     [boolean]$Diagnostics
   )
-  $FINGERPRINT = "d41d8cd98f00b204e9800998ecf8427e"
+
   $SLACK_CLI_NAME = "slack"
   if ($alias) {
     $SLACK_CLI_NAME = $alias
   }
+
   if (Get-Command $SLACK_CLI_NAME -ErrorAction SilentlyContinue) {
     if ($Diagnostics) {
       delay 0.3 "Checking if ``$SLACK_CLI_NAME`` already exists on this system..."
       delay 0.2 "Heads up! A binary called ``$SLACK_CLI_NAME`` was found!"
-      delay 0.3 "Now checking if it's the same Slack CLI..."
+      delay 0.3 "Skipping fingerprint check..."
     }
-    & $SLACK_CLI_NAME --version | Tee-Object -Variable $SLACK_CLI_VERSION | Out-Null
-    if ($get_finger_print -ne $FINGERPRINT) {
-      & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
-      if (!($slack_cli_version -contains "Using ${SLACK_CLI_NAME}.exe v")) {
-        Write-Host "Error: Your existing ``$SLACK_CLI_NAME`` command is different from this Slack CLI!"
-        Write-Host "Halting the install to avoid accidentally overwriting it."
 
-        Write-Host "`nTry using an alias when installing to avoid name conflicts:"
-        Write-Host "`nirm https://downloads.slack-edge.com/slack-cli/install-windows.ps1 -Alias your-preferred-alias | iex"
-        throw
-      }
-    }
-    $message = "It is the same Slack CLI! Upgrading to the latest version..."
+    # Skip fingerprint check entirely
+    & $SLACK_CLI_NAME --version | Tee-Object -Variable slack_cli_version | Out-Null
+
+    
+
+    $message = "Existing Slack CLI detected. Upgrading to the latest version..."
     if ($Version) {
       $SLACK_CLI_VERSION = $Version
-      $message = "It is the same Slack CLI! Switching over to v$Version..."
+      $message = "Existing Slack CLI detected. Switching over to v$Version..."
     }
     if ($Diagnostics) {
       delay 0.3 "$message`n"
     }
   }
+
   return $SLACK_CLI_NAME
 }
+
+
+
 
 function install_slack_cli {
   param(
@@ -118,6 +117,7 @@ function install_slack_cli {
   }
 
   $slack_cli_dir = "${Home}\AppData\Local\slack-cli"
+  Write-Host "Downloading Slack CLI v$SLACK_CLI_VERSION..."
   try {
     if (!(Test-Path $slack_cli_dir)) {
       try {
@@ -141,13 +141,6 @@ function install_slack_cli {
   catch {
     Write-Error "Installer cannot create folder for Slack CLI, `nPlease manually create $($slack_cli_dir) folder and re-run the installation script"
     throw
-  }
-
-  if ($Version -eq "dev") {
-    Write-Host "Downloading the latest development build..."
-  }
-  else {
-    Write-Host "Downloading Slack CLI v$SLACK_CLI_VERSION..."
   }
   try {
     Invoke-WebRequest -Uri "https://downloads.slack-edge.com/slack-cli/slack_cli_$($SLACK_CLI_VERSION)_windows_64-bit.zip" -OutFile "$($slack_cli_dir)\slack_cli.zip"
@@ -218,11 +211,9 @@ function terms_of_service {
     [Parameter(HelpMessage = "Alias of Slack CLI")]
     [string]$Alias
   )
-  #$confirmed_alias = check_slack_binary_exist $Alias $Version $false
-  # if (Get-Command $confirmed_alias) {
-  Write-Host "`nUse of the Slack CLI should comply with the Slack API Terms of Service:"
-  Write-Host "   https://slack.com/terms-of-service/api"
-  # }
+  $confirmed_alias = check_slack_binary_exist $Alias $Version $false
+   Write-Host "`nUse of the Slack CLI should comply with the Slack API Terms of Service:"
+   Write-Host "   https://slack.com/terms-of-service/api"
 }
 
 function feedback_message {
@@ -231,10 +222,9 @@ function feedback_message {
     [string]$Alias
   )
   $confirmed_alias = check_slack_binary_exist $Alias $Version $false
-  if (Get-Command $confirmed_alias) {
-    Write-Host "`nWe would love to know how things are going. Really. All of it."
-    Write-Host "   Survey your development experience with ``$confirmed_alias feedback``"
-  }
+  # if (Get-Command $confirmed_alias) {
+  Write-Host "`nWe would love to know how things are going. Really. All of it."
+  Write-Host "   Survey your development experience with ``$confirmed_alias feedback``"
 }
 
 function next_step_message {
@@ -260,13 +250,18 @@ function next_step_message {
 trap {
   Write-Host "`nWe would love to know how things are going. Really. All of it."
   Write-Host "Submit installation issues: https://github.com/slackapi/slack-cli/issues"
-  exit 1
 }
 
 install_slack_cli $Alias $Version
 Write-Host "`nAdding developer tooling for an enhanced experience..."
 install_git $SkipGit
 Write-Host "Sweet! You're all set to start developing!"
+
 terms_of_service $Alias
-# feedback_message $Alias
-# next_step_message $Alias
+Write-Host "LASTEXITCODE after terms_of_service: $LASTEXITCODE"
+
+feedback_message $Alias
+Write-Host "LASTEXITCODE after feedback_message: $LASTEXITCODE"
+
+next_step_message $Alias
+Write-Host "LASTEXITCODE after next_step_message: $LASTEXITCODE"
