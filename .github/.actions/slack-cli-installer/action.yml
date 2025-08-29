@@ -72,7 +72,7 @@ runs:
       if: runner.os == 'Windows' && (steps.cache-cli.outputs.cache-hit != 'true')
       shell: pwsh
       run: |
-        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -Alias slack | iex
+        irm https://downloads.slack-edge.com/slack-cli/install-windows-dev.ps1 -Alias slackcli | iex
         
       
     - name: Run Slack CLI Command
