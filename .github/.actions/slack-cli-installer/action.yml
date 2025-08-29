@@ -5,17 +5,21 @@ inputs:
   command:
     description: 'Slack CLI command to run'
     required: true
+    type: string
   verbose:
     description: 'Verbose flag'
     type: boolean
     default: false
+    type: string
   cli_version:
     description: 'CLI version'
     required: false
+    type: string
     default: "latest"
   app_id: 
     description: "App ID"
     required: false
+    type: string
 
 outputs:
   success:
