@@ -49,7 +49,7 @@ jobs:
 
   run-tests:
     needs: run-slack-cli
-    #if: ${{ github.event_name == 'pull_request' }} 
+    if: ${{ github.event_name == 'pull_request' }} 
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
