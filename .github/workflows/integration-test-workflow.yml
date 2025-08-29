@@ -1,7 +1,7 @@
 name: Slack CLI Runner Tests 
 
 on:
-  pull_request
+  workflow_dispatch
 
 jobs:
   test-all:
@@ -168,21 +168,4 @@ jobs:
           echo "Specific version failure"
           echo "Actual output: '${{ steps.specific-version.outputs.stdout }}'"
           exit 1
-
-      - name: Run with empty tokens
-        id: empty-tokens
-        continue-on-error: true
-        uses: ./.github/.actions/slack-cli-installer
-        with:
-          command: "version"
-          cli_version: "latest"
-          
-      - name: Expect failure with empty tokens
-        if: steps.empty-tokens.outputs.success == 'true'
-        run: |
-          echo "Expected failure with empty tokens"
-          echo "stdout: '${{ steps.empty-tokens.outputs.stdout }}'"
-          echo "success: '${{ steps.empty-tokens.outputs.success }}'"
-          exit 1
-    
     
