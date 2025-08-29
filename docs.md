@@ -21,6 +21,17 @@ on:
       command:
         description: 'Slack CLI command to run'
         required: true
+      verbose:
+        description: 'Verbose flag'
+        type: boolean
+        default: false
+      cli_version:
+        description: 'CLI version'
+        required: false
+        default: "latest"
+      app_id: 
+        description: "App ID"
+        required: false
 
 jobs:
   run-slack-cli:  
@@ -30,11 +41,13 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Run Slack CLI Command
-        uses: slackapi/slack-github-action@main
+        uses: ewanek1/slack-deploy-playground/.github/workflows/cli-runner.yml@main
         with:
           command: ${{ github.event.inputs.command }}
-        env:
-          SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
+          verbose: ${{ github.event.inputs.verbose || github.run_attempt > 1 }}
+          cli_version: ${{ github.event.inputs.cli_version }}
+          app_id: ${{ github.event.inputs.app_id }}
+        secrets: inherit
 ```
 
 3. Go to [Actions tab](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow#configuring-a-workflow-to-run-manually) in your GitHub repository.
