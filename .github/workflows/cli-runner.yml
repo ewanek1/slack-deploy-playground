@@ -45,7 +45,7 @@ jobs:
       
       - name: Install Slack CLI and Run Command
         id: run-slack-cli-command
-        uses: ./.github/.actions/slack-cli-installer
+        uses: ewanek1/slack-deploy-playground/.github/.actions/slack-cli-installer@main
         with:
           command: ${{ github.event.inputs.command }}
           verbose: ${{ github.run_attempt > 1 }}
