@@ -1,7 +1,7 @@
 name: Slack CLI Command Runner
 
 on:
-  workflow_dispatch:
+  #workflow_dispatch:
   workflow_call:
     inputs:
       command:
