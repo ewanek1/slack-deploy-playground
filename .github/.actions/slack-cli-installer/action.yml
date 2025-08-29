@@ -3,16 +3,18 @@ description: Download and cache the Slack CLI and run the input command
 
 inputs:
   command:
-    description: "Slack CLI command to run"
+    description: 'Slack CLI command to run'
     required: true
+    type: string
   verbose:
-    description: "Enable verbose output"
-    required: false
-    default: 'false'
+    description: 'Verbose flag'
+    type: boolean
+    default: false
   cli_version:
-    description: "Slack CLI Version"
+    description: 'CLI version'
     required: false
-    default: '3.6.0'
+    type: string
+    default: "latest"
   app_id: 
     description: "App ID"
     required: false
@@ -20,18 +22,20 @@ inputs:
 
 outputs:
   success:
-    description: "Whether the command ran successfully"
     value: ${{ steps.run-slack-cli-command.outputs.success }}
+  stdout:
+    value: ${{ steps.run-slack-cli-command.outputs.stdout }}
+  command_executed:
+    value: ${{ steps.run-slack-cli-command.outputs.command_executed }}
 
 runs:
   using: composite
   steps:
-    - name: Cache Slack CLI 
+    - name: Cache Slack CLI
       id: cache-cli
       uses: actions/cache@v4
       with:
-        path: |
-          ${{ runner.os == 'Windows' && format('{0}/AppData/Local/slack-cli', env.USERPROFILE) || '~/.slack/bin' }}
+        path: ~/.slack/bin
         key: slack-cli-${{ runner.os }}-${{ runner.arch }}-${{ inputs.cli_version }}
 
     - name: Add Slack CLI to PATH (Linux/macOS)
@@ -72,55 +76,39 @@ runs:
       if: runner.os == 'Windows' && (steps.cache-cli.outputs.cache-hit != 'true')
       shell: pwsh
       run: |
-        Write-Host "=== INSTALL DEBUG ==="
+        Write-Host "--- INSTALL DEBUG ---"
         $scriptPath = "$env:RUNNER_TEMP\install.ps1"
         Write-Host "Script exists: $(Test-Path $scriptPath)"
 
-        # Use named parameters only
         Write-Host "Running install script..."
-        & $scriptPath -SkipGit $false -Verbose
+        & $scriptPath -Alias "slack" -SkipGit $false -Verbose
 
-        Write-Host "Script completed with exit code: $LASTEXITCODE"
-      
+        Write-Host "Script finished, exit code: $LASTEXITCODE"
+
     - name: Run Slack CLI Command
       id: run-slack-cli-command
-      shell: pwsh
+      shell: bash
       env:
         SLACK_SERVICE_TOKEN: $SLACK_SERVICE_TOKEN
         SLACK_BOT_TOKEN: $SLACK_BOT_TOKEN
         VERBOSE: ${{ inputs.verbose }}
       run: |
-        Write-Host "Running command: ${{ inputs.command }}"
+        echo "Running command: ${{ inputs.command }}"
+        if [ "${{ inputs.verbose }}" == "true" ]; then
+          output=$(slack ${{ inputs.command }} --verbose --app ${{ inputs.app_id }} --skip-update)
+        else
+          output=$(slack ${{ inputs.command }} --app ${{ inputs.app_id }} --skip-update)
+        fi
         
-        $slackExe = "C:\Users\runneradmin\AppData\Local\slack-cli\bin\slack.exe"
-        Write-Host "Using Slack CLI at: $slackExe"
-        
-        # Convert 'version' to '--version' if needed
-        $cmd = "${{ inputs.command }}"
-        if ($cmd -eq "version") { $cmd = "--version" }
-
-        # Build argument array
-        $args = @()
-        $args += $cmd
-        if ("${{ inputs.verbose }}" -eq "true") { $args += "--verbose" }
-        $args += "--skip-update"
-
-        # Run the command, capturing both stdout and stderr
-        $output = & $slackExe @args 2>&1
-        $exitCode = $LASTEXITCODE
-
-        # Print output line by line in GitHub logs
-        Write-Host "Command output:"
-        $output | ForEach-Object { Write-Host $_ }
-        Write-Host "Exit code: $exitCode"
-
-        # Set success output
-        $success = if ($exitCode -eq 0) { "true" } else { "false" }
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "success=$success"
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "exit_code=$exitCode"
-
-        # Capture full stdout for workflow output
-        $eof = [Guid]::NewGuid().ToString()
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "stdout<<$eof"
-        $output | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "$eof"
+        exit_code=$?
+            
+        if [ $exit_code -eq 0 ]; then
+          echo "success=true" >> $GITHUB_OUTPUT
+        else
+          echo "success=false" >> $GITHUB_OUTPUT
+        fi
+            
+        echo "command_executed=slack ${{ inputs.command }}" >> $GITHUB_OUTPUT
+        echo "stdout<<EOF" >> $GITHUB_OUTPUT
+        echo "$output" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
