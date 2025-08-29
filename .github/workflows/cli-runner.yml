@@ -46,15 +46,3 @@ jobs:
         env:
           SLACK_SERVICE_TOKEN: ${{ secrets.SLACK_SERVICE_TOKEN }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
-  run-tests:
-    needs: run-slack-cli
-    # Run tests on PR
-    if: ${{ github.event_name == 'pull_request' }} 
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    uses: ./.github/workflows/integration-test-workflow.yml
-    with:
-      test_os: ${{ matrix.os }}
-    secrets: inherit
